@@ -23,7 +23,7 @@ const cardColors = ["bg-candy", "bg-aqua", "bg-lime", "bg-mango", "bg-bubble"];
 		<main class="mx-auto max-w-6xl px-4 py-10 md:py-16">
 			<section class="mb-10 grid gap-6 rounded-3xl border border-ink/15 bg-white/88 p-6 shadow-soft dark:bg-gray-light md:grid-cols-[1fr_auto] md:items-end md:p-8">
 				<div class="max-w-3xl">
-					<p class="mb-3 inline-flex rounded-full bg-lime px-4 py-2 text-sm font-bold uppercase text-ink">
+					<p class="mb-3 inline-flex rounded-full bg-lime px-4 py-2 text-sm font-bold uppercase text-ink dark:text-gray-dark">
 						全部文章
 					</p>
 					<h1 class="text-ink dark:text-gray-dark">慢慢积累的文章归档。</h1>
@@ -31,7 +31,7 @@ const cardColors = ["bg-candy", "bg-aqua", "bg-lime", "bg-mango", "bg-bubble"];
 						这里收集 Byte MVP 的产品思考、前端实验和日常记录。
 					</p>
 				</div>
-				<div class="rounded-2xl border border-ink/15 bg-mango p-5 text-center text-ink shadow-pop">
+				<div class="rounded-2xl border border-ink/15 bg-mango p-5 text-center text-ink shadow-pop dark:text-gray-dark">
 					<p class="text-5xl font-bold leading-none">{posts.length}</p>
 					<p class="font-bold uppercase">篇文章</p>
 				</div>
@@ -62,10 +62,10 @@ const cardColors = ["bg-candy", "bg-aqua", "bg-lime", "bg-mango", "bg-bubble"];
 									<div class:list={[
 										"flex flex-col justify-between gap-6 p-6",
 										cardColors[index % cardColors.length],
-										"text-ink",
+										"text-ink dark:text-gray-dark",
 									]}>
 										<div class="space-y-4">
-											<p class="inline-flex rounded-full bg-white/85 px-3 py-1 text-sm font-bold text-ink">
+											<p class="inline-flex rounded-full bg-white/85 px-3 py-1 text-sm font-bold text-[#142326] dark:bg-white/10 dark:text-gray-dark">
 												<FormattedDate date={post.data.pubDate} />
 											</p>
 											<h2 class={index === 0 ? "text-4xl md:text-5xl" : "text-3xl"}>

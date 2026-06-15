@@ -67,10 +67,8 @@
 		font-family: "Atkinson", sans-serif;
 		color: rgb(var(--gray-dark));
 		background:
-			radial-gradient(circle at 10% 12%, rgba(246, 199, 214, 0.45), transparent 24%),
-			radial-gradient(circle at 86% 10%, rgba(191, 229, 234, 0.42), transparent 28%),
-			radial-gradient(circle at 22% 86%, rgba(215, 237, 195, 0.42), transparent 26%),
-			linear-gradient(135deg, #fbf8f1 0%, #f3fbf7 52%, #f7f4fb 100%);
+			linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0)),
+			#f7f8f4;
 		font-size: 16px;
 		line-height: 1.7;
 		word-wrap: break-word;
@@ -79,9 +77,8 @@
 
 	[data-theme="dark"] body {
 		background:
-			radial-gradient(circle at 10% 12%, rgba(141, 102, 119, 0.28), transparent 24%),
-			radial-gradient(circle at 86% 10%, rgba(95, 131, 139, 0.25), transparent 28%),
-			linear-gradient(135deg, #142326 0%, #202a2c 52%, #252332 100%);
+			linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+			#142326;
 	}
 
 	h1,
@@ -97,11 +94,11 @@
 	}
 
 	h1 {
-		@apply text-5xl font-bold md:text-7xl;
+		@apply text-4xl font-bold md:text-6xl;
 	}
 
 	h2 {
-		@apply text-3xl font-bold md:text-5xl;
+		@apply text-3xl font-bold md:text-4xl;
 	}
 
 	h3 {

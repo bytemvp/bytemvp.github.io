@@ -13,98 +13,62 @@ const [featuredPost, ...recentPosts] = posts;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} image={featuredPost?.data.heroImage} />
 	</head>
 	<body>
 		<Header />
-		<main class="mx-auto flex max-w-6xl flex-col gap-14 px-4 py-10 md:gap-20 md:py-16">
-			<section class="grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]" aria-labelledby="hero-title">
-				<div class="space-y-7">
-					<div class="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-white/85 px-4 py-2 text-sm font-bold text-ink shadow-pop dark:bg-gray-light dark:text-gray-dark">
-						<span class="h-3 w-3 rounded-full bg-candy"></span>
-						给小团队的清爽实践
-					</div>
-					<div class="space-y-5">
-						<h1 id="hero-title" class="max-w-4xl text-ink dark:text-gray-dark">
-							用更轻盈的方式，记录可落地的产品与前端思考。
-						</h1>
-						<p class="max-w-2xl text-xl font-semibold text-gray-dark dark:text-gray">
-							{SITE_DESCRIPTION}
-						</p>
-					</div>
+		<main class="mx-auto flex w-full max-w-5xl flex-col gap-12 px-4 py-10 md:gap-16 md:py-16">
+			<section class="border-b border-ink/10 pb-10 md:pb-14" aria-labelledby="hero-title">
+				<div class="max-w-3xl space-y-6">
+					<p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Byte MVP</p>
+					<h1 id="hero-title" class="text-4xl text-ink dark:text-gray-dark md:text-6xl">
+						记录产品、前端与个人创作的轻量实践。
+					</h1>
+					<p class="max-w-2xl text-lg text-gray-dark dark:text-gray">
+						{SITE_DESCRIPTION}
+					</p>
 					<div class="flex flex-wrap gap-3">
-						<a class="inline-flex min-h-12 items-center justify-center rounded-full border border-ink/15 bg-candy px-6 font-bold text-ink shadow-pop transition-transform hover:-translate-y-1" href="/blog">
+						<a class="inline-flex min-h-11 items-center justify-center rounded-lg bg-ink px-5 font-bold text-white transition-colors hover:bg-accent-dark dark:bg-accent dark:text-[#142326] dark:hover:bg-accent-dark" href="/blog">
 							浏览文章
 						</a>
-						<a class="inline-flex min-h-12 items-center justify-center rounded-full border border-ink/15 bg-lime px-6 font-bold text-ink shadow-pop transition-transform hover:-translate-y-1" href="/about">
-							了解作者
+						<a class="inline-flex min-h-11 items-center justify-center rounded-lg border border-ink/15 bg-white/70 px-5 font-bold text-ink transition-colors hover:border-accent hover:text-accent-dark dark:border-white/10 dark:bg-white/5 dark:text-gray-dark dark:hover:border-accent" href="/about">
+							关于作者
 						</a>
-					</div>
-				</div>
-
-				<div class="relative">
-					<div class="absolute -left-4 top-8 hidden h-20 w-20 rotate-12 rounded-[1.5rem] border border-ink/15 bg-mango shadow-pop md:block"></div>
-					<div class="absolute -right-2 bottom-10 hidden h-16 w-16 rounded-full border border-ink/15 bg-aqua shadow-pop md:block"></div>
-					<div class="relative rounded-3xl border border-ink/15 bg-white/88 p-5 shadow-soft dark:bg-gray-light">
-						<div class="grid gap-4">
-							<div class="rounded-2xl border border-ink/15 bg-mango p-5 text-ink">
-								<p class="text-sm font-bold uppercase">已发布</p>
-								<p class="mt-1 text-5xl font-bold leading-none">{posts.length}</p>
-								<p class="mt-2 font-semibold">篇笔记、指南与实验</p>
-							</div>
-							<div class="grid grid-cols-2 gap-4">
-								<div class="rounded-2xl border border-ink/15 bg-lime p-4 text-ink">
-									<p class="text-sm font-bold uppercase">技术栈</p>
-									<p class="mt-2 text-2xl font-bold">Astro</p>
-								</div>
-								<div class="rounded-2xl border border-ink/15 bg-aqua p-4 text-ink">
-									<p class="text-sm font-bold uppercase">风格</p>
-									<p class="mt-2 text-2xl font-bold">小清新</p>
-								</div>
-							</div>
-							<div class="rounded-2xl border border-ink/15 bg-bubble p-4 text-ink">
-								<p class="text-sm font-bold uppercase">方向</p>
-								<p class="mt-2 text-2xl font-bold">清晰表达，稳步迭代。</p>
-							</div>
-						</div>
 					</div>
 				</div>
 			</section>
 
 			{
 				featuredPost && (
-					<section aria-labelledby="featured-title" class="space-y-5">
-						<div class="flex flex-wrap items-end justify-between gap-4">
-							<div>
-								<p class="mb-2 text-sm font-bold uppercase text-accent">精选</p>
-								<h2 id="featured-title">从这篇开始读</h2>
-							</div>
-							<a class="font-bold text-accent underline decoration-[3px] underline-offset-4" href="/blog">
-								查看全部
+					<section aria-labelledby="featured-title" class="space-y-4">
+						<div class="flex flex-wrap items-center justify-between gap-3">
+							<h2 id="featured-title" class="text-2xl md:text-3xl">推荐阅读</h2>
+							<a class="font-bold text-accent underline decoration-2 underline-offset-4" href="/blog">
+								全部文章
 							</a>
 						</div>
-						<article class="grid overflow-hidden rounded-3xl border border-ink/15 bg-white/88 shadow-soft dark:bg-gray-light lg:grid-cols-[1.08fr_0.92fr]">
+						<article class="grid overflow-hidden rounded-xl border border-ink/10 bg-white/82 shadow-card dark:bg-gray-light lg:grid-cols-[0.95fr_1.05fr]">
 							<img
-								class="h-full min-h-72 w-full object-cover"
+								class="h-64 w-full object-cover lg:h-full"
 								src={featuredPost.data.heroImage}
 								alt=""
 								width="960"
 								height="540"
 								loading="lazy"
 							/>
-							<div class="flex flex-col justify-between gap-8 p-6 md:p-8">
-								<div class="space-y-4">
-									<p class="inline-flex rounded-full bg-lime px-4 py-2 text-sm font-bold text-ink">
+							<div class="flex flex-col justify-between gap-6 p-5 md:p-7">
+								<div class="space-y-3">
+									<p class="text-sm font-bold text-accent">
 										<FormattedDate date={featuredPost.data.pubDate} />
 									</p>
-									<h3>{featuredPost.data.title}</h3>
-									<p class="text-lg font-semibold text-gray-dark dark:text-gray">
+									<h3 class="text-2xl md:text-4xl">{featuredPost.data.title}</h3>
+									<p class="text-base text-gray-dark dark:text-gray">
 										{featuredPost.data.description}
 									</p>
 								</div>
-								<a class="inline-flex w-fit min-h-12 items-center justify-center rounded-full border border-ink/15 bg-candy px-6 font-bold text-ink shadow-pop transition-transform hover:-translate-y-1" href={`/blog/${featuredPost.id}/`}>
+								<a class="font-bold text-ink underline decoration-2 underline-offset-4 dark:text-gray-dark" href={`/blog/${featuredPost.id}/`}>
 									阅读全文
 								</a>
 							</div>
@@ -114,41 +78,28 @@ const [featuredPost, ...recentPosts] = posts;
 			}
 
 			<section class="space-y-5" aria-labelledby="latest-title">
-				<div>
-					<p class="mb-2 text-sm font-bold uppercase text-accent">最近更新</p>
-					<h2 id="latest-title">轻量记录</h2>
+				<div class="flex flex-wrap items-center justify-between gap-3">
+					<h2 id="latest-title" class="text-2xl md:text-3xl">最新记录</h2>
+					<span class="text-sm font-bold text-gray">{posts.length} 篇文章</span>
 				</div>
-				<div class="grid gap-5 md:grid-cols-3">
+				<div class="divide-y divide-ink/10 rounded-xl border border-ink/10 bg-white/72 shadow-card dark:bg-gray-light">
 					{
-						recentPosts.slice(0, 3).map((post, index) => (
-							<article class:list={[
-								"flex min-h-72 flex-col justify-between rounded-3xl border border-ink/15 p-5 text-ink shadow-pop transition-transform hover:-translate-y-1",
-								["bg-aqua", "bg-lime", "bg-mango"][index % 3],
-							]}>
-								<div class="space-y-4">
-									<p class="rounded-full bg-white/80 px-3 py-1 text-sm font-bold">
+						recentPosts.slice(0, 4).map((post) => (
+							<article>
+								<a class="grid gap-3 p-5 transition-colors hover:bg-white/70 dark:hover:bg-white/5 md:grid-cols-[9rem_1fr_auto] md:items-center" href={`/blog/${post.id}/`}>
+									<p class="text-sm font-bold text-accent">
 										<FormattedDate date={post.data.pubDate} />
 									</p>
-									<h3 class="text-2xl">{post.data.title}</h3>
-									<p class="font-semibold">{post.data.description}</p>
-								</div>
-								<a class="mt-6 font-bold underline decoration-[3px] underline-offset-4" href={`/blog/${post.id}/`}>
-									继续阅读
+									<div class="space-y-1">
+										<h3 class="text-xl md:text-2xl">{post.data.title}</h3>
+										<p class="text-sm text-gray-dark dark:text-gray">{post.data.description}</p>
+									</div>
+									<span class="font-bold text-ink dark:text-gray-dark">阅读</span>
 								</a>
 							</article>
 						))
 					}
 				</div>
-			</section>
-
-			<section class="flex flex-wrap items-center justify-between gap-6 rounded-3xl border border-ink/15 bg-white/88 p-6 shadow-soft dark:bg-gray-light md:p-8" aria-labelledby="cta-title">
-				<div class="max-w-2xl">
-					<p class="mb-2 text-sm font-bold uppercase text-accent">文章归档</p>
-					<h2 id="cta-title">更多笔记，慢慢翻看。</h2>
-				</div>
-				<a class="inline-flex min-h-12 items-center justify-center rounded-full border border-ink/15 bg-bubble px-6 font-bold text-ink shadow-pop transition-transform hover:-translate-y-1" href="/blog">
-					查看所有文章
-				</a>
 			</section>
 		</main>
 		<Footer />

@@ -4,11 +4,11 @@
 
 <button
 	id="theme-toggle"
-	class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-ink/15 bg-candy text-ink shadow-pop transition-transform hover:-translate-y-0.5 md:h-11 md:w-11"
+	class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-ink/10 bg-white/70 text-ink transition-colors hover:border-accent hover:text-accent-dark dark:bg-white/5 dark:text-gray-dark"
 	aria-label="切换深色模式"
 >
 	<svg
-		class="hidden h-6 w-6 dark:block"
+		class="hidden h-5 w-5 dark:block"
 		width="20"
 		height="20"
 		viewBox="0 0 20 20"
@@ -26,7 +26,7 @@
 		<line x1="15.24" y1="4.76" x2="16.66" y2="3.34" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
 	</svg>
 	<svg
-		class="block h-6 w-6 dark:hidden"
+		class="block h-5 w-5 dark:hidden"
 		width="20"
 		height="20"
 		viewBox="0 0 20 20"
@@ -38,25 +38,22 @@
 </button>
 
 <script>
-	import { toggleTheme } from './theme';
+	import { toggleTheme } from "./theme";
 
-	// Add click handler
-	const themeToggle = document.getElementById('theme-toggle');
+	const themeToggle = document.getElementById("theme-toggle");
 	if (themeToggle) {
-		themeToggle.addEventListener('click', () => {
+		themeToggle.addEventListener("click", () => {
 			const newTheme = toggleTheme();
-			// Update aria-label
 			themeToggle.setAttribute(
-				'aria-label',
-				newTheme === 'dark' ? '切换到浅色模式' : '切换到深色模式'
+				"aria-label",
+				newTheme === "dark" ? "切换到浅色模式" : "切换到深色模式",
 			);
 		});
 
-		// Set initial aria-label
-		const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+		const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
 		themeToggle.setAttribute(
-			'aria-label',
-			currentTheme === 'dark' ? '切换到浅色模式' : '切换到深色模式'
+			"aria-label",
+			currentTheme === "dark" ? "切换到浅色模式" : "切换到深色模式",
 		);
 	}
 </script>

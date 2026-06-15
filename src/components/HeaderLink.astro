@@ -1,21 +1,21 @@
 ---
-import type { HTMLAttributes } from 'astro/types';
+import type { HTMLAttributes } from "astro/types";
 
-type Props = HTMLAttributes<'a'>;
+type Props = HTMLAttributes<"a">;
 
 const { href, class: className, ...props } = Astro.props;
-const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, '');
+const pathname = Astro.url.pathname.replace(import.meta.env.BASE_URL, "");
 const subpath = pathname.match(/[^\/]+/g);
-const isActive = href === pathname || href === '/' + (subpath?.[0] || '');
+const isActive = href === pathname || href === "/" + (subpath?.[0] || "");
 ---
 
 <a
 	href={href}
 	class:list={[
-		"inline-flex min-h-9 shrink-0 items-center justify-center rounded-full border border-transparent px-3 text-sm font-bold text-ink transition-all hover:-translate-y-0.5 hover:border-ink/15 hover:bg-lime hover:text-ink dark:text-gray-dark dark:hover:text-ink md:min-h-10 md:px-4",
+		"inline-flex min-h-9 shrink-0 items-center justify-center rounded-lg border border-transparent px-3 text-sm font-bold text-ink transition-colors hover:border-ink/10 hover:bg-white/70 hover:text-accent-dark dark:text-gray-dark dark:hover:bg-white/5 md:min-h-10 md:px-4",
 		className,
 		{
-			"border-ink/15 bg-mango text-ink shadow-pop": isActive,
+			"border-ink/10 bg-white/80 text-accent-dark dark:bg-white/5 dark:text-accent": isActive,
 		},
 	]}
 	{...props}
