@@ -4,8 +4,8 @@
 
 <button
 	id="theme-toggle"
-	class="inline-flex items-center justify-center rounded-md p-2 text-gray-dark transition-colors hover:text-accent"
-	aria-label="Toggle dark mode"
+	class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 bg-candy text-ink shadow-pop transition-transform hover:-translate-y-0.5"
+	aria-label="切换深色模式"
 >
 	<svg
 		class="hidden h-6 w-6 dark:block"
@@ -48,7 +48,7 @@
 			// Update aria-label
 			themeToggle.setAttribute(
 				'aria-label',
-				newTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+				newTheme === 'dark' ? '切换到浅色模式' : '切换到深色模式'
 			);
 		});
 
@@ -56,7 +56,7 @@
 		const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
 		themeToggle.setAttribute(
 			'aria-label',
-			currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+			currentTheme === 'dark' ? '切换到浅色模式' : '切换到深色模式'
 		);
 	}
 </script>

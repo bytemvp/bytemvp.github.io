@@ -3,16 +3,25 @@ const today = new Date();
 ---
 
 <footer
-  class="bg-[linear-gradient(var(--gray-gradient))] py-10 text-center text-sm text-gray"
+  class="mt-16 border-t-2 border-ink/10 bg-white/70 px-4 py-10 text-center text-sm text-gray backdrop-blur dark:border-white/10 dark:bg-white/5"
 >
-  &copy; {today.getFullYear()} ByteMVP here. All rights reserved.
-  <div class="mt-4 flex justify-center gap-4">
+  <div class="mx-auto flex max-w-6xl flex-col items-center gap-4 md:flex-row md:justify-between">
+    <p class="m-0 font-bold text-ink dark:text-gray-dark">
+      &copy; {today.getFullYear()} Byte MVP。轻量记录，持续生长。
+    </p>
+    <div class="flex items-center gap-3">
+      <span class="h-3 w-3 rounded-full bg-candy"></span>
+      <span class="h-3 w-3 rounded-full bg-mango"></span>
+      <span class="h-3 w-3 rounded-full bg-lime"></span>
+      <span class="h-3 w-3 rounded-full bg-aqua"></span>
+    </div>
     <a
-      class="text-gray transition-colors hover:text-gray-dark"
+      class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 bg-lime text-ink shadow-pop transition-transform hover:-translate-y-0.5"
       href="https://github.com/bytemvp"
       target="_blank"
+      rel="noreferrer"
     >
-      <span class="sr-only">Go to ByteMVP's GitHub repo</span>
+      <span class="sr-only">打开 Byte MVP 的 GitHub</span>
       <svg
         viewBox="0 0 16 16"
         aria-hidden="true"

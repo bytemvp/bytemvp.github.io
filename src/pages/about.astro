@@ -1,213 +1,62 @@
 ---
-import Layout from '../layouts/BlogPost.astro';
+import Layout from "../layouts/BlogPost.astro";
 ---
 
 <Layout
-	title="About Me"
-	description="Lorem ipsum dolor sit amet"
-	pubDate={new Date('August 08 2021')}
+	title="关于 Byte MVP"
+	description="一个记录产品思考、前端实践和个人创作的小站。"
+	pubDate={new Date("January 30 2026")}
 	heroImage="/blog-placeholder-about.jpg"
 >
-	<section class="about-hero" aria-labelledby="about-hero-title">
-		<div>
-			<p class="eyebrow">About</p>
-			<h1 id="about-hero-title">Building thoughtful experiences with words and code.</h1>
-			<p class="lead">
-				I’m a writer and developer focused on clear communication, human-centered design, and
-				building products that feel effortless to use.
-			</p>
-		</div>
-		<div class="highlight-card">
-			<h2>Profile highlights</h2>
-			<ul>
-				<li>10+ years crafting digital products</li>
-				<li>Focus on accessibility and performance</li>
-				<li>Based in a remote-first studio</li>
-			</ul>
-		</div>
+	<section class="not-prose mb-10 grid gap-5 md:grid-cols-3">
+		<article class="rounded-3xl border border-ink/15 bg-candy p-5 text-ink shadow-pop">
+			<p class="text-sm font-bold uppercase">关注</p>
+			<h2 class="mt-3 text-3xl text-ink">MVP 实践</h2>
+			<p class="mt-3 font-semibold">轻量界面、清晰表达，以及更容易推进的产品决策。</p>
+		</article>
+		<article class="rounded-3xl border border-ink/15 bg-aqua p-5 text-ink shadow-pop">
+			<p class="text-sm font-bold uppercase">技术</p>
+			<h2 class="mt-3 text-3xl text-ink">Astro + TS</h2>
+			<p class="mt-3 font-semibold">以静态优先的方式构建网站，在需要的地方补充恰当交互。</p>
+		</article>
+		<article class="rounded-3xl border border-ink/15 bg-mango p-5 text-ink shadow-pop">
+			<p class="text-sm font-bold uppercase">审美</p>
+			<h2 class="mt-3 text-3xl text-ink">清新系统</h2>
+			<p class="mt-3 font-semibold">有颜色，但不过度；有结构，也保持轻松。</p>
+		</article>
 	</section>
 
-	<section class="about-story" aria-labelledby="about-story-title">
-		<div>
-			<h2 id="about-story-title">My story</h2>
-			<p>
-				I started by writing about design systems and evolved into building them. Today I help teams
-				ship beautiful, resilient products and share what I learn along the way.
-			</p>
-		</div>
-		<div class="values-grid">
-			<article>
-				<h3>Clarity</h3>
-				<p>Make complex ideas simple and approachable.</p>
-			</article>
-			<article>
-				<h3>Craft</h3>
-				<p>Obsess over details that create trust.</p>
-			</article>
-			<article>
-				<h3>Momentum</h3>
-				<p>Ship consistently and iterate with feedback.</p>
-			</article>
-		</div>
-	</section>
+	<h2>这个网站写什么</h2>
+	<p>
+		Byte MVP 是一个小型发布空间，记录产品设计、前端工程和快速验证过程中的想法。
+		我希望它看起来轻松一点，但内容仍然清晰、可复用、能落地。
+	</p>
 
-	<section class="about-credentials" aria-labelledby="about-credentials-title">
-		<h2 id="about-credentials-title">Experience & skills</h2>
-		<div class="credentials-grid">
-			<div class="timeline">
-				<h3>Timeline</h3>
-				<ul>
-					<li><strong>2024</strong> — Led a product redesign for a global fintech.</li>
-					<li><strong>2022</strong> — Built a content platform serving 1M+ readers.</li>
-					<li><strong>2019</strong> — Launched a design system for a SaaS startup.</li>
-				</ul>
+	<h2>我如何工作</h2>
+	<p>
+		我偏好紧凑的系统：更少的活动部件、更强的默认值、更明确的取舍。
+		这个网站也是这种思路的实践：内容集合、静态渲染、可复用组件，以及一种表达明确但不会太吵的视觉语言。
+	</p>
+
+	<section class="not-prose my-10 rounded-3xl border border-ink/15 bg-lime p-6 text-ink shadow-pop">
+		<div class="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
+			<div>
+				<p class="text-sm font-bold uppercase">保持联系</p>
+				<h2 class="mt-2 text-3xl text-ink md:text-4xl">有想验证的想法？</h2>
+				<p class="mt-3 max-w-2xl font-semibold">
+					可以聊聊你想优化的产品、页面或原型。
+				</p>
 			</div>
-			<div class="skills">
-				<h3>Skills</h3>
-				<div class="skill-tags">
-					<span>Product Writing</span>
-					<span>Design Systems</span>
-					<span>Astro + TS</span>
-					<span>UX Strategy</span>
-					<span>Performance</span>
-					<span>Accessibility</span>
-				</div>
-			</div>
+			<a class="inline-flex min-h-12 items-center justify-center rounded-full border border-ink/15 bg-bubble px-6 font-bold text-ink shadow-pop transition-transform hover:-translate-y-1" href="mailto:hello@example.com">
+				发邮件
+			</a>
 		</div>
 	</section>
 
-	<section class="about-contact" aria-labelledby="about-contact-title">
-		<div>
-			<h2 id="about-contact-title">Let’s connect</h2>
-			<p>Have a collaboration in mind or want to chat? I’d love to hear from you.</p>
-		</div>
-		<a class="cta-button" href="mailto:hello@example.com">Email me</a>
-	</section>
+	<h2>一些原则</h2>
+	<ul>
+		<li>第一版先做到有用，而不是只追求装饰。</li>
+		<li>用清晰的视觉系统建立节奏，再逐步删掉多余的东西。</li>
+		<li>优先选择能经得起长期维护的内容和性能方案。</li>
+	</ul>
 </Layout>
-
-<style>
-	:global(body) {
-		background: linear-gradient(var(--gray-gradient)) no-repeat;
-		background-size: 100% 500px;
-	}
-
-	section {
-		margin-bottom: 3.5rem;
-	}
-
-	.about-hero {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-		gap: 2rem;
-		align-items: start;
-	}
-
-	.eyebrow {
-		text-transform: uppercase;
-		letter-spacing: 0.12em;
-		font-size: 0.75rem;
-		color: rgb(var(--gray));
-		margin-bottom: 0.75rem;
-	}
-
-	.lead {
-		font-size: 1.15rem;
-		color: rgb(var(--gray-dark));
-	}
-
-	.highlight-card {
-		background: white;
-		border-radius: 18px;
-		padding: 1.5rem;
-		box-shadow: var(--box-shadow);
-	}
-
-	.highlight-card ul {
-		list-style: none;
-		padding: 0;
-		margin: 0.75rem 0 0;
-		display: grid;
-		gap: 0.5rem;
-	}
-
-	.about-story {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-		gap: 2rem;
-	}
-
-	.values-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		gap: 1.25rem;
-	}
-
-	.values-grid article {
-		background: white;
-		border-radius: 16px;
-		padding: 1.25rem;
-		box-shadow: var(--box-shadow);
-	}
-
-	.about-credentials h2 {
-		margin-bottom: 1.5rem;
-	}
-
-	.credentials-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-		gap: 2rem;
-	}
-
-	.timeline ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		display: grid;
-		gap: 0.75rem;
-	}
-
-	.skill-tags {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
-
-	.skill-tags span {
-		background: rgb(var(--gray-light));
-		padding: 0.4rem 0.8rem;
-		border-radius: 999px;
-		font-size: 0.9rem;
-	}
-
-	.about-contact {
-		background: rgb(var(--gray-light));
-		border-radius: 20px;
-		padding: 2rem;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 1.5rem;
-		align-items: center;
-		justify-content: space-between;
-	}
-
-	.cta-button {
-		background: var(--accent);
-		color: white;
-		text-decoration: none;
-		padding: 0.75rem 1.6rem;
-		border-radius: 999px;
-		font-weight: 600;
-		box-shadow: 0 12px 24px rgba(var(--gray), 0.25);
-	}
-
-	@media (max-width: 720px) {
-		section {
-			margin-bottom: 2.5rem;
-		}
-
-		.about-contact {
-			align-items: flex-start;
-		}
-	}
-</style>

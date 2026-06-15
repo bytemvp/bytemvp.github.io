@@ -1,49 +1,81 @@
 ---
-import BaseHead from '../../components/BaseHead.astro';
-import Header from '../../components/Header.astro';
-import Footer from '../../components/Footer.astro';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../../consts';
-import { getCollection } from 'astro:content';
-import FormattedDate from '../../components/FormattedDate.astro';
+import BaseHead from "../../components/BaseHead.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import { SITE_TITLE, SITE_DESCRIPTION } from "../../consts";
+import { getCollection } from "astro:content";
+import FormattedDate from "../../components/FormattedDate.astro";
 
-const posts = (await getCollection('blog')).sort(
+const posts = (await getCollection("blog")).sort(
 	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
 );
+
+const cardColors = ["bg-candy", "bg-aqua", "bg-lime", "bg-mango", "bg-bubble"];
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<BaseHead title={`文章 | ${SITE_TITLE}`} description={SITE_DESCRIPTION} image={posts[0]?.data.heroImage} />
 	</head>
 	<body>
 		<Header />
-		<main class="mx-auto max-w-5xl px-4 py-10">
+		<main class="mx-auto max-w-6xl px-4 py-10 md:py-16">
+			<section class="mb-10 grid gap-6 rounded-3xl border border-ink/15 bg-white/88 p-6 shadow-soft dark:bg-gray-light md:grid-cols-[1fr_auto] md:items-end md:p-8">
+				<div class="max-w-3xl">
+					<p class="mb-3 inline-flex rounded-full bg-lime px-4 py-2 text-sm font-bold uppercase text-ink">
+						全部文章
+					</p>
+					<h1 class="text-ink dark:text-gray-dark">慢慢积累的文章归档。</h1>
+					<p class="mt-4 text-xl font-semibold text-gray-dark dark:text-gray">
+						这里收集 Byte MVP 的产品思考、前端实验和日常记录。
+					</p>
+				</div>
+				<div class="rounded-2xl border border-ink/15 bg-mango p-5 text-center text-ink shadow-pop">
+					<p class="text-5xl font-bold leading-none">{posts.length}</p>
+					<p class="font-bold uppercase">篇文章</p>
+				</div>
+			</section>
+
 			<section>
 				<ul class="grid gap-6 md:grid-cols-2">
 					{
 						posts.map((post, index) => (
-							<li
-								class:list={[
-									"rounded-xl border border-gray-light p-4 transition-shadow hover:shadow-card",
-									index === 0 ? "md:col-span-2" : "",
-								]}
-							>
-								<a class="group block space-y-3" href={`/blog/${post.id}/`}>
+							<li class:list={[index === 0 ? "md:col-span-2" : ""]}>
+								<a
+									class:list={[
+										"group grid h-full overflow-hidden rounded-3xl border border-ink/15 bg-white/90 shadow-pop transition-transform hover:-translate-y-1 dark:bg-gray-light",
+										index === 0 ? "md:grid-cols-[1.1fr_0.9fr]" : "",
+									]}
+									href={`/blog/${post.id}/`}
+								>
 									<img
-										class="w-full rounded-lg"
-										width={720}
-										height={360}
+										class:list={[
+											"w-full object-cover",
+											index === 0 ? "h-full min-h-80" : "h-64",
+										]}
+										width={900}
+										height={520}
 										src={post.data.heroImage}
 										alt=""
 									/>
-									<div class="space-y-1">
-										<h4 class="text-xl font-semibold text-black transition-colors group-hover:text-accent dark:text-gray-dark">
-											{post.data.title}
-										</h4>
-										<p class="text-sm text-gray transition-colors group-hover:text-accent">
-											<FormattedDate date={post.data.pubDate} />
-										</p>
+									<div class:list={[
+										"flex flex-col justify-between gap-6 p-6",
+										cardColors[index % cardColors.length],
+										"text-ink",
+									]}>
+										<div class="space-y-4">
+											<p class="inline-flex rounded-full bg-white/85 px-3 py-1 text-sm font-bold text-ink">
+												<FormattedDate date={post.data.pubDate} />
+											</p>
+											<h2 class={index === 0 ? "text-4xl md:text-5xl" : "text-3xl"}>
+												{post.data.title}
+											</h2>
+											<p class="text-lg font-semibold">{post.data.description}</p>
+										</div>
+										<span class="font-bold underline decoration-[3px] underline-offset-4">
+											打开文章
+										</span>
 									</div>
 								</a>
 							</li>

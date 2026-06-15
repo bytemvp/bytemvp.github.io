@@ -5,32 +5,34 @@ import { SITE_TITLE } from "../consts";
 ---
 
 <header
-  class="border-b border-gray-light bg-white/80 backdrop-blur dark:border-gray dark:bg-gray-light"
+  class="sticky top-0 z-50 border-b-2 border-ink/10 bg-white/78 backdrop-blur-xl dark:border-white/10 dark:bg-[#171124]/78"
 >
   <nav
-    class="mx-auto flex max-w-5xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between"
+    class="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between"
   >
-    <h2 class="m-0 flex items-center text-base font-semibold">
+    <h2 class="m-0 flex items-center text-lg font-bold">
       <a
-        class="text-black transition-colors hover:text-accent dark:text-gray-dark"
+        class="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-white/85 px-4 py-2 text-ink shadow-pop transition-transform hover:-translate-y-0.5 dark:bg-gray-light dark:text-gray-dark"
         href="/"
       >
+        <span class="h-3 w-3 rounded-full bg-candy"></span>
         {SITE_TITLE}
       </a>
     </h2>
-    <div class="flex flex-wrap items-center gap-4">
-      <HeaderLink href="/" class="text-sm font-medium">Home</HeaderLink>
-      <HeaderLink href="/blog" class="text-sm font-medium">Blog</HeaderLink>
-      <HeaderLink href="/about" class="text-sm font-medium">About</HeaderLink>
+    <div class="flex flex-wrap items-center gap-2">
+      <HeaderLink href="/">首页</HeaderLink>
+      <HeaderLink href="/blog">文章</HeaderLink>
+      <HeaderLink href="/about">关于</HeaderLink>
     </div>
     <div class="flex items-center gap-3">
       <ThemeToggle />
       <a
-        class="inline-flex items-center text-gray-dark transition-colors hover:text-accent"
+        class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-ink/15 bg-aqua text-ink shadow-pop transition-transform hover:-translate-y-0.5"
         href="https://github.com/bytemvp"
         target="_blank"
+        rel="noreferrer"
       >
-        <span class="sr-only">Go to ByteMVP's GitHub repo</span>
+        <span class="sr-only">打开 Byte MVP 的 GitHub</span>
         <svg viewBox="0 0 16 16" aria-hidden="true" width="28" height="28"
           ><path
             fill="currentColor"

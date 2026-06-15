@@ -12,10 +12,10 @@ const isActive = href === pathname || href === '/' + (subpath?.[0] || '');
 <a
 	href={href}
 	class:list={[
-		"inline-flex items-center gap-1 text-black dark:text-gray-dark hover:text-accent transition-colors",
+		"inline-flex min-h-10 items-center justify-center rounded-full border border-transparent px-4 text-sm font-bold text-ink transition-all hover:-translate-y-0.5 hover:border-ink/15 hover:bg-lime hover:text-ink dark:text-gray-dark dark:hover:text-ink",
 		className,
 		{
-			"font-semibold underline decoration-2 underline-offset-4 decoration-accent": isActive,
+			"border-ink/15 bg-mango text-ink shadow-pop": isActive,
 		},
 	]}
 	{...props}
