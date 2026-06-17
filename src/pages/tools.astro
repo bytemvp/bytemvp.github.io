@@ -1,0 +1,254 @@
+---
+import BaseHead from "../components/BaseHead.astro";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import { SITE_TITLE } from "../consts";
+
+const pageTitle = `在线工具 - ${SITE_TITLE}`;
+const pageDescription = "常用在线小工具集合：JSON 格式化、URL 编解码、Base64、时间戳、UUID、密码生成与字数统计。";
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <BaseHead title={pageTitle} description={pageDescription} />
+  </head>
+  <body>
+    <Header />
+    <main class="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 md:py-16">
+      <section class="rounded-2xl border border-ink/10 bg-white/80 p-6 shadow-card dark:bg-gray-light md:p-8">
+        <p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Tools</p>
+        <div class="mt-4 max-w-3xl space-y-4">
+          <h1 class="text-4xl text-ink dark:text-gray-dark md:text-6xl">&#x5E38;&#x7528;&#x5728;&#x7EBF;&#x5DE5;&#x5177;</h1>
+          <p class="text-lg text-gray-dark dark:text-gray">&#x65E5;&#x5E38;&#x5199;&#x4EE3;&#x7801;&#x3001;&#x6392;&#x67E5;&#x95EE;&#x9898;&#x3001;&#x5904;&#x7406;&#x6587;&#x672C;&#x5E38;&#x7528;&#x7684;&#x5C0F;&#x5DE5;&#x5177;&#x3002;&#x6240;&#x6709;&#x8BA1;&#x7B97;&#x90FD;&#x5728;&#x5F53;&#x524D;&#x6D4F;&#x89C8;&#x5668;&#x672C;&#x5730;&#x5B8C;&#x6210;&#x3002;</p>
+        </div>
+      </section>
+
+      <section class="grid gap-5 lg:grid-cols-2" aria-label="tools">
+        <article class="tool-card lg:col-span-2">
+          <div class="tool-head">
+            <div><p class="tool-kicker">Formatter</p><h2 class="tool-title">JSON &#x683C;&#x5F0F;&#x5316; / &#x538B;&#x7F29;</h2></div>
+            <div class="flex flex-wrap gap-2"><button class="tool-button" type="button" data-json-format>&#x683C;&#x5F0F;&#x5316;</button><button class="tool-button secondary" type="button" data-json-minify>&#x538B;&#x7F29;</button></div>
+          </div>
+          <textarea class="tool-textarea" data-json-input rows="8" placeholder='Paste JSON, e.g. {"name":"Byte MVP"}'></textarea>
+          <p class="tool-message" data-json-message></p>
+        </article>
+
+        <article class="tool-card">
+          <div class="tool-head"><div><p class="tool-kicker">URL</p><h2 class="tool-title">URL &#x7F16;&#x7801; / &#x89E3;&#x7801;</h2></div></div>
+          <textarea class="tool-textarea" data-url-input rows="5" placeholder="URL or text"></textarea>
+          <div class="mt-3 flex flex-wrap gap-2"><button class="tool-button" type="button" data-url-encode>&#x7F16;&#x7801;</button><button class="tool-button secondary" type="button" data-url-decode>&#x89E3;&#x7801;</button></div>
+          <textarea class="tool-textarea mt-3" data-url-output rows="5" placeholder="Result" readonly></textarea>
+          <p class="tool-message" data-url-message></p>
+        </article>
+
+        <article class="tool-card">
+          <div class="tool-head"><div><p class="tool-kicker">Base64</p><h2 class="tool-title">Base64 &#x7F16;&#x7801; / &#x89E3;&#x7801;</h2></div></div>
+          <textarea class="tool-textarea" data-base64-input rows="5" placeholder="Text"></textarea>
+          <div class="mt-3 flex flex-wrap gap-2"><button class="tool-button" type="button" data-base64-encode>&#x7F16;&#x7801;</button><button class="tool-button secondary" type="button" data-base64-decode>&#x89E3;&#x7801;</button></div>
+          <textarea class="tool-textarea mt-3" data-base64-output rows="5" placeholder="Result" readonly></textarea>
+          <p class="tool-message" data-base64-message></p>
+        </article>
+
+        <article class="tool-card">
+          <div class="tool-head"><div><p class="tool-kicker">Time</p><h2 class="tool-title">&#x65F6;&#x95F4;&#x6233;&#x8F6C;&#x6362;</h2></div><button class="tool-button secondary" type="button" data-time-now>&#x5F53;&#x524D;&#x65F6;&#x95F4;</button></div>
+          <label class="tool-label" for="timestamp-input">Unix &#x65F6;&#x95F4;&#x6233;</label>
+          <input id="timestamp-input" class="tool-input" data-timestamp-input placeholder="seconds or milliseconds" />
+          <button class="tool-button mt-3" type="button" data-time-convert>&#x8F6C;&#x65E5;&#x671F;</button>
+          <div class="tool-result mt-4" data-time-output>&#x7B49;&#x5F85;&#x8F93;&#x5165;&#x65F6;&#x95F4;&#x6233;</div>
+        </article>
+
+        <article class="tool-card">
+          <div class="tool-head"><div><p class="tool-kicker">Generator</p><h2 class="tool-title">UUID &#x751F;&#x6210;&#x5668;</h2></div><button class="tool-button" type="button" data-uuid-generate>&#x751F;&#x6210;</button></div>
+          <div class="tool-result break-all" data-uuid-output>&#x70B9;&#x51FB;&#x751F;&#x6210; UUID</div>
+          <button class="tool-link" type="button" data-copy-target="[data-uuid-output]">&#x590D;&#x5236;&#x7ED3;&#x679C;</button>
+        </article>
+
+        <article class="tool-card">
+          <div class="tool-head"><div><p class="tool-kicker">Security</p><h2 class="tool-title">&#x968F;&#x673A;&#x5BC6;&#x7801;&#x751F;&#x6210;&#x5668;</h2></div></div>
+          <label class="tool-label" for="password-length">&#x957F;&#x5EA6;&#xFF1A;<span data-password-length-text>16</span></label>
+          <input id="password-length" class="w-full accent-accent" data-password-length type="range" min="8" max="48" value="16" />
+          <button class="tool-button mt-4" type="button" data-password-generate>&#x751F;&#x6210;&#x5BC6;&#x7801;</button>
+          <div class="tool-result mt-4 break-all" data-password-output>&#x70B9;&#x51FB;&#x751F;&#x6210;&#x968F;&#x673A;&#x5BC6;&#x7801;</div>
+          <button class="tool-link" type="button" data-copy-target="[data-password-output]">&#x590D;&#x5236;&#x7ED3;&#x679C;</button>
+        </article>
+
+        <article class="tool-card">
+          <div class="tool-head"><div><p class="tool-kicker">Text</p><h2 class="tool-title">&#x5B57;&#x6570;&#x7EDF;&#x8BA1;</h2></div></div>
+          <textarea class="tool-textarea" data-count-input rows="7" placeholder="Paste text"></textarea>
+          <div class="mt-4 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
+            <div class="tool-stat"><span data-count-chars>0</span><small>&#x5B57;&#x7B26;</small></div>
+            <div class="tool-stat"><span data-count-cn>0</span><small>&#x4E2D;&#x6587;</small></div>
+            <div class="tool-stat"><span data-count-words>0</span><small>&#x82F1;&#x6587;&#x8BCD;</small></div>
+            <div class="tool-stat"><span data-count-lines>0</span><small>&#x884C;&#x6570;</small></div>
+          </div>
+        </article>
+      </section>
+    </main>
+    <Footer />
+
+    <script is:inline>
+      const query = (selector) => document.querySelector(selector);
+      const setText = (selector, text) => {
+        const element = query(selector);
+        if (element) element.textContent = text;
+      };
+      const messages = {
+        jsonOk: "\u683c\u5f0f\u5316\u6210\u529f",
+        jsonMinOk: "\u538b\u7f29\u6210\u529f",
+        jsonError: "JSON \u683c\u5f0f\u4e0d\u6b63\u786e\uff0c\u8bf7\u68c0\u67e5\u540e\u91cd\u8bd5",
+        encodeOk: "\u7f16\u7801\u5b8c\u6210",
+        decodeOk: "\u89e3\u7801\u5b8c\u6210",
+        urlError: "URL \u7f16\u7801\u683c\u5f0f\u4e0d\u6b63\u786e",
+        base64Error: "Base64 \u683c\u5f0f\u4e0d\u6b63\u786e",
+        invalidNumber: "\u8bf7\u8f93\u5165\u6709\u6548\u6570\u5b57",
+        invalidDate: "\u8f6c\u6362\u7ed3\u679c\u65e0\u6548\uff0c\u8bf7\u68c0\u67e5\u65f6\u95f4\u6233",
+        copied: "\u5df2\u590d\u5236",
+        copyFailed: "\u590d\u5236\u5931\u8d25",
+        copyResult: "\u590d\u5236\u7ed3\u679c"
+      };
+      const toBase64 = (value) => {
+        const bytes = new TextEncoder().encode(value);
+        let binary = "";
+        bytes.forEach((byte) => (binary += String.fromCharCode(byte)));
+        return btoa(binary);
+      };
+      const fromBase64 = (value) => {
+        const binary = atob(value);
+        const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+        return new TextDecoder().decode(bytes);
+      };
+
+      query("[data-json-format]")?.addEventListener("click", () => {
+        const input = query("[data-json-input]");
+        try {
+          input.value = JSON.stringify(JSON.parse(input.value), null, 2);
+          setText("[data-json-message]", messages.jsonOk);
+        } catch {
+          setText("[data-json-message]", messages.jsonError);
+        }
+      });
+      query("[data-json-minify]")?.addEventListener("click", () => {
+        const input = query("[data-json-input]");
+        try {
+          input.value = JSON.stringify(JSON.parse(input.value));
+          setText("[data-json-message]", messages.jsonMinOk);
+        } catch {
+          setText("[data-json-message]", messages.jsonError);
+        }
+      });
+      query("[data-url-encode]")?.addEventListener("click", () => {
+        query("[data-url-output]").value = encodeURIComponent(query("[data-url-input]").value);
+        setText("[data-url-message]", messages.encodeOk);
+      });
+      query("[data-url-decode]")?.addEventListener("click", () => {
+        try {
+          query("[data-url-output]").value = decodeURIComponent(query("[data-url-input]").value);
+          setText("[data-url-message]", messages.decodeOk);
+        } catch {
+          setText("[data-url-message]", messages.urlError);
+        }
+      });
+      query("[data-base64-encode]")?.addEventListener("click", () => {
+        query("[data-base64-output]").value = toBase64(query("[data-base64-input]").value);
+        setText("[data-base64-message]", messages.encodeOk);
+      });
+      query("[data-base64-decode]")?.addEventListener("click", () => {
+        try {
+          query("[data-base64-output]").value = fromBase64(query("[data-base64-input]").value.trim());
+          setText("[data-base64-message]", messages.decodeOk);
+        } catch {
+          setText("[data-base64-message]", messages.base64Error);
+        }
+      });
+
+      const renderTime = (date) => {
+        if (Number.isNaN(date.getTime())) {
+          setText("[data-time-output]", messages.invalidDate);
+          return;
+        }
+        setText("[data-time-output]", `${date.toLocaleString()} | ISO: ${date.toISOString()}`);
+      };
+      query("[data-time-now]")?.addEventListener("click", () => {
+        const now = new Date();
+        query("[data-timestamp-input]").value = String(now.getTime());
+        renderTime(now);
+      });
+      query("[data-time-convert]")?.addEventListener("click", () => {
+        const rawValue = query("[data-timestamp-input]").value.trim();
+        const timestamp = Number(rawValue);
+        if (!Number.isFinite(timestamp)) {
+          setText("[data-time-output]", messages.invalidNumber);
+          return;
+        }
+        renderTime(new Date(rawValue.length === 10 ? timestamp * 1000 : timestamp));
+      });
+      query("[data-uuid-generate]")?.addEventListener("click", () => setText("[data-uuid-output]", crypto.randomUUID()));
+
+      const passwordLength = query("[data-password-length]");
+      passwordLength?.addEventListener("input", () => setText("[data-password-length-text]", passwordLength.value));
+      query("[data-password-generate]")?.addEventListener("click", () => {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*_-+=?";
+        const values = crypto.getRandomValues(new Uint32Array(Number(passwordLength.value)));
+        setText("[data-password-output]", Array.from(values, (value) => chars[value % chars.length]).join(""));
+      });
+      query("[data-count-input]")?.addEventListener("input", (event) => {
+        const value = event.target.value;
+        setText("[data-count-chars]", String(value.length));
+        setText("[data-count-cn]", String((value.match(/[\u4e00-\u9fa5]/g) || []).length));
+        setText("[data-count-words]", String((value.trim().match(/[A-Za-z0-9]+(?:[-'][A-Za-z0-9]+)*/g) || []).length));
+        setText("[data-count-lines]", String(value ? value.split(/\r\n|\r|\n/).length : 0));
+      });
+      document.querySelectorAll("[data-copy-target]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const target = query(button.dataset.copyTarget);
+          const text = (target?.value || target?.textContent || "").trim();
+          try {
+            if (navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(text);
+            } else {
+              const textarea = document.createElement("textarea");
+              textarea.value = text;
+              textarea.style.position = "fixed";
+              textarea.style.opacity = "0";
+              document.body.append(textarea);
+              textarea.select();
+              document.execCommand("copy");
+              textarea.remove();
+            }
+            button.textContent = messages.copied;
+          } catch {
+            button.textContent = messages.copyFailed;
+          }
+          window.setTimeout(() => (button.textContent = messages.copyResult), 1200);
+        });
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  .tool-card { border: 1px solid rgba(var(--ink), 0.1); border-radius: 1rem; background: rgba(255, 255, 255, 0.78); padding: 1.25rem; box-shadow: var(--box-shadow); }
+  [data-theme="dark"] .tool-card { background: rgb(var(--gray-light)); }
+  .tool-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+  .tool-kicker { margin: 0 0 0.25rem; color: var(--accent); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+  .tool-title { font-size: 1.35rem; }
+  .tool-textarea, .tool-input { width: 100%; border: 1px solid rgba(var(--ink), 0.12); border-radius: 0.85rem; background: rgba(255, 255, 255, 0.75); padding: 0.85rem 1rem; color: rgb(var(--ink)); outline: none; }
+  [data-theme="dark"] .tool-textarea, [data-theme="dark"] .tool-input { background: rgba(255, 255, 255, 0.06); color: rgb(var(--gray-dark)); }
+  .tool-textarea:focus, .tool-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(111, 167, 160, 0.18); }
+  .tool-button { min-height: 2.5rem; border-radius: 0.75rem; background: rgb(var(--ink)); padding: 0 1rem; color: white; font-weight: 700; transition: opacity 0.2s ease, transform 0.2s ease; }
+  .tool-button:hover { opacity: 0.88; transform: translateY(-1px); }
+  .tool-button.secondary { border: 1px solid rgba(var(--ink), 0.14); background: rgba(255, 255, 255, 0.72); color: rgb(var(--ink)); }
+  [data-theme="dark"] .tool-button { background: var(--accent); color: #142326; }
+  [data-theme="dark"] .tool-button.secondary { background: rgba(255, 255, 255, 0.08); color: rgb(var(--gray-dark)); }
+  .tool-label { display: block; margin-bottom: 0.45rem; font-weight: 700; }
+  .tool-result { min-height: 3rem; border-radius: 0.85rem; background: rgba(var(--gray-light), 0.8); padding: 0.85rem 1rem; color: rgb(var(--ink)); font-weight: 700; }
+  [data-theme="dark"] .tool-result { background: rgba(255, 255, 255, 0.08); color: rgb(var(--gray-dark)); }
+  .tool-message { min-height: 1.5rem; margin: 0.65rem 0 0; color: var(--accent-dark); font-size: 0.9rem; font-weight: 700; }
+  .tool-link { margin-top: 0.75rem; color: var(--accent-dark); font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+  .tool-stat { border-radius: 0.85rem; background: rgba(var(--gray-light), 0.78); padding: 0.85rem; text-align: center; }
+  [data-theme="dark"] .tool-stat { background: rgba(255, 255, 255, 0.08); }
+  .tool-stat span { display: block; color: rgb(var(--ink)); font-size: 1.35rem; font-weight: 700; }
+  [data-theme="dark"] .tool-stat span { color: rgb(var(--gray-dark)); }
+  .tool-stat small { color: rgb(var(--gray)); font-weight: 700; }
+</style>
