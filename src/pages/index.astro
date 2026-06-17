@@ -19,24 +19,32 @@ const [featuredPost, ...recentPosts] = posts;
 	</head>
 	<body>
 		<Header />
-		<main class="mx-auto flex w-full max-w-5xl flex-col gap-12 px-4 py-10 md:gap-16 md:py-16">
-			<section class="border-b border-ink/10 pb-10 md:pb-14" aria-labelledby="hero-title">
-				<div class="max-w-3xl space-y-6">
+		<main class="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 py-10 md:gap-16 md:py-16">
+			<section class="rounded-3xl border border-ink/10 bg-white/82 p-6 shadow-soft dark:bg-gray-light md:p-8" aria-labelledby="hero-title">
+				<div class="mx-auto max-w-4xl text-center">
 					<p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Byte MVP</p>
-					<h1 id="hero-title" class="text-4xl text-ink dark:text-gray-dark md:text-6xl">
-						记录产品、前端与个人创作的轻量实践。
+					<h1 id="hero-title" class="mt-5 text-4xl leading-tight text-ink dark:text-gray-dark md:text-6xl">
+						聚合 AI 动态，记录工具与产品实践。
 					</h1>
-					<p class="max-w-2xl text-lg text-gray-dark dark:text-gray">
+					<p class="mx-auto mt-5 max-w-2xl text-lg text-gray-dark dark:text-gray">
 						{SITE_DESCRIPTION}
 					</p>
-					<div class="flex flex-wrap gap-3">
+					<div class="mt-6 flex flex-wrap justify-center gap-3">
 						<a class="inline-flex min-h-11 items-center justify-center rounded-lg bg-ink px-5 font-bold text-white transition-colors hover:bg-accent-dark dark:bg-accent dark:text-[#142326] dark:hover:bg-accent-dark" href="/blog">
-							浏览文章
+							浏览 AI 资讯
+						</a>
+						<a class="inline-flex min-h-11 items-center justify-center rounded-lg border border-ink/15 bg-white/70 px-5 font-bold text-ink transition-colors hover:border-accent hover:text-accent-dark dark:border-white/10 dark:bg-white/5 dark:text-gray-dark dark:hover:border-accent" href="/tools">
+							在线工具
 						</a>
 						<a class="inline-flex min-h-11 items-center justify-center rounded-lg border border-ink/15 bg-white/70 px-5 font-bold text-ink transition-colors hover:border-accent hover:text-accent-dark dark:border-white/10 dark:bg-white/5 dark:text-gray-dark dark:hover:border-accent" href="/about">
-							关于作者
+							关于 ByteMVP
 						</a>
 					</div>
+				</div>
+				<div class="mt-8 grid gap-3 text-sm font-bold text-ink dark:text-gray-dark sm:grid-cols-3">
+					<span class="rounded-2xl bg-lime px-4 py-3 text-center">AI 资讯聚合</span>
+					<span class="rounded-2xl bg-aqua px-4 py-3 text-center">工具与工作流</span>
+					<span class="rounded-2xl bg-mango px-4 py-3 text-center">轻量产品实践</span>
 				</div>
 			</section>
 
@@ -44,14 +52,14 @@ const [featuredPost, ...recentPosts] = posts;
 				featuredPost && (
 					<section aria-labelledby="featured-title" class="space-y-4">
 						<div class="flex flex-wrap items-center justify-between gap-3">
-							<h2 id="featured-title" class="text-2xl md:text-3xl">推荐阅读</h2>
+							<h2 id="featured-title" class="text-2xl md:text-3xl">重点关注</h2>
 							<a class="font-bold text-accent underline decoration-2 underline-offset-4" href="/blog">
-								全部文章
+								全部 AI 资讯
 							</a>
 						</div>
-						<article class="grid overflow-hidden rounded-xl border border-ink/10 bg-white/82 shadow-card dark:bg-gray-light lg:grid-cols-[0.95fr_1.05fr]">
+						<article class="grid overflow-hidden rounded-3xl border border-ink/10 bg-white/82 shadow-card dark:bg-gray-light lg:grid-cols-[0.9fr_1.1fr]">
 							<img
-								class="h-64 w-full object-cover lg:h-full"
+								class="aspect-[16/9] h-auto w-full object-cover lg:h-full lg:min-h-[22rem]"
 								src={featuredPost.data.heroImage}
 								alt=""
 								width="960"
@@ -63,10 +71,19 @@ const [featuredPost, ...recentPosts] = posts;
 									<p class="text-sm font-bold text-accent">
 										<FormattedDate date={featuredPost.data.pubDate} />
 									</p>
-									<h3 class="text-2xl md:text-4xl">{featuredPost.data.title}</h3>
+									<h3 class="text-2xl leading-tight md:text-3xl xl:text-4xl">{featuredPost.data.title}</h3>
 									<p class="text-base text-gray-dark dark:text-gray">
 										{featuredPost.data.description}
 									</p>
+									{
+										featuredPost.data.tags.length > 0 && (
+											<div class="flex flex-wrap gap-2">
+												{featuredPost.data.tags.map((tag) => (
+													<span class="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-ink dark:bg-white/10 dark:text-gray-dark">#{tag}</span>
+												))}
+											</div>
+										)
+									}
 								</div>
 								<a class="font-bold text-ink underline decoration-2 underline-offset-4 dark:text-gray-dark" href={`/blog/${featuredPost.id}/`}>
 									阅读全文
@@ -79,19 +96,19 @@ const [featuredPost, ...recentPosts] = posts;
 
 			<section class="space-y-5" aria-labelledby="latest-title">
 				<div class="flex flex-wrap items-center justify-between gap-3">
-					<h2 id="latest-title" class="text-2xl md:text-3xl">最新记录</h2>
+					<h2 id="latest-title" class="text-2xl md:text-3xl">最新 AI 资讯</h2>
 					<span class="text-sm font-bold text-gray">{posts.length} 篇文章</span>
 				</div>
 				<div class="divide-y divide-ink/10 rounded-xl border border-ink/10 bg-white/72 shadow-card dark:bg-gray-light">
 					{
 						recentPosts.slice(0, 4).map((post) => (
 							<article>
-								<a class="grid gap-3 p-5 transition-colors hover:bg-white/70 dark:hover:bg-white/5 md:grid-cols-[9rem_1fr_auto] md:items-center" href={`/blog/${post.id}/`}>
+								<a class="grid gap-3 p-5 transition-colors hover:bg-white/70 dark:hover:bg-white/5 md:grid-cols-[8rem_minmax(0,1fr)_auto] md:items-center" href={`/blog/${post.id}/`}>
 									<p class="text-sm font-bold text-accent">
 										<FormattedDate date={post.data.pubDate} />
 									</p>
 									<div class="space-y-1">
-										<h3 class="text-xl md:text-2xl">{post.data.title}</h3>
+										<h3 class="text-xl leading-tight md:text-2xl">{post.data.title}</h3>
 										<p class="text-sm text-gray-dark dark:text-gray">{post.data.description}</p>
 									</div>
 									<span class="font-bold text-ink dark:text-gray-dark">阅读</span>

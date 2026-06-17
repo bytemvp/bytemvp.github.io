@@ -5,13 +5,14 @@ import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import FormattedDate from "../components/FormattedDate.astro";
 
-type Props = CollectionEntry<"blog">["data"];
+type Props = CollectionEntry<"blog">["data"] & { pubDate?: Date };
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
-const eyebrow = Astro.url.pathname === "/about" ? "关于" : "文章";
+const { title, description, pubDate, updatedDate, heroImage, tags = [], sourceUrl, sourceName } = Astro.props;
+const isAboutPage = Astro.url.pathname.replace(/\/$/, "") === "/about";
+const eyebrow = isAboutPage ? "\u5173\u4e8e" : "\u6587\u7ae0";
 ---
 
-<html lang="en">
+<html lang="zh-CN">
 	<head>
 		<BaseHead title={title} description={description} image={heroImage} />
 	</head>
@@ -20,30 +21,56 @@ const eyebrow = Astro.url.pathname === "/about" ? "关于" : "文章";
 		<Header />
 		<main class="mx-auto w-full max-w-6xl px-4 py-10 md:py-16">
 			<article class="space-y-8">
-				<header class="grid gap-8 rounded-3xl border border-ink/15 bg-white/88 p-5 shadow-soft dark:bg-gray-light lg:grid-cols-[0.92fr_1.08fr] md:p-8">
-					<div class="flex flex-col justify-between gap-8 rounded-2xl border border-ink/15 bg-lime p-6 text-ink">
-						<div class="space-y-4">
-							<p class="inline-flex rounded-full bg-white/85 px-3 py-1 text-sm font-bold uppercase text-[#142326] dark:bg-white/10 dark:text-gray-dark">
-								{eyebrow}
-							</p>
-							<h1 class="text-4xl md:text-6xl">{title}</h1>
-							<p class="text-lg font-semibold">{description}</p>
-						</div>
-						<div class="text-sm font-bold uppercase">
-							<FormattedDate date={pubDate} />
+				<header class:list={["grid gap-6 rounded-3xl border border-ink/15 bg-white/88 p-5 shadow-soft dark:bg-gray-light md:p-8", isAboutPage ? "lg:grid-cols-[0.88fr_1.12fr]" : "lg:grid-cols-[0.96fr_1.04fr]"]}>
+					<div class:list={["flex flex-col gap-8 rounded-2xl border border-ink/15 bg-lime p-6 text-ink md:p-7", isAboutPage ? "min-h-64 items-center justify-center text-center lg:min-h-full" : "justify-between"]}>
+						<div class:list={["space-y-4", { "mx-auto max-w-xl": isAboutPage }]}>
 							{
-								updatedDate && (
-									<p class="mt-2 normal-case">
-										更新于 <FormattedDate date={updatedDate} />
+								!isAboutPage && (
+									<p class="inline-flex rounded-full bg-white/85 px-3 py-1 text-sm font-bold uppercase text-[#142326] dark:bg-white/10 dark:text-gray-dark">
+										{eyebrow}
 									</p>
 								)
 							}
+							<h1 class="text-3xl leading-tight md:text-5xl xl:text-6xl">{title}</h1>
+							<p class="text-base font-semibold md:text-lg">{description}</p>
 						</div>
+						{
+							!isAboutPage && (
+								<div class="space-y-4 text-sm font-bold">
+									<div class="uppercase">
+										<FormattedDate date={pubDate} />
+									{
+										updatedDate && (
+											<p class="mt-2 normal-case">
+												更新于 <FormattedDate date={updatedDate} />
+											</p>
+										)
+									}
+									</div>
+									{
+										tags.length > 0 && (
+										<div class="flex flex-wrap gap-2">
+											{tags.map((tag) => (
+												<span class="rounded-full bg-white/80 px-3 py-1 text-xs text-[#142326] dark:bg-white/10 dark:text-gray-dark">#{tag}</span>
+											))}
+										</div>
+									)
+								}
+									{
+										sourceUrl && (
+										<a class="inline-flex underline decoration-2 underline-offset-4" href={sourceUrl} target="_blank" rel="noreferrer">
+											来源：{sourceName || "原文"}
+										</a>
+									)
+								}
+							</div>
+							)
+						}
 					</div>
 					{
 						heroImage && (
 							<img
-								class="h-full min-h-80 w-full rounded-2xl border border-ink/15 object-cover"
+								class:list={["aspect-[16/9] h-auto w-full rounded-2xl border border-ink/15 object-cover lg:h-full", isAboutPage ? "lg:min-h-96" : "lg:min-h-80"]}
 								width={1020}
 								height={620}
 								src={heroImage}
@@ -54,7 +81,7 @@ const eyebrow = Astro.url.pathname === "/about" ? "关于" : "文章";
 				</header>
 
 				<div class="rounded-3xl border border-ink/15 bg-white/88 p-6 shadow-soft backdrop-blur dark:bg-gray-light/90 md:p-10">
-					<div class="prose mx-auto max-w-3xl text-gray-dark dark:text-gray-dark">
+					<div class="prose mx-auto max-w-3xl text-gray-dark dark:text-gray">
 						<slot />
 					</div>
 				</div>

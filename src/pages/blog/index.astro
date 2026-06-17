@@ -14,7 +14,7 @@ const cardColors = ["bg-candy", "bg-aqua", "bg-lime", "bg-mango", "bg-bubble"];
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 	<head>
 		<BaseHead title={`文章 | ${SITE_TITLE}`} description={SITE_DESCRIPTION} image={posts[0]?.data.heroImage} />
 	</head>
@@ -24,35 +24,35 @@ const cardColors = ["bg-candy", "bg-aqua", "bg-lime", "bg-mango", "bg-bubble"];
 			<section class="mb-10 grid gap-6 rounded-3xl border border-ink/15 bg-white/88 p-6 shadow-soft dark:bg-gray-light md:grid-cols-[1fr_auto] md:items-end md:p-8">
 				<div class="max-w-3xl">
 					<p class="mb-3 inline-flex rounded-full bg-lime px-4 py-2 text-sm font-bold uppercase text-ink dark:text-gray-dark">
-						全部文章
+						AI 资讯
 					</p>
-					<h1 class="text-ink dark:text-gray-dark">慢慢积累的文章归档。</h1>
+					<h1 class="text-ink dark:text-gray-dark">聚合近期 AI 动态与实践观察。</h1>
 					<p class="mt-4 text-xl font-semibold text-gray-dark dark:text-gray">
-						这里收集 Byte MVP 的产品思考、前端实验和日常记录。
+						收集模型发布、产品更新、产业动作和 AI 工作流趋势，方便快速了解关键变化。
 					</p>
 				</div>
 				<div class="rounded-2xl border border-ink/15 bg-mango p-5 text-center text-ink shadow-pop dark:text-gray-dark">
 					<p class="text-5xl font-bold leading-none">{posts.length}</p>
-					<p class="font-bold uppercase">篇文章</p>
+					<p class="font-bold uppercase">篇资讯</p>
 				</div>
 			</section>
 
 			<section>
-				<ul class="grid gap-6 md:grid-cols-2">
+				<ul class="grid gap-6 lg:grid-cols-2">
 					{
 						posts.map((post, index) => (
-							<li class:list={[index === 0 ? "md:col-span-2" : ""]}>
+							<li class:list={[index === 0 ? "lg:col-span-2" : ""]}>
 								<a
 									class:list={[
 										"group grid h-full overflow-hidden rounded-3xl border border-ink/15 bg-white/90 shadow-pop transition-transform hover:-translate-y-1 dark:bg-gray-light",
-										index === 0 ? "md:grid-cols-[1.1fr_0.9fr]" : "",
+										index === 0 ? "lg:grid-cols-[0.95fr_1.05fr]" : "",
 									]}
 									href={`/blog/${post.id}/`}
 								>
 									<img
 										class:list={[
-											"w-full object-cover",
-											index === 0 ? "h-full min-h-80" : "h-64",
+											"aspect-[16/9] w-full object-cover",
+											index === 0 ? "h-auto lg:h-full lg:min-h-80" : "h-auto",
 										]}
 										width={900}
 										height={520}
@@ -68,10 +68,19 @@ const cardColors = ["bg-candy", "bg-aqua", "bg-lime", "bg-mango", "bg-bubble"];
 											<p class="inline-flex rounded-full bg-white/85 px-3 py-1 text-sm font-bold text-[#142326] dark:bg-white/10 dark:text-gray-dark">
 												<FormattedDate date={post.data.pubDate} />
 											</p>
-											<h2 class={index === 0 ? "text-4xl md:text-5xl" : "text-3xl"}>
+											<h2 class={index === 0 ? "text-3xl leading-tight md:text-4xl" : "text-2xl leading-tight md:text-3xl"}>
 												{post.data.title}
 											</h2>
-											<p class="text-lg font-semibold">{post.data.description}</p>
+											<p class="text-base font-semibold md:text-lg">{post.data.description}</p>
+											{
+												post.data.tags.length > 0 && (
+													<div class="flex flex-wrap gap-2">
+														{post.data.tags.map((tag) => (
+															<span class="rounded-full bg-white/85 px-3 py-1 text-xs font-bold text-[#142326] dark:bg-white/10 dark:text-gray-dark">#{tag}</span>
+														))}
+													</div>
+												)
+											}
 										</div>
 										<span class="font-bold underline decoration-[3px] underline-offset-4">
 											打开文章

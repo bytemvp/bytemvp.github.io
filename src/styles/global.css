@@ -97,6 +97,14 @@
 		@apply text-4xl font-bold md:text-6xl;
 	}
 
+	@supports (text-wrap: balance) {
+		h1,
+		h2,
+		h3 {
+			text-wrap: balance;
+		}
+	}
+
 	h2 {
 		@apply text-3xl font-bold md:text-4xl;
 	}
