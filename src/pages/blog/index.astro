@@ -16,80 +16,26 @@ const cardColors = ["bg-candy", "bg-aqua", "bg-lime", "bg-mango", "bg-bubble"];
 <!doctype html>
 <html lang="zh-CN">
 	<head>
-		<BaseHead title={`文章 | ${SITE_TITLE}`} description={SITE_DESCRIPTION} image={posts[0]?.data.heroImage} />
+		<BaseHead title={`&#x6587;&#x7AE0; | ${SITE_TITLE}`} description={SITE_DESCRIPTION} image={posts[0]?.data.heroImage} />
 	</head>
 	<body>
 		<Header />
 		<main class="mx-auto max-w-6xl px-4 py-10 md:py-16">
-			<section class="mb-10 grid gap-6 rounded-3xl border border-ink/15 bg-white/88 p-6 shadow-soft dark:bg-gray-light md:grid-cols-[1fr_auto] md:items-end md:p-8">
+			<section class="mb-12 grid gap-6 lg:grid-cols-[minmax(0,1fr)_16rem] lg:items-end">
 				<div class="max-w-3xl">
-					<p class="mb-3 inline-flex rounded-full bg-lime px-4 py-2 text-sm font-bold uppercase text-ink dark:text-gray-dark">
-						AI 资讯
-					</p>
-					<h1 class="text-ink dark:text-gray-dark">聚合近期 AI 动态与实践观察。</h1>
-					<p class="mt-4 text-xl font-semibold text-gray-dark dark:text-gray">
-						收集模型发布、产品更新、产业动作和 AI 工作流趋势，方便快速了解关键变化。
-					</p>
+					<p class="neon-pill mb-4 inline-flex rounded-full px-4 py-2 text-sm font-bold uppercase tracking-[0.16em] text-accent">AI &#x8D44;&#x8BAF;</p>
+					<h1 class="text-5xl leading-[0.98] text-ink dark:text-gray-dark md:text-7xl">&#x805A;&#x5408;&#x8FD1;&#x671F; AI &#x52A8;&#x6001;&#x4E0E;&#x5B9E;&#x8DF5;&#x89C2;&#x5BDF;&#x3002;</h1>
+					<p class="mt-4 text-xl font-semibold text-gray-dark dark:text-gray">&#x6536;&#x96C6;&#x6A21;&#x578B;&#x53D1;&#x5E03;&#x3001;&#x4EA7;&#x54C1;&#x66F4;&#x65B0;&#x3001;&#x4EA7;&#x4E1A;&#x52A8;&#x4F5C;&#x548C; AI &#x5DE5;&#x4F5C;&#x6D41;&#x8D8B;&#x52BF;&#xFF0C;&#x65B9;&#x4FBF;&#x5FEB;&#x901F;&#x4E86;&#x89E3;&#x5173;&#x952E;&#x53D8;&#x5316;&#x3002;</p>
 				</div>
-				<div class="rounded-2xl border border-ink/15 bg-mango p-5 text-center text-ink shadow-pop dark:text-gray-dark">
+				<div class="lift-card rounded-lg border border-ink/10 bg-mango p-5 text-center text-ink shadow-pop dark:text-gray-dark lg:mb-8">
 					<p class="text-5xl font-bold leading-none">{posts.length}</p>
-					<p class="font-bold uppercase">篇资讯</p>
+					<p class="font-bold uppercase">&#x7BC7;&#x8D44;&#x8BAF;</p>
 				</div>
 			</section>
 
 			<section>
-				<ul class="grid gap-6 lg:grid-cols-2">
-					{
-						posts.map((post, index) => (
-							<li class:list={[index === 0 ? "lg:col-span-2" : ""]}>
-								<a
-									class:list={[
-										"group grid h-full overflow-hidden rounded-3xl border border-ink/15 bg-white/90 shadow-pop transition-transform hover:-translate-y-1 dark:bg-gray-light",
-										index === 0 ? "lg:grid-cols-[0.95fr_1.05fr]" : "",
-									]}
-									href={`/blog/${post.id}/`}
-								>
-									<img
-										class:list={[
-											"aspect-[16/9] w-full object-cover",
-											index === 0 ? "h-auto lg:h-full lg:min-h-80" : "h-auto",
-										]}
-										width={900}
-										height={520}
-										src={post.data.heroImage}
-										alt=""
-									/>
-									<div class:list={[
-										"flex flex-col justify-between gap-6 p-6",
-										cardColors[index % cardColors.length],
-										"text-ink dark:text-gray-dark",
-									]}>
-										<div class="space-y-4">
-											<p class="inline-flex rounded-full bg-white/85 px-3 py-1 text-sm font-bold text-[#142326] dark:bg-white/10 dark:text-gray-dark">
-												<FormattedDate date={post.data.pubDate} />
-											</p>
-											<h2 class={index === 0 ? "text-3xl leading-tight md:text-4xl" : "text-2xl leading-tight md:text-3xl"}>
-												{post.data.title}
-											</h2>
-											<p class="text-base font-semibold md:text-lg">{post.data.description}</p>
-											{
-												post.data.tags.length > 0 && (
-													<div class="flex flex-wrap gap-2">
-														{post.data.tags.map((tag) => (
-															<span class="rounded-full bg-white/85 px-3 py-1 text-xs font-bold text-[#142326] dark:bg-white/10 dark:text-gray-dark">#{tag}</span>
-														))}
-													</div>
-												)
-											}
-										</div>
-										<span class="font-bold underline decoration-[3px] underline-offset-4">
-											打开文章
-										</span>
-									</div>
-								</a>
-							</li>
-						))
-					}
+				<ul class="grid gap-5 lg:grid-cols-6">
+					{posts.map((post, index) => (<li class:list={[index === 0 ? "lg:col-span-4" : "lg:col-span-3", index === 1 ? "lg:col-span-2 lg:mt-16" : "", index > 1 && index % 3 === 0 ? "lg:mb-8" : ""]}><a class:list={["group lift-card surface-card grid h-full overflow-hidden rounded-lg", index === 0 ? "lg:grid-cols-[0.9fr_1.1fr]" : ""]} href={`/blog/${post.id}/`}><img class:list={["aspect-[16/10] w-full object-cover", index === 0 ? "h-auto lg:h-full lg:min-h-96" : "h-auto"]} width={900} height={520} src={post.data.heroImage} alt="" /><div class:list={["flex flex-col justify-between gap-6 p-6", cardColors[index % cardColors.length], "text-ink dark:text-gray-dark"]}><div class="space-y-4"><p class="neon-pill inline-flex rounded-full px-3 py-1 text-sm font-bold text-[#142326] dark:text-gray-dark"><FormattedDate date={post.data.pubDate} /></p><h2 class={index === 0 ? "text-3xl leading-tight md:text-4xl" : "text-2xl leading-tight"}>{post.data.title}</h2><p class="text-base font-semibold md:text-lg">{post.data.description}</p>{post.data.tags.length > 0 && (<div class="flex flex-wrap gap-2">{post.data.tags.map((tag) => (<span class="neon-pill rounded-full px-3 py-1 text-xs font-bold text-[#142326] dark:text-gray-dark">#{tag}</span>))}</div>)}</div><span class="font-bold underline decoration-[3px] underline-offset-4 transition group-hover:translate-x-1">&#x6253;&#x5F00;&#x6587;&#x7AE0;</span></div></a></li>))}
 				</ul>
 			</section>
 		</main>

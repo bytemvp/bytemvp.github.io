@@ -5,28 +5,29 @@ import { SITE_TITLE } from "../consts";
 ---
 
 <header
-  class="sticky top-0 z-50 border-b border-ink/10 bg-white/82 backdrop-blur-xl dark:border-white/10 dark:bg-gray-light/82"
+  class="sticky top-3 z-50 mx-auto w-[calc(100%-1rem)] max-w-6xl rounded-lg border border-[var(--glass-border)] bg-white/72 shadow-card backdrop-blur-2xl dark:bg-gray-light/70"
 >
   <nav
-    class="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-3 md:flex md:justify-between md:gap-4"
+    class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-3 py-3 md:flex md:justify-between md:gap-4 md:px-4"
   >
     <h2 class="m-0 flex min-w-0 items-center text-base font-bold md:text-lg">
       <a
-        class="inline-flex min-w-0 max-w-full items-center gap-2 text-ink transition-colors hover:text-accent-dark dark:text-gray-dark"
+        class="inline-flex min-w-0 max-w-full items-center gap-2 rounded-lg px-2 py-1 text-ink transition-colors hover:text-accent-dark dark:text-gray-dark"
         href="/"
       >
+        <span class="h-3 w-3 rounded-full bg-[var(--hero-gradient)] shadow-[0_0_22px_rgba(37,99,235,0.5)]"></span>
         <span class="truncate">{SITE_TITLE}</span>
       </a>
     </h2>
     <div class="flex items-center justify-end gap-2 md:order-3 md:gap-3">
       <ThemeToggle />
       <a
-        class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-ink/10 bg-white/70 text-ink transition-colors hover:border-accent hover:text-accent-dark dark:bg-white/5 dark:text-gray-dark"
+        class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--glass-border)] bg-white/60 text-ink transition hover:border-accent hover:text-accent-dark hover:shadow-card dark:bg-white/5 dark:text-gray-dark"
         href="https://github.com/bytemvp"
         target="_blank"
         rel="noreferrer"
       >
-        <span class="sr-only">打开 Byte MVP 的 GitHub</span>
+        <span class="sr-only">&#x6253;&#x5F00; Byte MVP &#x7684; GitHub</span>
         <svg class="h-5 w-5" viewBox="0 0 16 16" aria-hidden="true"
           ><path
             fill="currentColor"
@@ -35,11 +36,11 @@ import { SITE_TITLE } from "../consts";
         >
       </a>
     </div>
-    <div class="col-span-2 flex min-w-0 items-center gap-1 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:order-2 md:col-span-1 md:flex-wrap md:justify-center md:gap-2 md:overflow-visible md:pb-0">
-      <HeaderLink href="/">首页</HeaderLink>
-      <HeaderLink href="/blog">文章</HeaderLink>
-      <HeaderLink href="/tools">工具</HeaderLink>
-      <HeaderLink href="/about">关于</HeaderLink>
+    <div class="col-span-2 flex min-w-0 items-center gap-1 overflow-x-auto rounded-lg bg-white/40 p-1 [-ms-overflow-style:none] [scrollbar-width:none] dark:bg-white/5 [&::-webkit-scrollbar]:hidden md:order-2 md:col-span-1 md:flex-wrap md:justify-center md:gap-1 md:overflow-visible">
+      <HeaderLink href="/">&#x9996;&#x9875;</HeaderLink>
+      <HeaderLink href="/blog">&#x6587;&#x7AE0;</HeaderLink>
+      <HeaderLink href="/tools">&#x5DE5;&#x5177;</HeaderLink>
+      <HeaderLink href="/about">&#x5173;&#x4E8E;</HeaderLink>
     </div>
   </nav>
 </header>

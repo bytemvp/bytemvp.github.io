@@ -19,103 +19,80 @@ const [featuredPost, ...recentPosts] = posts;
 	</head>
 	<body>
 		<Header />
-		<main class="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 py-10 md:gap-16 md:py-16">
-			<section class="rounded-3xl border border-ink/10 bg-white/82 p-6 shadow-soft dark:bg-gray-light md:p-8" aria-labelledby="hero-title">
-				<div class="mx-auto max-w-4xl text-center">
-					<p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Byte MVP</p>
-					<h1 id="hero-title" class="mt-5 text-4xl leading-tight text-ink dark:text-gray-dark md:text-6xl">
-						聚合 AI 动态，记录工具与产品实践。
+		<main class="mx-auto flex w-full max-w-6xl flex-col gap-14 px-4 py-10 md:gap-20 md:py-16">
+			<section class="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_22rem]" aria-labelledby="hero-title">
+				<div class="hero-shell min-h-[32rem] rounded-lg p-5 md:p-9">
+					<p class="neon-pill inline-flex rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-accent">Byte MVP</p>
+					<h1 id="hero-title" class="mt-8 max-w-4xl text-5xl leading-[0.98] text-ink dark:text-gray-dark md:text-7xl">
+						&#x805A;&#x5408; AI &#x52A8;&#x6001;&#xFF0C;&#x8BB0;&#x5F55;&#x5DE5;&#x5177;&#x4E0E;&#x4EA7;&#x54C1;&#x5B9E;&#x8DF5;&#x3002;
 					</h1>
-					<p class="mx-auto mt-5 max-w-2xl text-lg text-gray-dark dark:text-gray">
+					<p class="mt-7 max-w-2xl text-lg font-semibold text-gray-dark dark:text-gray md:text-xl">
 						{SITE_DESCRIPTION}
 					</p>
-					<div class="mt-6 flex flex-wrap justify-center gap-3">
-						<a class="inline-flex min-h-11 items-center justify-center rounded-lg bg-ink px-5 font-bold text-white transition-colors hover:bg-accent-dark dark:bg-accent dark:text-[#142326] dark:hover:bg-accent-dark" href="/blog">
-							浏览 AI 资讯
+					<div class="mt-10 flex flex-wrap gap-3">
+						<a class="cta-primary inline-flex min-h-12 items-center justify-center rounded-lg px-6 font-bold text-white transition hover:shadow-pop" href="/blog">
+							&#x6D4F;&#x89C8; AI &#x8D44;&#x8BAF;
 						</a>
-						<a class="inline-flex min-h-11 items-center justify-center rounded-lg border border-ink/15 bg-white/70 px-5 font-bold text-ink transition-colors hover:border-accent hover:text-accent-dark dark:border-white/10 dark:bg-white/5 dark:text-gray-dark dark:hover:border-accent" href="/tools">
-							在线工具
+						<a class="cta-secondary inline-flex min-h-12 items-center justify-center rounded-lg px-6 font-bold text-ink transition hover:text-accent-dark hover:shadow-card dark:text-gray-dark" href="/tools">
+							&#x5728;&#x7EBF;&#x5DE5;&#x5177;
 						</a>
-						<a class="inline-flex min-h-11 items-center justify-center rounded-lg border border-ink/15 bg-white/70 px-5 font-bold text-ink transition-colors hover:border-accent hover:text-accent-dark dark:border-white/10 dark:bg-white/5 dark:text-gray-dark dark:hover:border-accent" href="/about">
-							关于 ByteMVP
+						<a class="cta-secondary inline-flex min-h-12 items-center justify-center rounded-lg px-6 font-bold text-ink transition hover:text-accent-dark hover:shadow-card dark:text-gray-dark" href="/about">
+							&#x5173;&#x4E8E; ByteMVP
 						</a>
 					</div>
 				</div>
-				<div class="mt-8 grid gap-3 text-sm font-bold text-ink dark:text-gray-dark sm:grid-cols-3">
-					<span class="rounded-2xl bg-lime px-4 py-3 text-center">AI 资讯聚合</span>
-					<span class="rounded-2xl bg-aqua px-4 py-3 text-center">工具与工作流</span>
-					<span class="rounded-2xl bg-mango px-4 py-3 text-center">轻量产品实践</span>
+				<div class="grid gap-4 self-end sm:grid-cols-3 lg:grid-cols-1">
+					<div class="lift-card surface-card rounded-lg p-5 lg:mt-6">
+						<p class="text-5xl font-bold leading-none text-ink dark:text-gray-dark">{posts.length}</p>
+						<p class="mt-2 text-sm font-bold uppercase text-gray">AI &#x8D44;&#x8BAF;&#x6863;&#x6848;</p>
+					</div>
+					<div class="lift-card rounded-lg border border-ink/10 bg-lime p-5 text-ink shadow-card dark:text-gray-dark lg:mr-8">
+						<p class="text-sm font-bold uppercase">Focus</p>
+						<p class="mt-3 text-2xl font-bold leading-tight">AI &#x8D44;&#x8BAF;&#x805A;&#x5408;</p>
+					</div>
+					<div class="lift-card rounded-lg border border-ink/10 bg-aqua p-5 text-ink shadow-card dark:text-gray-dark lg:ml-4">
+						<p class="text-sm font-bold uppercase">Practice</p>
+						<p class="mt-3 text-2xl font-bold leading-tight">&#x5DE5;&#x5177;&#x4E0E;&#x5DE5;&#x4F5C;&#x6D41;</p>
+					</div>
 				</div>
 			</section>
 
 			{
 				featuredPost && (
-					<section aria-labelledby="featured-title" class="space-y-4">
-						<div class="flex flex-wrap items-center justify-between gap-3">
-							<h2 id="featured-title" class="text-2xl md:text-3xl">重点关注</h2>
+					<section aria-labelledby="featured-title" class="grid gap-5 lg:grid-cols-[14rem_minmax(0,1fr)] lg:items-start">
+						<div class="lg:sticky lg:top-32">
+							<p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Featured</p>
+							<h2 id="featured-title" class="mt-3 text-3xl md:text-4xl">&#x91CD;&#x70B9;&#x5173;&#x6CE8;</h2>
 							<a class="font-bold text-accent underline decoration-2 underline-offset-4" href="/blog">
-								全部 AI 资讯
+								&#x5168;&#x90E8; AI &#x8D44;&#x8BAF;
 							</a>
 						</div>
-						<article class="grid overflow-hidden rounded-3xl border border-ink/10 bg-white/82 shadow-card dark:bg-gray-light lg:grid-cols-[0.9fr_1.1fr]">
-							<img
-								class="aspect-[16/9] h-auto w-full object-cover lg:h-full lg:min-h-[22rem]"
-								src={featuredPost.data.heroImage}
-								alt=""
-								width="960"
-								height="540"
-								loading="lazy"
-							/>
-							<div class="flex flex-col justify-between gap-6 p-5 md:p-7">
+						<article class="lift-card surface-card grid overflow-hidden rounded-lg lg:grid-cols-[0.95fr_1.05fr]">
+							<img class="aspect-[16/10] h-auto w-full object-cover lg:h-full lg:min-h-[25rem]" src={featuredPost.data.heroImage} alt="" width="960" height="540" loading="lazy" />
+							<div class="flex flex-col justify-between gap-8 p-5 md:p-8">
 								<div class="space-y-3">
-									<p class="text-sm font-bold text-accent">
-										<FormattedDate date={featuredPost.data.pubDate} />
-									</p>
+									<p class="text-sm font-bold text-accent"><FormattedDate date={featuredPost.data.pubDate} /></p>
 									<h3 class="text-2xl leading-tight md:text-3xl xl:text-4xl">{featuredPost.data.title}</h3>
-									<p class="text-base text-gray-dark dark:text-gray">
-										{featuredPost.data.description}
-									</p>
-									{
-										featuredPost.data.tags.length > 0 && (
-											<div class="flex flex-wrap gap-2">
-												{featuredPost.data.tags.map((tag) => (
-													<span class="rounded-full bg-white/80 px-3 py-1 text-xs font-bold text-ink dark:bg-white/10 dark:text-gray-dark">#{tag}</span>
-												))}
-											</div>
-										)
-									}
+									<p class="text-base text-gray-dark dark:text-gray">{featuredPost.data.description}</p>
+									{featuredPost.data.tags.length > 0 && (<div class="flex flex-wrap gap-2">{featuredPost.data.tags.map((tag) => (<span class="neon-pill rounded-full px-3 py-1 text-xs font-bold text-ink dark:text-gray-dark">#{tag}</span>))}</div>)}
 								</div>
-								<a class="font-bold text-ink underline decoration-2 underline-offset-4 dark:text-gray-dark" href={`/blog/${featuredPost.id}/`}>
-									阅读全文
-								</a>
+								<a class="font-bold text-ink underline decoration-2 underline-offset-4 dark:text-gray-dark" href={`/blog/${featuredPost.id}/`}>&#x9605;&#x8BFB;&#x5168;&#x6587;</a>
 							</div>
 						</article>
 					</section>
 				)
 			}
 
-			<section class="space-y-5" aria-labelledby="latest-title">
-				<div class="flex flex-wrap items-center justify-between gap-3">
-					<h2 id="latest-title" class="text-2xl md:text-3xl">最新 AI 资讯</h2>
-					<span class="text-sm font-bold text-gray">{posts.length} 篇文章</span>
+			<section class="space-y-6" aria-labelledby="latest-title">
+				<div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
+					<div>
+						<p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Latest</p>
+						<h2 id="latest-title" class="mt-2 text-3xl md:text-4xl">&#x6700;&#x65B0; AI &#x8D44;&#x8BAF;</h2>
+					</div>
+					<span class="text-sm font-bold text-gray">{posts.length} &#x7BC7;&#x6587;&#x7AE0;</span>
 				</div>
-				<div class="divide-y divide-ink/10 rounded-xl border border-ink/10 bg-white/72 shadow-card dark:bg-gray-light">
-					{
-						recentPosts.slice(0, 4).map((post) => (
-							<article>
-								<a class="grid gap-3 p-5 transition-colors hover:bg-white/70 dark:hover:bg-white/5 md:grid-cols-[8rem_minmax(0,1fr)_auto] md:items-center" href={`/blog/${post.id}/`}>
-									<p class="text-sm font-bold text-accent">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-									<div class="space-y-1">
-										<h3 class="text-xl leading-tight md:text-2xl">{post.data.title}</h3>
-										<p class="text-sm text-gray-dark dark:text-gray">{post.data.description}</p>
-									</div>
-									<span class="font-bold text-ink dark:text-gray-dark">阅读</span>
-								</a>
-							</article>
-						))
-					}
+				<div class="grid gap-4 md:grid-cols-2">
+					{recentPosts.slice(0, 4).map((post, index) => (<article class:list={["lift-card surface-card rounded-lg p-5", index === 1 ? "md:mt-8" : "", index === 2 ? "md:mb-8" : ""]}><a class="group grid h-full gap-5" href={`/blog/${post.id}/`}><p class="text-sm font-bold text-accent"><FormattedDate date={post.data.pubDate} /></p><div class="space-y-2"><h3 class="text-2xl leading-tight">{post.data.title}</h3><p class="text-sm text-gray-dark dark:text-gray">{post.data.description}</p></div><span class="mt-auto font-bold text-ink transition group-hover:translate-x-1 dark:text-gray-dark">&#x9605;&#x8BFB; &#x2192;</span></a></article>))}
 				</div>
 			</section>
 		</main>

@@ -19,14 +19,14 @@ const eyebrow = isAboutPage ? "\u5173\u4e8e" : "\u6587\u7ae0";
 
 	<body>
 		<Header />
-		<main class="mx-auto w-full max-w-6xl px-4 py-10 md:py-16">
+		<main class="mx-auto w-full max-w-6xl px-4 py-12 md:py-20">
 			<article class="space-y-8">
-				<header class:list={["grid gap-6 rounded-3xl border border-ink/15 bg-white/88 p-5 shadow-soft dark:bg-gray-light md:p-8", isAboutPage ? "lg:grid-cols-[0.88fr_1.12fr]" : "lg:grid-cols-[0.96fr_1.04fr]"]}>
-					<div class:list={["flex flex-col gap-8 rounded-2xl border border-ink/15 bg-lime p-6 text-ink md:p-7", isAboutPage ? "min-h-64 items-center justify-center text-center lg:min-h-full" : "justify-between"]}>
+				<header class:list={["hero-shell grid gap-6 rounded-lg p-5 md:p-8", isAboutPage ? "lg:grid-cols-[0.88fr_1.12fr]" : "lg:grid-cols-[0.96fr_1.04fr]"]}>
+					<div class:list={["flex flex-col gap-8 rounded-lg border border-white/50 bg-lime p-6 text-ink shadow-card md:p-7", isAboutPage ? "min-h-64 items-center justify-center text-center lg:min-h-full" : "justify-between"]}>
 						<div class:list={["space-y-4", { "mx-auto max-w-xl": isAboutPage }]}>
 							{
 								!isAboutPage && (
-									<p class="inline-flex rounded-full bg-white/85 px-3 py-1 text-sm font-bold uppercase text-[#142326] dark:bg-white/10 dark:text-gray-dark">
+									<p class="neon-pill inline-flex rounded-full px-3 py-1 text-sm font-bold uppercase text-[#142326] dark:text-gray-dark">
 										{eyebrow}
 									</p>
 								)
@@ -42,7 +42,7 @@ const eyebrow = isAboutPage ? "\u5173\u4e8e" : "\u6587\u7ae0";
 									{
 										updatedDate && (
 											<p class="mt-2 normal-case">
-												更新于 <FormattedDate date={updatedDate} />
+												&#x66F4;&#x65B0;&#x4E8E; <FormattedDate date={updatedDate} />
 											</p>
 										)
 									}
@@ -51,7 +51,7 @@ const eyebrow = isAboutPage ? "\u5173\u4e8e" : "\u6587\u7ae0";
 										tags.length > 0 && (
 										<div class="flex flex-wrap gap-2">
 											{tags.map((tag) => (
-												<span class="rounded-full bg-white/80 px-3 py-1 text-xs text-[#142326] dark:bg-white/10 dark:text-gray-dark">#{tag}</span>
+												<span class="neon-pill rounded-full px-3 py-1 text-xs text-[#142326] dark:text-gray-dark">#{tag}</span>
 											))}
 										</div>
 									)
@@ -59,7 +59,7 @@ const eyebrow = isAboutPage ? "\u5173\u4e8e" : "\u6587\u7ae0";
 									{
 										sourceUrl && (
 										<a class="inline-flex underline decoration-2 underline-offset-4" href={sourceUrl} target="_blank" rel="noreferrer">
-											来源：{sourceName || "原文"}
+											&#x6765;&#x6E90;&#xFF1A;{sourceName || "&#x539F;&#x6587;"}
 										</a>
 									)
 								}
@@ -70,7 +70,7 @@ const eyebrow = isAboutPage ? "\u5173\u4e8e" : "\u6587\u7ae0";
 					{
 						heroImage && (
 							<img
-								class:list={["aspect-[16/9] h-auto w-full rounded-2xl border border-ink/15 object-cover lg:h-full", isAboutPage ? "lg:min-h-96" : "lg:min-h-80"]}
+								class:list={["aspect-[16/9] h-auto w-full rounded-lg border border-[var(--glass-border)] object-cover shadow-card lg:h-full", isAboutPage ? "lg:min-h-96" : "lg:min-h-80"]}
 								width={1020}
 								height={620}
 								src={heroImage}
@@ -80,7 +80,7 @@ const eyebrow = isAboutPage ? "\u5173\u4e8e" : "\u6587\u7ae0";
 					}
 				</header>
 
-				<div class="rounded-3xl border border-ink/15 bg-white/88 p-6 shadow-soft backdrop-blur dark:bg-gray-light/90 md:p-10">
+				<div class="surface-card rounded-lg p-6 md:p-10">
 					<div class="prose mx-auto max-w-3xl text-gray-dark dark:text-gray">
 						<slot />
 					</div>

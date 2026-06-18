@@ -4,8 +4,8 @@
 
 <button
 	id="theme-toggle"
-	class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-ink/10 bg-white/70 text-ink transition-colors hover:border-accent hover:text-accent-dark dark:bg-white/5 dark:text-gray-dark"
-	aria-label="切换深色模式"
+	class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--glass-border)] bg-white/60 text-ink transition hover:border-accent hover:text-accent-dark hover:shadow-card dark:bg-white/5 dark:text-gray-dark"
+	aria-label="&#x5207;&#x6362;&#x6DF1;&#x8272;&#x6A21;&#x5F0F;"
 >
 	<svg
 		class="hidden h-5 w-5 dark:block"
@@ -42,18 +42,15 @@
 
 	const themeToggle = document.getElementById("theme-toggle");
 	if (themeToggle) {
+		const getToggleLabel = (theme: string) =>
+			theme === "dark" ? "\u5207\u6362\u5230\u6d45\u8272\u6a21\u5f0f" : "\u5207\u6362\u5230\u6df1\u8272\u6a21\u5f0f";
+
 		themeToggle.addEventListener("click", () => {
 			const newTheme = toggleTheme();
-			themeToggle.setAttribute(
-				"aria-label",
-				newTheme === "dark" ? "切换到浅色模式" : "切换到深色模式",
-			);
+			themeToggle.setAttribute("aria-label", getToggleLabel(newTheme));
 		});
 
 		const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
-		themeToggle.setAttribute(
-			"aria-label",
-			currentTheme === "dark" ? "切换到浅色模式" : "切换到深色模式",
-		);
+		themeToggle.setAttribute("aria-label", getToggleLabel(currentTheme));
 	}
 </script>
