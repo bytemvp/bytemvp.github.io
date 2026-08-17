@@ -7,23 +7,23 @@ import Layout from "../layouts/BlogPost.astro";
 	description="一个记录产品思考、前端实践和个人创作的小站。"
 	heroImage="/bytemvp-about-cover.svg"
 >
-	<section class="not-prose mb-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-		<article class="rounded-lg border border-ink/15 bg-candy p-5 text-ink shadow-pop dark:text-gray-dark lg:mt-6">
-			<p class="text-sm font-bold uppercase">关注</p>
-			<h2 class="mt-3 text-3xl text-ink">MVP 实践</h2>
-			<p class="mt-3 font-semibold">轻量界面、清晰表达，以及更容易推进的产品决策。</p>
-		</article>
-		<article class="rounded-lg border border-ink/15 bg-aqua p-5 text-ink shadow-pop dark:text-gray-dark">
-			<p class="text-sm font-bold uppercase">技术</p>
-			<h2 class="mt-3 text-3xl text-ink">Astro + TS</h2>
-			<p class="mt-3 font-semibold">以静态优先的方式构建网站，在需要的地方补充恰当交互。</p>
-		</article>
-		<article class="rounded-lg border border-ink/15 bg-mango p-5 text-ink shadow-pop dark:text-gray-dark lg:mb-4">
-			<p class="text-sm font-bold uppercase">审美</p>
-			<h2 class="mt-3 text-3xl text-ink">清新系统</h2>
-			<p class="mt-3 font-semibold">有颜色，但不过度；有结构，也保持轻松。</p>
-		</article>
-	</section>
+    <section class="not-prose mb-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <article class="rounded-lg border border-[var(--glass-border)] bg-paper-deep p-5 text-ink shadow-pop dark:text-gray-dark lg:mt-6">
+            <p class="text-sm font-bold uppercase text-accent">关注</p>
+            <h2 class="mt-3 text-3xl text-ink">MVP 实践</h2>
+            <p class="mt-3 font-semibold">轻量界面、清晰表达，以及更容易推进的产品决策。</p>
+        </article>
+        <article class="rounded-lg border border-[var(--glass-border)] bg-wash p-5 text-ink shadow-pop dark:text-gray-dark">
+            <p class="text-sm font-bold uppercase text-accent">技术</p>
+            <h2 class="mt-3 text-3xl text-ink">Astro + TS</h2>
+            <p class="mt-3 font-semibold">以静态优先的方式构建网站，在需要的地方补充恰当交互。</p>
+        </article>
+        <article class="rounded-lg border border-[var(--glass-border)] bg-paper p-5 text-ink shadow-pop dark:text-gray-dark lg:mb-4">
+            <p class="text-sm font-bold uppercase text-accent">审美</p>
+            <h2 class="mt-3 text-3xl text-ink">清新系统</h2>
+            <p class="mt-3 font-semibold">有颜色，但不过度；有结构，也保持轻松。</p>
+        </article>
+    </section>
 
 	<h2>这个网站写什么</h2>
 	<p>
@@ -37,7 +37,7 @@ import Layout from "../layouts/BlogPost.astro";
 		这个网站也是这种思路的实践：内容集合、静态渲染、可复用组件，以及一种表达明确但不会太吵的视觉语言。
 	</p>
 
-	<section class="not-prose my-10 rounded-lg border border-ink/15 bg-lime p-6 text-ink shadow-pop dark:text-gray-dark">
+    <section class="not-prose my-10 rounded-lg border border-[var(--glass-border)] bg-paper-deep p-6 text-ink shadow-pop dark:text-gray-dark">
 		<div class="grid gap-6 md:grid-cols-[1fr_auto] md:items-center">
 			<div>
 				<p class="text-sm font-bold uppercase">保持联系</p>
@@ -46,7 +46,7 @@ import Layout from "../layouts/BlogPost.astro";
 					可以聊聊你想优化的产品、页面或原型。
 				</p>
 			</div>
-			<a class="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-ink/15 bg-bubble px-6 font-bold text-ink shadow-pop transition-shadow hover:shadow-card dark:text-gray-dark md:w-auto" href="mailto:hello@example.com">
+            <a class="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-[var(--glass-border)] bg-paper px-6 font-bold text-ink shadow-pop transition-shadow hover:border-accent hover:shadow-card dark:text-gray-dark md:w-auto" href="mailto:hello@example.com">
 				发邮件
 			</a>
 		</div>

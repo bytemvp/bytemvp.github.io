@@ -18,6 +18,8 @@ The system SHALL present the primary site routes with a coherent Chinese ink vis
 - **THEN** it SHALL serve as a focused visual accent rather than the dominant page background
 - **AND** text and controls SHALL remain readable in both themes
 
+## MODIFIED Requirements
+
 ### Requirement: Dark Theme Color Palette
 The system SHALL define a complete dark Chinese-ink color palette that maintains visual hierarchy, readability, and the atmosphere of an ink wash painting.
 
@@ -66,14 +68,3 @@ The system SHALL use theme-appropriate ink-wash surfaces, borders, shadows, and 
 - **WHEN** either light or dark theme is active
 - **THEN** background washes and surface variation SHALL use theme-appropriate paper or ink values
 - **AND** the visual texture SHALL remain quiet enough that body text and controls are the primary focus
-
-### Requirement: Theme Toggle Icon State
-The system SHALL display an appropriate icon representing the current theme state.
-
-#### Scenario: Dark theme icon display
-- **WHEN** light theme is active
-- **THEN** toggle button SHALL show moon or dark mode icon
-
-#### Scenario: Light theme icon display
-- **WHEN** dark theme is active
-- **THEN** toggle button SHALL show sun or light mode icon
