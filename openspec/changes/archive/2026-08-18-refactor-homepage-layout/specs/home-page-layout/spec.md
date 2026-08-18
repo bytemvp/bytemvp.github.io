@@ -1,8 +1,16 @@
 ## Purpose
 
-定义首页的整体布局结构和响应式行为。
+定义首页的整体布局结构和响应式行为。（已存在，本次修改）
 
-## Requirements
+## REMOVED Requirements
+
+### Requirement: Featured Content Area
+<!-- 此需求已移除：首页不再展示精选文章 -->
+
+### Requirement: Latest Posts List
+<!-- 此需求已移除：首页不再展示最新文章列表 -->
+
+## MODIFIED Requirements
 
 ### Requirement: Modern Home Page Structure
 首页 SHALL 以 section 形式组织内容，包含 Hero、项目展示、导航卡片等区域。

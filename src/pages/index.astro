@@ -2,97 +2,101 @@
 import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import FormattedDate from "../components/FormattedDate.astro";
-import { getCollection } from "astro:content";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 
-const posts = (await getCollection("blog")).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
-const [featuredPost, ...recentPosts] = posts;
+const projects = [
+	{
+		name: "Byte MVP",
+		description: "AI 资讯聚合与产品实践分享平台",
+	},
+	{
+		name: "AI 工作流",
+		description: "探索 AI 在日常开发中的实际应用方式",
+	},
+	{
+		name: "开源工具",
+		description: "轻量级开发工具与效率提升方案",
+	},
+];
+
+const navLinks = [
+	{
+		title: "博客",
+		description: "浏览 AI 资讯与产品实践文章",
+		href: "/blog",
+	},
+	{
+		title: "关于",
+		description: "了解 Byte MVP 的故事与理念",
+		href: "/about",
+	},
+	{
+		title: "工具",
+		description: "在线开发工具与实用小应用",
+		href: "/tools",
+	},
+];
 ---
 
 <!doctype html>
 <html lang="zh-CN">
 	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} image={featuredPost?.data.heroImage} />
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
 	</head>
 	<body>
 		<Header />
 		<main class="mx-auto flex w-full max-w-6xl flex-col gap-14 px-4 py-10 md:gap-20 md:py-16">
-			<section class="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_22rem]" aria-labelledby="hero-title">
-				<div class="hero-shell min-h-[32rem] rounded-lg p-5 md:p-9">
+			<section class="flex min-h-[32rem] flex-col items-center justify-center text-center" aria-labelledby="hero-title">
+				<div class="hero-shell rounded-lg p-5 md:p-9">
 					<p class="neon-pill inline-flex rounded-full px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-accent">Byte MVP</p>
 					<h1 id="hero-title" class="mt-8 max-w-4xl text-5xl leading-[0.98] text-ink dark:text-gray-dark md:text-7xl">
-						&#x805A;&#x5408; AI &#x52A8;&#x6001;&#xFF0C;&#x8BB0;&#x5F55;&#x5DE5;&#x5177;&#x4E0E;&#x4EA7;&#x54C1;&#x5B9E;&#x8DF5;&#x3002;
+						聚合 AI 动态，记录工具与产品实践。
 					</h1>
 					<p class="mt-7 max-w-2xl text-lg font-semibold text-gray-dark dark:text-gray md:text-xl">
 						{SITE_DESCRIPTION}
 					</p>
-					<div class="mt-10 flex flex-wrap gap-3">
+					<div class="mt-10 flex flex-wrap justify-center gap-3">
 						<a class="cta-primary inline-flex min-h-12 items-center justify-center rounded-lg px-6 font-bold text-white transition hover:shadow-pop" href="/blog">
-							&#x6D4F;&#x89C8; AI &#x8D44;&#x8BAF;
+							浏览 AI 资讯
 						</a>
-                        <a class="cta-secondary inline-flex min-h-12 items-center justify-center rounded-lg px-6 font-bold text-ink transition hover:text-accent-dark hover:shadow-card dark:text-gray-dark" href="/tools">
-                            &#x5728;&#x7EBF;&#x5DE5;&#x5177;
-                        </a>
-                        <a class="cta-secondary inline-flex min-h-12 items-center justify-center rounded-lg px-6 font-bold text-ink transition hover:text-accent-dark hover:shadow-card dark:text-gray-dark" href="/about">
-                            &#x5173;&#x4E8E; ByteMVP
-                        </a>
-					</div>
-				</div>
-				<div class="grid gap-4 self-end sm:grid-cols-3 lg:grid-cols-1">
-					<div class="lift-card surface-card rounded-lg p-5 lg:mt-6">
-						<p class="text-5xl font-bold leading-none text-ink dark:text-gray-dark">{posts.length}</p>
-						<p class="mt-2 text-sm font-bold uppercase text-gray">AI &#x8D44;&#x8BAF;&#x6863;&#x6848;</p>
-					</div>
-                    <div class="lift-card rounded-lg border border-[var(--glass-border)] bg-paper-deep p-5 text-ink shadow-card dark:text-gray-dark lg:mr-8">
-                        <p class="text-sm font-bold uppercase">Focus</p>
-                        <p class="mt-3 text-2xl font-bold leading-tight">AI &#x8D44;&#x8BAF;&#x805A;&#x5408;</p>
-                    </div>
-                    <div class="lift-card rounded-lg border border-[var(--glass-border)] bg-wash p-5 text-ink shadow-card dark:text-gray-dark lg:ml-4">
-                        <p class="text-sm font-bold uppercase">Practice</p>
-                        <p class="mt-3 text-2xl font-bold leading-tight">&#x5DE5;&#x5177;&#x4E0E;&#x5DE5;&#x4F5C;&#x6D41;</p>
+						<a class="cta-secondary inline-flex min-h-12 items-center justify-center rounded-lg px-6 font-bold text-ink transition hover:text-accent-dark hover:shadow-card dark:text-gray-dark" href="/about">
+							关于 ByteMVP
+						</a>
 					</div>
 				</div>
 			</section>
 
-			{
-				featuredPost && (
-					<section aria-labelledby="featured-title" class="grid gap-5 lg:grid-cols-[14rem_minmax(0,1fr)] lg:items-start">
-						<div class="lg:sticky lg:top-32">
-							<p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Featured</p>
-							<h2 id="featured-title" class="mt-3 text-3xl md:text-4xl">&#x91CD;&#x70B9;&#x5173;&#x6CE8;</h2>
-							<a class="font-bold text-accent underline decoration-2 underline-offset-4" href="/blog">
-								&#x5168;&#x90E8; AI &#x8D44;&#x8BAF;
-							</a>
-						</div>
-						<article class="lift-card surface-card grid overflow-hidden rounded-lg lg:grid-cols-[0.95fr_1.05fr]">
-							<img class="aspect-[16/10] h-auto w-full object-cover lg:h-full lg:min-h-[25rem]" src={featuredPost.data.heroImage} alt="" width="960" height="540" loading="lazy" />
-							<div class="flex flex-col justify-between gap-8 p-5 md:p-8">
-								<div class="space-y-3">
-									<p class="text-sm font-bold text-accent"><FormattedDate date={featuredPost.data.pubDate} /></p>
-									<h3 class="text-2xl leading-tight md:text-3xl xl:text-4xl">{featuredPost.data.title}</h3>
-									<p class="text-base text-gray-dark dark:text-gray">{featuredPost.data.description}</p>
-									{featuredPost.data.tags.length > 0 && (<div class="flex flex-wrap gap-2">{featuredPost.data.tags.map((tag) => (<span class="neon-pill rounded-full px-3 py-1 text-xs font-bold text-ink dark:text-gray-dark">#{tag}</span>))}</div>)}
-								</div>
-								<a class="font-bold text-ink underline decoration-2 underline-offset-4 dark:text-gray-dark" href={`/blog/${featuredPost.id}/`}>&#x9605;&#x8BFB;&#x5168;&#x6587;</a>
-							</div>
-						</article>
-					</section>
-				)
-			}
-
-			<section class="space-y-6" aria-labelledby="latest-title">
-				<div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-					<div>
-						<p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Latest</p>
-						<h2 id="latest-title" class="mt-2 text-3xl md:text-4xl">&#x6700;&#x65B0; AI &#x8D44;&#x8BAF;</h2>
-					</div>
-					<span class="text-sm font-bold text-gray">{posts.length} &#x7BC7;&#x6587;&#x7AE0;</span>
+			<section class="space-y-6" aria-labelledby="showcase-title">
+				<div>
+					<p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Projects</p>
+					<h2 id="showcase-title" class="mt-2 text-3xl md:text-4xl">项目展示</h2>
 				</div>
-				<div class="grid gap-4 md:grid-cols-2">
-					{recentPosts.slice(0, 4).map((post, index) => (<article class:list={["lift-card surface-card rounded-lg p-5", index === 1 ? "md:mt-8" : "", index === 2 ? "md:mb-8" : ""]}><a class="group grid h-full gap-5" href={`/blog/${post.id}/`}><p class="text-sm font-bold text-accent"><FormattedDate date={post.data.pubDate} /></p><div class="space-y-2"><h3 class="text-2xl leading-tight">{post.data.title}</h3><p class="text-sm text-gray-dark dark:text-gray">{post.data.description}</p></div><span class="mt-auto font-bold text-ink transition group-hover:translate-x-1 dark:text-gray-dark">&#x9605;&#x8BFB; &#x2192;</span></a></article>))}
+				<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+					{projects.map((project) => (
+						<article class="lift-card surface-card rounded-lg p-5">
+							<h3 class="text-xl font-bold">{project.name}</h3>
+							<p class="mt-2 text-sm text-gray-dark dark:text-gray">{project.description}</p>
+						</article>
+					))}
+				</div>
+			</section>
+
+			<section class="space-y-6" aria-labelledby="nav-title">
+				<div>
+					<p class="text-sm font-bold uppercase tracking-[0.18em] text-accent">Explore</p>
+					<h2 id="nav-title" class="mt-2 text-3xl md:text-4xl">探索站点</h2>
+				</div>
+				<div class="grid gap-4 md:grid-cols-3">
+					{navLinks.map((link) => (
+						<a
+							href={link.href}
+							class="lift-card surface-card group rounded-lg p-5 transition hover:shadow-pop"
+						>
+							<h3 class="text-xl font-bold text-ink transition group-hover:text-accent dark:text-gray-dark">{link.title}</h3>
+							<p class="mt-2 text-sm text-gray-dark dark:text-gray">{link.description}</p>
+							<span class="mt-4 inline-block font-bold text-accent transition group-hover:translate-x-1">了解更多 →</span>
+						</a>
+					))}
 				</div>
 			</section>
 		</main>
