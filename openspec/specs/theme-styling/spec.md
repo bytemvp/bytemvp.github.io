@@ -1,30 +1,39 @@
-## ADDED Requirements
+## Purpose
 
-### Requirement: Chinese Ink Visual Language
-The system SHALL present the primary site routes with a coherent Chinese ink visual language built from paper-like surfaces, ink-inspired neutrals, restrained accent colors, and quiet visual depth.
+定义站点统一的视觉语言契约：小清新配色体系、深浅双主题、组件主题适配与主题切换图标状态。
 
-#### Scenario: Content pages use the ink visual language
+## Requirements
+
+### Requirement: Fresh Minimal Visual Language
+The system SHALL present the primary site routes with a coherent fresh-and-clean visual language built from airy light surfaces, soft mint/sky accents, generous whitespace, rounded shapes, and lightweight shadows.
+
+#### Scenario: Content pages use the fresh visual language
 - **WHEN** a user views the home page, blog index, blog post, or about page
-- **THEN** the page SHALL use the shared paper, ink, border, surface, and accent treatment
-- **AND** no page SHALL fall back to the previous candy-color visual language as its primary presentation
+- **THEN** the page SHALL use the shared light paper-white surface, soft neutral text tones, and mint/sky accent treatment
+- **AND** no page SHALL retain the previous Chinese-ink or candy-color visual language as its primary presentation
 
-#### Scenario: Tool page uses the ink visual language
+#### Scenario: Tool page uses the fresh visual language
 - **WHEN** a user views the online tools page
-- **THEN** tool cards, controls, results, and status messages SHALL use the same ink-inspired visual hierarchy as the rest of the site
+- **THEN** tool cards, controls, results, and status messages SHALL use the same fresh visual hierarchy as the rest of the site
 - **AND** functional states SHALL remain distinguishable without relying on decorative color alone
 
-#### Scenario: Accent colors remain restrained
+#### Scenario: Accents stay soft and focused
 - **WHEN** an accent color is used for a button, link, label, badge, or status
-- **THEN** it SHALL serve as a focused visual accent rather than the dominant page background
+- **THEN** it SHALL be a low-saturation mint, sky, or leaf tone that reads as calm and fresh rather than loud
 - **AND** text and controls SHALL remain readable in both themes
 
+#### Scenario: Pages remain clean and uncluttered
+- **WHEN** any primary route is viewed in either theme
+- **THEN** spacing, borders, and shadows SHALL keep the layout visually tidy with content as the clear focus
+- **AND** no decorative effect SHALL compete with body text or controls for attention
+
 ### Requirement: Dark Theme Color Palette
-The system SHALL define a complete dark Chinese-ink color palette that maintains visual hierarchy, readability, and the atmosphere of an ink wash painting.
+The system SHALL define a complete dark color palette that preserves the fresh, clean atmosphere in low light: deep cool-tinted backgrounds, muted soft-green or soft-blue accents, and calm surface separation.
 
 #### Scenario: Dark theme colors are applied
 - **WHEN** dark theme is active
-- **THEN** the page SHALL use deep ink-inspired backgrounds, muted paper or ash surfaces, and restrained accent colors
-- **AND** text SHALL use light ink or paper tones with sufficient contrast
+- **THEN** the page SHALL use deep cool-neutral backgrounds, muted surfaces, and restrained fresh-toned accent colors
+- **AND** text SHALL use light neutral tones with sufficient contrast
 
 #### Scenario: Color contrast meets accessibility standards
 - **WHEN** dark theme is active
@@ -32,16 +41,16 @@ The system SHALL define a complete dark Chinese-ink color palette that maintains
 - **AND** interactive elements SHALL have minimum 3:1 contrast ratio
 
 ### Requirement: Component Theme Adaptation
-The system SHALL ensure all shared and content components render correctly in both light and dark Chinese-ink themes.
+The system SHALL ensure all shared and content components render correctly in both light and dark fresh-minimal themes.
 
 #### Scenario: Header in dark theme
 - **WHEN** dark theme is active
-- **THEN** the header and navigation links SHALL use visible ink-inspired surfaces, borders, and text colors
+- **THEN** the header and navigation links SHALL use visible surfaces, borders, and text colors from the fresh palette
 - **AND** the active navigation state SHALL remain distinguishable
 
 #### Scenario: Footer in dark theme
 - **WHEN** dark theme is active
-- **THEN** the footer SHALL use the dark ink surface treatment
+- **THEN** the footer SHALL use the dark surface treatment from the fresh palette
 - **AND** its text and external link control SHALL remain readable and identifiable
 
 #### Scenario: Blog post content in dark theme
@@ -51,20 +60,20 @@ The system SHALL ensure all shared and content components render correctly in bo
 
 #### Scenario: Blog list page in dark theme
 - **WHEN** viewing the blog index in dark theme
-- **THEN** post titles, excerpts, dates, metadata, cards, and links SHALL use the dark ink hierarchy
+- **THEN** post titles, excerpts, dates, metadata, cards, and links SHALL use the dark fresh-palette hierarchy
 - **AND** featured and non-featured posts SHALL remain visually distinguishable
 
 ### Requirement: Theme-Specific Visual Elements
-The system SHALL use theme-appropriate ink-wash surfaces, borders, shadows, and background treatments instead of glossy or overly saturated effects.
+The system SHALL use lightweight, airy surfaces, borders, shadows, and background treatments—soft gradients, gentle translucency, and subtle depth—instead of heavy or saturated effects.
 
 #### Scenario: Shadows and borders in dark theme
 - **WHEN** dark theme is active
 - **THEN** box shadows SHALL remain subtle against the dark background
-- **AND** borders SHALL use low-contrast but visible ink or paper tones
+- **AND** borders SHALL use low-contrast but visible neutral tones
 
 #### Scenario: Background washes in both themes
 - **WHEN** either light or dark theme is active
-- **THEN** background washes and surface variation SHALL use theme-appropriate paper or ink values
+- **THEN** background washes and surface variation SHALL use theme-appropriate fresh values such as soft sky/mint tints in light mode and deep cool tints in dark mode
 - **AND** the visual texture SHALL remain quiet enough that body text and controls are the primary focus
 
 ### Requirement: Theme Toggle Icon State

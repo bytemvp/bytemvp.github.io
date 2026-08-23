@@ -306,12 +306,13 @@ const pageDescription = "常用在线小工具集合：JSON 格式化、URL 编�
   .tool-kicker { margin: 0 0 0.25rem; color: var(--accent); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
   .tool-title { font-size: 1.35rem; line-height: 1.08; letter-spacing: 0.01em; }
   .tool-textarea, .tool-input { width: 100%; border: 1px solid var(--glass-border); border-radius: 0.5rem; background: var(--paper); padding: 0.9rem 1rem; color: rgb(var(--ink)); outline: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42); }
-  [data-theme="dark"] .tool-textarea, [data-theme="dark"] .tool-input { background: var(--paper-deep); color: rgb(var(--gray-dark)); box-shadow: inset 0 1px 0 rgba(234, 225, 210, 0.08); }
-  .tool-textarea:focus, .tool-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(156, 47, 47, 0.16); }
+  [data-theme="dark"] .tool-textarea, [data-theme="dark"] .tool-input { background: var(--paper-deep); color: rgb(var(--gray-dark)); box-shadow: inset 0 1px 0 rgba(214, 224, 224, 0.08); }
+  .tool-textarea:focus, .tool-input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(47, 158, 131, 0.18); }
+  [data-theme="dark"] .tool-textarea:focus, [data-theme="dark"] .tool-input:focus { box-shadow: 0 0 0 4px rgba(87, 196, 164, 0.22); }
   .tool-button { min-height: 2.5rem; border: 1px solid transparent; border-radius: 0.5rem; background: var(--accent); padding: 0 1rem; color: var(--paper); font-weight: 700; box-shadow: var(--soft-shadow); transition: opacity 0.18s ease, box-shadow 0.18s ease; }
   @media (max-width: 520px) { .tool-button { flex: 1 1 auto; } .tool-head > .flex { width: 100%; } }
   .tool-button:hover { opacity: 0.92; box-shadow: var(--pop-shadow); }
-  .tool-button:focus-visible, .tool-link:focus-visible { outline: 3px solid var(--indigo); outline-offset: 3px; }
+  .tool-button:focus-visible, .tool-link:focus-visible { outline: 3px solid var(--sky); outline-offset: 3px; }
   .tool-button.secondary { border-color: var(--glass-border); background: var(--paper-deep); color: rgb(var(--ink)); box-shadow: none; }
   [data-theme="dark"] .tool-button { color: var(--paper); }
   [data-theme="dark"] .tool-button.secondary { background: var(--paper-deep); color: rgb(var(--gray-dark)); }
