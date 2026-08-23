@@ -1,6 +1,6 @@
 # Blog
 
-Personal blog built with [Astro](https://astro.build), deployed on [Cloudflare Workers](https://workers.cloudflare.com/).
+Personal blog and online tools built with [Astro](https://astro.build), pure static output, deployable to both GitHub Pages and Cloudflare Pages.
 
 ## Topics
 
@@ -15,13 +15,17 @@ Personal blog built with [Astro](https://astro.build), deployed on [Cloudflare W
 | `npm install` | Install dependencies |
 | `npm run dev` | Start local dev server at `localhost:4321` |
 | `npm run build` | Build production site to `./dist/` |
-| `npm run preview` | Preview build locally |
-| `npm run deploy` | Deploy to Cloudflare Workers |
+| `npm run preview` | Preview the built site locally |
+| `npm run check` | Build + TypeScript check |
+
+## Deployment
+
+- **GitHub Pages**: push to `main` triggers `.github/workflows/deploy.yml`, which builds and publishes `dist/`. In the repo settings (Settings → Pages), set Source to "GitHub Actions".
+- **Cloudflare Pages**: connect this repository in the Cloudflare dashboard, set Build command to `npm run build` and Build output directory to `dist`.
 
 ## Tech Stack
 
-- **Framework:** Astro 5
+- **Framework:** Astro 5 (static output)
 - **Styling:** Tailwind CSS
 - **Content:** Markdown & MDX
-- **Deployment:** Cloudflare Workers
-- **Logging:** Wrangler observability
+- **Deployment:** GitHub Pages / Cloudflare Pages

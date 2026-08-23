@@ -2,13 +2,13 @@
 
 ## 项目概览
 
-这是 Byte MVP 的个人博客与在线工具站，使用 Astro 构建，部署到 Cloudflare Workers。站点内容以 AI 资讯、开发者工具与工作流、科技行业观察为主，内容页面默认静态生成；在线工具页包含主要浏览器端交互，主题切换也在浏览器端运行。
+这是 Byte MVP 的个人博客与在线工具站，使用 Astro 构建，纯静态输出，可部署到 GitHub Pages 与 Cloudflare Pages。站点内容以 AI 资讯、开发者工具与工作流、科技行业观察为主，全部页面静态生成；在线工具页包含主要浏览器端交互，主题切换也在浏览器端运行。
 
 - **框架**：Astro 5.16.2
 - **语言**：TypeScript 5.9.3、Astro components、少量页面内联 JavaScript
 - **样式**：Tailwind CSS 3.4.17 + PostCSS；共享设计 token 在 `src/styles/global.css`
 - **内容**：Astro Content Collections，支持 Markdown 与 MDX
-- **部署**：`@astrojs/cloudflare` + Wrangler 4，Cloudflare Workers 静态资源目录为 `dist/`
+- **部署**：纯静态输出（Astro static），构建产物目录为 `dist/`；GitHub Pages 由 `.github/workflows/deploy.yml` 自动发布，Cloudflare Pages 在控制台配置构建命令
 - **站点语言**：页面文案主要为简体中文；现有文章正文和 frontmatter 主要为英文
 - **包管理**：npm，提交 `package-lock.json` 变更时保持锁文件同步
 
@@ -30,13 +30,13 @@ src/
 │   └── rss.xml.js    # `/rss.xml` RSS endpoint
 ├── styles/global.css # Tailwind layers、主题变量、全局/共享组件样式
 ├── consts.ts         # SITE_TITLE、SITE_DESCRIPTION 等站点常量
-└── env.d.ts          # Cloudflare Runtime/Env 类型声明
+└── env.d.ts          # Astro 客户端类型引用
 public/
 ├── fonts/            # Atkinson regular/bold 字体
 └── ...               # favicon、文章占位图、关于页封面
 ```
 
-根目录中的 `astro.config.mjs` 注册 Tailwind、MDX、Sitemap 与 Cloudflare adapter；`tailwind.config.mjs` 扫描 `src` 下的 Astro/HTML/JS/JSX/MD/MDX/TS/TSX 文件，并把 CSS 变量映射为 Tailwind token。`worker-configuration.d.ts` 是 Wrangler 类型生成文件，优先通过脚本更新，不要手工维护其大段内容。
+根目录中的 `astro.config.mjs` 注册 Tailwind、MDX、Sitemap，并设置 `site` 为 GitHub Pages 域名；`tailwind.config.mjs` 扫描 `src` 下的 Astro/HTML/JS/JSX/MD/MDX/TS/TSX 文件，并把 CSS 变量映射为 Tailwind token。
 
 `.history/` 保存历史快照，不是当前实现的源码入口；除非任务明确要求，不要编辑其中的备份文件。`openspec/changes/archive/` 保存已归档的设计驱动变更，不代表当前待实施任务。
 
@@ -45,11 +45,9 @@ public/
 ```bash
 npm install                 # 安装依赖
 npm run dev                 # Astro 开发服务器，默认 http://localhost:4321
-npm run build               # 构建到 dist/
-npm run preview             # 构建后以 wrangler dev 预览 Cloudflare Worker
-npm run check               # astro build + tsc + wrangler deploy --dry-run
-npm run cf-typegen          # 重新生成 worker-configuration.d.ts
-npm run deploy              # 部署到 Cloudflare Workers，需要 Wrangler 登录/授权
+npm run build               # 静态构建到 dist/
+npm run preview             # 本地预览构建产物
+npm run check               # astro build + tsc
 ```
 
 当前 `package.json` 没有独立的 test、lint 或 format 脚本。交付前至少运行 `npm run check`；涉及视觉或浏览器交互的改动，还应运行 `npm run dev`（或 `npm run preview`）并实际检查对应路由。不要把 `dist/`、`.astro/`、`.wrangler/` 或本地环境文件提交进版本库。
@@ -97,11 +95,11 @@ sourceUrl: "https://example.com/source" # 可选，必须是合法 URL
 
 `src/pages/tools.astro` 是单页浏览器端工具集合，当前包含 JSON 格式化/压缩、URL 编解码、Base64 编解码、Unix 时间戳转换、UUID、随机密码和字数统计。工具计算不调用后端，使用原生 Web API（如 `TextEncoder`、`crypto.randomUUID`、`crypto.getRandomValues`、Clipboard API）。交互选择器通过 `data-*` 属性连接，新增工具时保持该模式并处理无效输入、复制失败及不支持 API 的降级路径。页面专属 `.tool-*` 样式留在该页面；跨页面复用的样式才应提升到全局样式。
 
-## Cloudflare 与元信息注意事项
+## 部署与元信息注意事项
 
-- `wrangler.json` 的 Worker 入口是 `./dist/_worker.js/index.js`，静态资源目录是 `./dist`，绑定名为 `ASSETS`，已启用 `nodejs_compat`、observability 和 source map 上传。
-- `astro.config.mjs` 当前 `site` 仍是 `https://example.com`。若要上线真实域名，需同时更新该配置并检查 canonical、Open Graph、Twitter、Sitemap 与 RSS 地址；不要只改页面文字。
-- Cloudflare 运行时类型通过 `src/env.d.ts` 接入 Astro `App.Locals`。新增 Worker binding 或环境变量时，先更新配置并运行 `npm run cf-typegen`，再修复类型错误。
+- 站点为纯静态输出，构建产物在 `dist/`；GitHub Pages 部署走 `.github/workflows/deploy.yml`（push 到 `main` 触发），Cloudflare Pages 在控制台连接仓库并设置 Build command 为 `npm run build`、输出目录为 `dist`。
+- `astro.config.mjs` 的 `site` 为 `https://bytemvp.github.io`。若改用自定义域名，需同步更新该配置并检查 canonical、Open Graph、Twitter、Sitemap 与 RSS 地址；不要只改页面文字。
+- 不要引入任何需要服务端运行时的依赖（adapter、binding、环境变量等），GitHub Pages 只能托管静态文件。
 - RSS 位于 `src/pages/rss.xml.js`，从 `blog` 集合生成文章链接；新增或修改 frontmatter 时检查 RSS 能否构建。
 
 ## OpenSpec 工作流
@@ -116,5 +114,5 @@ sourceUrl: "https://example.com/source" # 可选，必须是合法 URL
 2. 新页面复用了共享 head/header/footer，新增文章符合 collection schema。
 3. 相关路由、导航、RSS、canonical/SEO 和静态路径没有遗漏。
 4. 浅色、深色和移动端布局均已检查；交互改动已在浏览器执行成功路径和错误路径。
-5. 运行 `npm run check`，确认 Astro 构建、TypeScript 检查和 Wrangler dry-run 均通过。
-6. 若配置或环境类型改变，已运行 `npm run cf-typegen` 并检查生成类型；若部署相关变更，已核对 `wrangler.json`。
+5. 运行 `npm run check`，确认 Astro 构建与 TypeScript 检查均通过。
+6. 若部署相关变更，已核对 `.github/workflows/deploy.yml` 与静态构建配置。
