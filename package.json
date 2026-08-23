@@ -3,8 +3,6 @@
 	"description": "Build a personal website, blog, or portfolio with Astro.",
 	"dependencies": {
 		"@astrojs/tailwind": "6.0.2",
-		"@astrojs/mdx": "4.3.12",
-		"@astrojs/rss": "4.0.14",
 		"@astrojs/sitemap": "3.6.0",
 		"astro": "5.16.2",
 		"autoprefixer": "10.4.21",

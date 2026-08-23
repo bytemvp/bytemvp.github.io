@@ -214,7 +214,6 @@
 		border-radius: 0.5rem;
 		background: var(--glass);
 		box-shadow: var(--box-shadow);
-		backdrop-filter: blur(10px);
 	}
 
 	.hero-shell {
