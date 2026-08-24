@@ -9,39 +9,39 @@ const product = {
     name: "Night Rest（夜息）",
     tagline: "跨平台显示器亮度控制与护眼滤镜",
     description:
-        "用 Rust 编写的开源小工具：通过 DDC/CI 直接调节外接显示器亮度，叠加软件护眼滤镜，支持昼夜定时切换。Windows / Linux / macOS 全平台可用，提供 CLI 与 GUI 两种形态。",
+        "用 Rust 编写的开源桌面工具：通过 DDC/CI 直接调节外接显示器亮度，叠加软件护眼滤镜（屏幕变暗或暖色着色），按本地时区在昼夜间自动切换。Windows / Linux / macOS 一套 GUI、各平台原生安装包；核心协议与滤镜逻辑内置单元测试。",
     repo: "https://github.com/bytemvp/night-rest",
     clone: "git clone https://github.com/bytemvp/night-rest.git",
     features: [
         {
             title: "DDC/CI 亮度控制",
             description:
-                "直接向显示器发送 VESA 标准指令，无需厂商驱动，0–100% 精细调节外接屏幕亮度。",
+                "Get / Set / Adjust 0–100%：直接向显示器发送 VESA 标准指令，无需厂商驱动，精细调节外接屏幕亮度。",
         },
         {
-            title: "护眼滤镜",
+            title: "屏幕滤镜",
             description:
-                "黑色 / 绿色 / 暖色或自定义 RGB 滤镜，纯软件叠加、点击穿透，不改动硬件亮度。",
+                "黑色 / 绿色 / 暖色（琥珀）或任意自定义 RGB：纯软件叠加、点击穿透，只变暗或着色屏幕，不改动硬件亮度。",
         },
         {
             title: "昼夜定时切换",
             description:
-                "按本地时区在日间与夜间模式间自动切换，GUI 内以“破晓”渐亮过渡取代生硬跳变。",
+                "按本地时区自动切换日间 / 夜间滤镜，支持跨午夜时段；“破晓”渐亮在 60 秒内过渡到日光，取代生硬跳变。",
         },
         {
             title: "多显示器支持",
             description:
-                "列出所有检测到的显示器并按索引分别控制；Windows 下笔记本内屏经 WMI 同样可调。",
+                "列出所有检测到的显示器并按索引分别控制；Windows 下笔记本内屏经 WMI 亮度接口同样可调。",
         },
         {
-            title: "CLI + GUI 双形态",
+            title: "滑杆式 GUI",
             description:
-                "命令行适合脚本与远程场景；egui 图形界面提供亮度滑杆与滤镜、日程卡片。",
+                "egui 图形界面：每台显示器一条亮度滑杆，滤镜与日程以卡片呈现，开箱即用。",
         },
         {
-            title: "Rust 开源",
+            title: "原生安装包",
             description:
-                "MIT 协议开源，三端共享同一套接口与实现，核心协议与滤镜逻辑带单元测试。",
+                "Windows zip、macOS .app（Apple Silicon 与 Intel）、Debian / Ubuntu .deb、Fedora / RHEL .rpm，apt / dnf 原地升级。",
         },
     ],
 };
@@ -124,9 +124,7 @@ const product = {
 cd night-rest
 cargo build --release</code></pre>
                             <p class="mt-3 text-xs text-gray">
-                                构建产物：<code>night-rest-cli</code> / <code
-                                    >night-rest-gui</code
-                                >
+                                构建产物：<code>target/release/night-rest</code>（Windows 下为 <code>night-rest.exe</code>）
                             </p>
                         </div>
                     </div>
