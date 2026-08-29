@@ -6,7 +6,7 @@ import Footer from "../components/Footer.astro";
 import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
 
 const product = {
-    name: "Night Rest（夜息）",
+    name: "NightRest（夜息）",
     tagline: "跨平台显示器亮度控制与护眼滤镜",
     description:
         "用 Rust 编写的开源桌面工具：通过 DDC/CI 直接调节外接显示器亮度，叠加软件护眼滤镜（屏幕变暗或暖色着色），按本地时区在昼夜间自动切换。Windows / Linux / macOS 一套 GUI、各平台原生安装包；核心协议与滤镜逻辑内置单元测试。",
@@ -26,7 +26,7 @@ const product = {
         {
             title: "昼夜定时切换",
             description:
-                "按本地时区自动切换日间 / 夜间滤镜，支持跨午夜时段；“破晓”渐亮在 60 秒内过渡到日光，取代生硬跳变。",
+                "按本地时区自动切换日间 / 夜间滤镜，支持跨午夜时段；定时开启时滤镜强度与颜色控件会被锁定，切换即时生效——白天开启则滤镜立即归零，入夜瞬间恢复。",
         },
         {
             title: "多显示器支持",
