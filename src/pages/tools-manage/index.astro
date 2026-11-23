@@ -464,14 +464,14 @@ create policy "Allow public read" on public.ai_tools for select using (true);
 -- 2. 封死匿名写入！只有管理员登录后才能添加/修改/删除
 drop policy if exists "Allow public insert" on public.ai_tools;
 drop policy if exists "Only admin insert" on public.ai_tools;
-create policy "Only admin insert" on public.ai_tools for insert to authenticated with check (true);
+create policy "Only admin insert" on public.ai_tools for insert with check (auth.role() = 'authenticated');
 
 drop policy if exists "Allow public update" on public.ai_tools;
 drop policy if exists "Only admin update" on public.ai_tools;
-create policy "Only admin update" on public.ai_tools for update to authenticated using (true);
+create policy "Only admin update" on public.ai_tools for update using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 drop policy if exists "Allow public delete" on public.ai_tools;
-drop policy if exists "Only admin delete" on public.ai_tools for delete to authenticated using (true);</code></pre>
+drop policy if exists "Only admin delete" on public.ai_tools for delete using (auth.role() = 'authenticated');</code></pre>
                     </div>
 
                     <div class="flex justify-end pt-2">
@@ -511,14 +511,15 @@ create policy "Allow public read" on public.ai_tools for select using (true);
 
 drop policy if exists "Allow public insert" on public.ai_tools;
 drop policy if exists "Only admin insert" on public.ai_tools;
-create policy "Only admin insert" on public.ai_tools for insert to authenticated with check (true);
+create policy "Only admin insert" on public.ai_tools for insert with check (auth.role() = 'authenticated');
 
 drop policy if exists "Allow public update" on public.ai_tools;
 drop policy if exists "Only admin update" on public.ai_tools;
-create policy "Only admin update" on public.ai_tools for update to authenticated using (true);
+create policy "Only admin update" on public.ai_tools for update using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 drop policy if exists "Allow public delete" on public.ai_tools;
-drop policy if exists "Only admin delete" on public.ai_tools for delete to authenticated using (true);`;
+drop policy if exists "Only admin delete" on public.ai_tools;
+create policy "Only admin delete" on public.ai_tools for delete using (auth.role() = 'authenticated');`;
 
             function showToast(message: string, type: "success" | "error" | "info" = "info") {
                 const container = document.getElementById("toast-container");
