@@ -1,6 +1,6 @@
 ---
 import BaseHead from "../../components/BaseHead.astro";
-import { SITE_TITLE, SUPABASE_URL, SUPABASE_ANON_KEY, DEFAULT_ADMIN_PIN } from "../../consts";
+import { SITE_TITLE, SUPABASE_URL, SUPABASE_ANON_KEY } from "../../consts";
 import toolsData from "../../data/tools.json";
 
 const presetTools = toolsData;
@@ -16,47 +16,71 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
         <meta name="robots" content="noindex, nofollow" />
     </head>
     <body class="min-h-screen bg-paper text-ink dark:bg-paper dark:text-gray-dark flex flex-col font-sans">
-        <!-- ==================== 1. PIN GATEKEEPER SCREEN ==================== -->
+        <!-- Preset Tools Data for offline/static loading -->
+        <script id="preset-tools-data" type="application/json" set:html={JSON.stringify(presetTools)}></script>
+
+        <!-- ==================== 1. SUPABASE AUTH LOGIN SCREEN ==================== -->
         <div id="auth-gate-screen" class="flex flex-1 items-center justify-center p-4">
-            <div class="w-full max-w-sm rounded-2xl border border-[var(--glass-border)] bg-paper/80 p-8 shadow-2xl backdrop-blur-md dark:bg-paper-deep text-center">
+            <div class="w-full max-w-sm rounded-2xl border border-[var(--glass-border)] bg-paper/85 p-8 shadow-2xl backdrop-blur-md dark:bg-paper-deep text-center">
                 <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15 text-accent mb-4 shadow-sm">
                     <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                 </div>
 
                 <h1 class="text-xl font-extrabold tracking-tight text-ink dark:text-gray-dark">
-                    Byte MVP 管理后台
+                    管理员安全登录
                 </h1>
                 <p class="mt-1 text-xs text-ink/60 dark:text-gray">
-                    请输入管理口令以进入 AI 工具控制台
+                    基于 Supabase Auth 官方身份鉴权，保护云端数据库安全
                 </p>
 
-                <form id="gate-form" class="mt-6 space-y-4">
+                <form id="login-form" class="mt-6 space-y-3.5 text-left">
                     <div>
-                        <label for="gate-pin-input" class="sr-only">管理口令</label>
+                        <label for="admin-email" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">
+                            管理员邮箱
+                        </label>
                         <input
-                            type="password"
-                            id="gate-pin-input"
+                            type="email"
+                            id="admin-email"
                             required
                             autofocus
-                            placeholder="输入管理口令"
-                            class="w-full text-center rounded-xl border border-[var(--glass-border)] bg-paper py-3 text-sm text-ink placeholder-ink/40 tracking-widest focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 dark:bg-paper dark:text-gray-dark"
+                            placeholder="例如: your_email@gmail.com"
+                            class="w-full rounded-xl border border-[var(--glass-border)] bg-paper px-3.5 py-2.5 text-sm text-ink placeholder-ink/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 dark:bg-paper dark:text-gray-dark"
                         />
                     </div>
-                    <div class="flex items-center justify-center gap-2 text-xs text-ink/70 dark:text-gray">
-                        <input type="checkbox" id="gate-remember-check" checked class="rounded border-[var(--glass-border)] text-accent focus:ring-accent" />
-                        <label for="gate-remember-check">在此浏览器记住登录状态</label>
+
+                    <div>
+                        <label for="admin-password" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">
+                            登录密码
+                        </label>
+                        <input
+                            type="password"
+                            id="admin-password"
+                            required
+                            placeholder="输入 Supabase 管理员密码"
+                            class="w-full rounded-xl border border-[var(--glass-border)] bg-paper px-3.5 py-2.5 text-sm text-ink placeholder-ink/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 dark:bg-paper dark:text-gray-dark"
+                        />
                     </div>
+
+                    <div class="flex items-center gap-2 pt-1 text-xs text-ink/70 dark:text-gray">
+                        <input type="checkbox" id="remember-login-check" checked class="rounded border-[var(--glass-border)] text-accent focus:ring-accent" />
+                        <label for="remember-login-check">在此浏览器记住登录状态</label>
+                    </div>
+
                     <button
                         type="submit"
-                        class="w-full rounded-xl bg-accent py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-accent-dark cursor-pointer active:scale-95"
+                        id="login-submit-btn"
+                        class="w-full mt-2 rounded-xl bg-accent py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-accent-dark cursor-pointer active:scale-95"
                     >
-                        验证并进入控制台
+                        安全登录并进入后台
                     </button>
-                    <p class="text-[11px] text-ink/40 dark:text-gray/50">
-                        初始口令默认为: <code class="text-accent">admin123</code>（进入后可自定义）
-                    </p>
+
+                    <div class="pt-3 border-t border-[var(--glass-border)]/60 text-center">
+                        <p class="text-[11px] text-ink/50 dark:text-gray/60 leading-normal">
+                            💡 提示：请确保已在 Supabase 后台的 <strong>Authentication → Users</strong> 中添加了该管理员账号。
+                        </p>
+                    </div>
                 </form>
             </div>
         </div>
@@ -65,9 +89,8 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
         <div
             id="admin-dashboard-screen"
             class="hidden flex-1 flex-col"
-            data-default-pin={DEFAULT_ADMIN_PIN}
-            data-env-supabase-url={SUPABASE_URL}
-            data-env-supabase-key={SUPABASE_ANON_KEY}
+            data-supabase-url={SUPABASE_URL}
+            data-supabase-key={SUPABASE_ANON_KEY}
         >
             <!-- Admin Top Navigation Bar -->
             <header class="sticky top-0 z-40 border-b border-[var(--glass-border)] bg-paper/90 backdrop-blur-md dark:bg-paper/90">
@@ -85,6 +108,11 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                     </div>
 
                     <div class="flex items-center gap-2.5 sm:gap-3 text-xs font-medium">
+                        <span id="admin-user-badge" class="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-[var(--glass-border)] bg-paper px-3 py-1 text-ink/70 dark:bg-paper-deep dark:text-gray">
+                            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                            <span id="admin-user-email">管理员</span>
+                        </span>
+
                         <a
                             href="/tools"
                             target="_blank"
@@ -97,15 +125,14 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                         </a>
 
                         <button
-                            id="open-db-config-btn"
+                            id="open-sql-guide-btn"
                             type="button"
                             class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-1.5 text-ink hover:border-accent hover:text-accent-dark dark:bg-paper-deep dark:text-gray-dark cursor-pointer"
                         >
                             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
-                            <span>云数据库配置</span>
+                            <span>RLS 安全策略</span>
                         </button>
 
                         <button
@@ -136,7 +163,7 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
 
                     <div class="surface-card rounded-xl p-5 flex items-center justify-between">
                         <div>
-                            <p class="text-xs font-semibold uppercase text-ink/50 dark:text-gray/60">云端新增工具</p>
+                            <p class="text-xs font-semibold uppercase text-ink/50 dark:text-gray/60">云端实时工具</p>
                             <h3 id="stat-cloud-count" class="mt-1 text-2xl font-bold text-emerald-600">0</h3>
                         </div>
                         <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
@@ -148,12 +175,15 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
 
                     <div class="surface-card rounded-xl p-5 flex items-center justify-between">
                         <div>
-                            <p class="text-xs font-semibold uppercase text-ink/50 dark:text-gray/60">Supabase 状态</p>
-                            <p id="stat-db-status" class="mt-1 text-sm font-bold text-amber-500">检测中...</p>
+                            <p class="text-xs font-semibold uppercase text-ink/50 dark:text-gray/60">安全鉴权状态</p>
+                            <p class="mt-1 text-sm font-bold text-emerald-600 flex items-center gap-1.5">
+                                <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                <span>已通过 Auth 管理员认证</span>
+                            </p>
                         </div>
-                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
                             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>
                         </div>
                     </div>
@@ -167,7 +197,7 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                         </span>
                         <div>
                             <h3 class="text-base font-bold text-ink dark:text-gray-dark">快捷录入新工具</h3>
-                            <p class="text-xs text-ink/60 dark:text-gray">填写工具网址，系统将自动抓取网站图标、名称、简介，并智能推荐分类</p>
+                            <p class="text-xs text-ink/60 dark:text-gray">填写工具网址，自动抓取图标、名称、简介，通过管理员权限直接保存到 Supabase</p>
                         </div>
                     </div>
 
@@ -405,48 +435,49 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
             </div>
         </div>
 
-        <!-- ==================== 4. DATABASE SETTINGS MODAL ==================== -->
-        <div id="db-config-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <!-- ==================== 4. RLS SQL SECURITY MODAL ==================== -->
+        <div id="sql-guide-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
             <div class="relative w-full max-w-lg rounded-2xl border border-[var(--glass-border)] bg-paper p-6 shadow-2xl dark:bg-paper-deep">
                 <div class="flex items-center justify-between pb-3 border-b border-[var(--glass-border)]">
-                    <h3 class="text-base font-bold text-ink dark:text-gray-dark">⚙️ Supabase 云数据库配置</h3>
-                    <button id="close-db-config-btn" class="text-ink/40 hover:text-ink dark:text-gray/50 p-1">
+                    <h3 class="text-base font-bold text-ink dark:text-gray-dark">🔒 Supabase RLS 安全加固脚本</h3>
+                    <button id="close-sql-guide-btn" class="text-ink/40 hover:text-ink dark:text-gray/50 p-1">
                         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M6.28 5.22a.75.75 0 001.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
                         </svg>
                     </button>
                 </div>
 
-                <form id="db-config-form" class="mt-4 space-y-3.5">
-                    <div>
-                        <label for="cfg-url" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">Supabase Project URL</label>
-                        <input type="url" id="cfg-url" placeholder="https://xxxxxxxx.supabase.co" class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
-                    </div>
+                <div class="mt-4 space-y-3.5">
+                    <p class="text-xs text-ink/70 dark:text-gray leading-relaxed">
+                        执行以下 SQL 后，普通访客（携带公开公钥）<strong>仅能只读浏览</strong>，数据库在底层彻底拒绝任何未登录的写入或篡改请求！
+                    </p>
 
-                    <div>
-                        <label for="cfg-key" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">Supabase Anon Public Key</label>
-                        <input type="password" id="cfg-key" placeholder="eyJhbGciOi..." class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
-                    </div>
-
-                    <div>
-                        <label for="cfg-pin" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">自定义管理口令</label>
-                        <input type="password" id="cfg-pin" placeholder="自定义你的后台进入口令 (留空则使用默认 admin123)" class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
-                    </div>
-
-                    <!-- 1-Click SQL Copy -->
                     <div class="rounded-xl bg-black/5 p-3 text-xs dark:bg-white/5 space-y-1">
                         <div class="flex items-center justify-between font-semibold">
-                            <span>💡 初次部署？需在 Supabase 运行建表 SQL</span>
+                            <span>SQL 规则代码：</span>
                             <button type="button" id="copy-sql-btn" class="text-accent hover:underline font-bold">复制 SQL</button>
                         </div>
-                        <p class="text-[11px] text-ink/60 dark:text-gray">进入 Supabase 后台 -> SQL Editor，粘贴执行即可创建数据表并启用公开读取策略。</p>
+                        <pre class="overflow-x-auto rounded bg-[#1c2629] p-3 text-[11px] text-[#d6e0e0] leading-relaxed"><code>-- 1. 任何人（普通访客）只能读取
+drop policy if exists "Allow public read" on public.ai_tools;
+create policy "Allow public read" on public.ai_tools for select using (true);
+
+-- 2. 封死匿名写入！只有管理员登录后才能添加/修改/删除
+drop policy if exists "Allow public insert" on public.ai_tools;
+drop policy if exists "Only admin insert" on public.ai_tools;
+create policy "Only admin insert" on public.ai_tools for insert to authenticated with check (true);
+
+drop policy if exists "Allow public update" on public.ai_tools;
+drop policy if exists "Only admin update" on public.ai_tools;
+create policy "Only admin update" on public.ai_tools for update to authenticated using (true);
+
+drop policy if exists "Allow public delete" on public.ai_tools;
+drop policy if exists "Only admin delete" on public.ai_tools for delete to authenticated using (true);</code></pre>
                     </div>
 
-                    <div class="flex items-center justify-between pt-3 border-t border-[var(--glass-border)]">
-                        <button type="button" id="test-conn-btn" class="rounded-lg border border-[var(--glass-border)] px-3 py-1.5 text-xs text-ink hover:border-accent dark:text-gray-dark">测试连接</button>
-                        <button type="submit" class="rounded-lg bg-accent px-5 py-1.5 text-xs font-bold text-white hover:bg-accent-dark">保存配置</button>
+                    <div class="flex justify-end pt-2">
+                        <button type="button" id="close-sql-modal-btn2" class="rounded-lg bg-accent px-5 py-1.5 text-xs font-bold text-white hover:bg-accent-dark">我知道了</button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
 
@@ -467,25 +498,27 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                 source?: "preset" | "cloud";
             }
 
-            const SQL_SCHEMA = `create table if not exists public.ai_tools (
-  id text primary key,
-  name text not null,
-  url text not null,
-  icon text,
-  category text not null,
-  description text,
-  tags text[] default '{}',
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-alter table public.ai_tools enable row level security;
+            interface SupabaseSession {
+                access_token: string;
+                refresh_token: string;
+                expires_at: number;
+                email: string;
+            }
+
+            const RLS_SQL_CODE = `alter table public.ai_tools enable row level security;
 drop policy if exists "Allow public read" on public.ai_tools;
 create policy "Allow public read" on public.ai_tools for select using (true);
+
 drop policy if exists "Allow public insert" on public.ai_tools;
-create policy "Allow public insert" on public.ai_tools for insert with check (true);
+drop policy if exists "Only admin insert" on public.ai_tools;
+create policy "Only admin insert" on public.ai_tools for insert to authenticated with check (true);
+
 drop policy if exists "Allow public update" on public.ai_tools;
-create policy "Allow public update" on public.ai_tools for update using (true);
+drop policy if exists "Only admin update" on public.ai_tools;
+create policy "Only admin update" on public.ai_tools for update to authenticated using (true);
+
 drop policy if exists "Allow public delete" on public.ai_tools;
-create policy "Allow public delete" on public.ai_tools for delete using (true);`;
+drop policy if exists "Only admin delete" on public.ai_tools for delete to authenticated using (true);`;
 
             function showToast(message: string, type: "success" | "error" | "info" = "info") {
                 const container = document.getElementById("toast-container");
@@ -508,15 +541,17 @@ create policy "Allow public delete" on public.ai_tools for delete using (true);`
             function initAdmin() {
                 const dashboard = document.getElementById("admin-dashboard-screen");
                 const gateScreen = document.getElementById("auth-gate-screen");
-                const gateForm = document.getElementById("gate-form") as HTMLFormElement | null;
-                const gatePinInput = document.getElementById("gate-pin-input") as HTMLInputElement | null;
-                const gateRememberCheck = document.getElementById("gate-remember-check") as HTMLInputElement | null;
+                const loginForm = document.getElementById("login-form") as HTMLFormElement | null;
+                const emailInput = document.getElementById("admin-email") as HTMLInputElement | null;
+                const passInput = document.getElementById("admin-password") as HTMLInputElement | null;
+                const rememberLoginCheck = document.getElementById("remember-login-check") as HTMLInputElement | null;
+                const loginSubmitBtn = document.getElementById("login-submit-btn") as HTMLButtonElement | null;
                 const logoutBtn = document.getElementById("logout-btn");
+                const adminUserEmail = document.getElementById("admin-user-email");
 
                 // Metrics
                 const statTotal = document.getElementById("stat-total-count");
                 const statCloud = document.getElementById("stat-cloud-count");
-                const statDbStatus = document.getElementById("stat-db-status");
 
                 // Quick Add Elements
                 const quickAddForm = document.getElementById("quick-add-form") as HTMLFormElement | null;
@@ -548,103 +583,132 @@ create policy "Allow public delete" on public.ai_tools for delete using (true);`
                 const editDescInput = document.getElementById("edit-tool-desc") as HTMLTextAreaElement | null;
                 const editTagsInput = document.getElementById("edit-tool-tags") as HTMLInputElement | null;
 
-                // DB Config modal
-                const dbConfigModal = document.getElementById("db-config-modal");
-                const openDbConfigBtn = document.getElementById("open-db-config-btn");
-                const closeDbConfigBtn = document.getElementById("close-db-config-btn");
-                const dbConfigForm = document.getElementById("db-config-form") as HTMLFormElement | null;
-                const cfgUrlInput = document.getElementById("cfg-url") as HTMLInputElement | null;
-                const cfgKeyInput = document.getElementById("cfg-key") as HTMLInputElement | null;
-                const cfgPinInput = document.getElementById("cfg-pin") as HTMLInputElement | null;
+                // SQL Guide Modal
+                const sqlGuideModal = document.getElementById("sql-guide-modal");
+                const openSqlGuideBtn = document.getElementById("open-sql-guide-btn");
+                const closeSqlGuideBtn = document.getElementById("close-sql-guide-btn");
+                const closeSqlModalBtn2 = document.getElementById("close-sql-modal-btn2");
                 const copySqlBtn = document.getElementById("copy-sql-btn");
-                const testConnBtn = document.getElementById("test-conn-btn");
 
-                const defaultPin = dashboard?.getAttribute("data-default-pin") || "admin123";
-                const envUrl = dashboard?.getAttribute("data-env-supabase-url") || "";
-                const envKey = dashboard?.getAttribute("data-env-supabase-key") || "";
+                const supabaseUrl = dashboard?.getAttribute("data-supabase-url") || "";
+                const supabaseKey = dashboard?.getAttribute("data-supabase-key") || "";
 
                 let allTools: ToolItem[] = [];
 
-                function getActivePin(): string {
-                    return localStorage.getItem("bytemvp_custom_pin") || defaultPin;
+                function getSavedSession(): SupabaseSession | null {
+                    try {
+                        const raw = localStorage.getItem("bytemvp_supabase_session");
+                        if (raw) return JSON.parse(raw);
+                    } catch {}
+                    return null;
                 }
 
-                function getDbConfig(): { url: string; key: string } {
-                    const localRaw = localStorage.getItem("bytemvp_supabase_config");
-                    if (localRaw) {
-                        try {
-                            const parsed = JSON.parse(localRaw);
-                            if (parsed.url && parsed.key) return parsed;
-                        } catch {}
+                function saveSession(session: SupabaseSession | null) {
+                    if (session) {
+                        localStorage.setItem("bytemvp_supabase_session", JSON.stringify(session));
+                    } else {
+                        localStorage.removeItem("bytemvp_supabase_session");
                     }
-                    return { url: envUrl, key: envKey };
                 }
 
-                // Authentication Check
-                function checkAuth(): boolean {
-                    const authed = localStorage.getItem("bytemvp_admin_authed");
-                    return authed === "true";
-                }
-
-                function enterDashboard() {
+                function enterDashboard(session: SupabaseSession) {
                     gateScreen?.classList.add("hidden");
                     dashboard?.classList.remove("hidden");
                     dashboard?.classList.add("flex");
+                    if (adminUserEmail) adminUserEmail.textContent = session.email || "管理员";
                     loadAllTools();
                 }
 
-                if (checkAuth()) {
-                    enterDashboard();
+                // Check existing session
+                const existingSession = getSavedSession();
+                if (existingSession && existingSession.access_token) {
+                    enterDashboard(existingSession);
                 }
 
-                gateForm?.addEventListener("submit", (e) => {
+                // Supabase Auth Login
+                loginForm?.addEventListener("submit", async (e) => {
                     e.preventDefault();
-                    const entered = gatePinInput?.value.trim() || "";
-                    if (entered === getActivePin()) {
-                        if (gateRememberCheck?.checked) {
-                            localStorage.setItem("bytemvp_admin_authed", "true");
+                    const email = emailInput?.value.trim() || "";
+                    const password = passInput?.value || "";
+
+                    if (!email || !password) {
+                        showToast("请输入邮箱和密码", "error");
+                        return;
+                    }
+
+                    if (loginSubmitBtn) {
+                        loginSubmitBtn.textContent = "安全鉴权中...";
+                        loginSubmitBtn.setAttribute("disabled", "true");
+                    }
+
+                    try {
+                        const endpoint = `${supabaseUrl.replace(/\/$/, "")}/auth/v1/token?grant_type=password`;
+                        const res = await fetch(endpoint, {
+                            method: "POST",
+                            headers: {
+                                apikey: supabaseKey,
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ email, password })
+                        });
+
+                        const data = await res.json();
+                        if (res.ok && data.access_token) {
+                            const newSession: SupabaseSession = {
+                                access_token: data.access_token,
+                                refresh_token: data.refresh_token,
+                                expires_at: Date.now() + (data.expires_in || 3600) * 1000,
+                                email: data.user?.email || email
+                            };
+
+                            if (rememberLoginCheck?.checked) {
+                                saveSession(newSession);
+                            }
+
+                            enterDashboard(newSession);
+                            showToast(`🎉 欢迎回来，${newSession.email}！已获取数据库管理权限`, "success");
+                        } else {
+                            showToast(`登录失败: ${data.error_description || data.msg || data.message || "账号或密码错误"}`, "error");
                         }
-                        enterDashboard();
-                        showToast("🎉 欢迎进入管理控制台！", "success");
-                    } else {
-                        showToast("口令错误，请重新输入", "error");
-                        gatePinInput?.select();
+                    } catch (err: any) {
+                        showToast(`网络连接异常: ${err.message}`, "error");
+                    } finally {
+                        if (loginSubmitBtn) {
+                            loginSubmitBtn.textContent = "安全登录并进入后台";
+                            loginSubmitBtn.removeAttribute("disabled");
+                        }
                     }
                 });
 
                 logoutBtn?.addEventListener("click", () => {
-                    localStorage.removeItem("bytemvp_admin_authed");
+                    saveSession(null);
                     window.location.reload();
                 });
 
                 // Load Tools (Preset + Cloud)
                 async function loadAllTools() {
                     allTools = [];
-                    // Load preset tools first
-                    try {
-                        const res = await fetch("/src/data/tools.json");
-                        if (res.ok) {
-                            const presets = await res.json();
+
+                    // 1. Load preset tools from static script tag
+                    const presetEl = document.getElementById("preset-tools-data");
+                    if (presetEl && presetEl.textContent) {
+                        try {
+                            const presets = JSON.parse(presetEl.textContent);
                             presets.forEach((p: any) => {
                                 allTools.push({ ...p, source: "preset" });
                             });
-                        }
-                    } catch {}
+                        } catch {}
+                    }
 
-                    const db = getDbConfig();
+                    // 2. Load cloud tools from Supabase
                     let cloudCount = 0;
-
-                    if (db.url && db.key) {
-                        if (statDbStatus) {
-                            statDbStatus.textContent = "已连接云端";
-                            statDbStatus.className = "mt-1 text-sm font-bold text-emerald-600";
-                        }
+                    if (supabaseUrl && supabaseKey) {
                         try {
-                            const endpoint = `${db.url.replace(/\/$/, "")}/rest/v1/ai_tools?select=*&order=created_at.desc`;
+                            const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?select=*&order=created_at.desc`;
                             const cloudRes = await fetch(endpoint, {
                                 headers: {
-                                    apikey: db.key,
-                                    Authorization: `Bearer ${db.key}`
+                                    apikey: supabaseKey,
+                                    Authorization: `Bearer ${supabaseKey}`
                                 }
                             });
 
@@ -679,15 +743,7 @@ create policy "Allow public delete" on public.ai_tools for delete using (true);`
                                 });
                             }
                         } catch (e) {
-                            if (statDbStatus) {
-                                statDbStatus.textContent = "连接异常";
-                                statDbStatus.className = "mt-1 text-sm font-bold text-red-500";
-                            }
-                        }
-                    } else {
-                        if (statDbStatus) {
-                            statDbStatus.textContent = "未配置云端";
-                            statDbStatus.className = "mt-1 text-sm font-bold text-amber-500";
+                            console.warn("Cloud load notice", e);
                         }
                     }
 
@@ -885,7 +941,7 @@ create policy "Allow public delete" on public.ai_tools for delete using (true);`
                     }
                 });
 
-                // Submit Quick Add Tool
+                // Submit Quick Add Tool with Admin Bearer Token
                 quickAddForm?.addEventListener("submit", async (e) => {
                     e.preventDefault();
                     const url = newUrlInput?.value.trim() || "";
@@ -901,10 +957,11 @@ create policy "Allow public delete" on public.ai_tools for delete using (true);`
                         return;
                     }
 
-                    const db = getDbConfig();
-                    if (!db.url || !db.key) {
-                        showToast("未检测到 Supabase 配置，请先点击右上角「云数据库配置」填入 URL 与 Key！", "error");
-                        openDbConfigBtn?.click();
+                    const session = getSavedSession();
+                    if (!session || !session.access_token) {
+                        showToast("管理员登录已失效，请重新登录", "error");
+                        saveSession(null);
+                        window.location.reload();
                         return;
                     }
 
@@ -917,12 +974,12 @@ create policy "Allow public delete" on public.ai_tools for delete using (true);`
                     const slug = parsed.hostname.replace(/^www\./, "").split(".")[0].toLowerCase().replace(/[^a-z0-9_-]/g, "") + "-" + Date.now().toString(36);
 
                     try {
-                        const endpoint = `${db.url.replace(/\/$/, "")}/rest/v1/ai_tools`;
+                        const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools`;
                         const res = await fetch(endpoint, {
                             method: "POST",
                             headers: {
-                                apikey: db.key,
-                                Authorization: `Bearer ${db.key}`,
+                                apikey: supabaseKey,
+                                Authorization: `Bearer ${session.access_token}`,
                                 "Content-Type": "application/json",
                                 Prefer: "return=representation"
                             },
@@ -944,8 +1001,12 @@ create policy "Allow public delete" on public.ai_tools for delete using (true);`
                             if (newIconInput) newIconInput.value = "/favicon.svg";
                             loadAllTools();
                         } else {
-                            const err = await res.json().catch(() => ({}));
-                            showToast(`发布失败: ${err.message || res.statusText}`, "error");
+                            if (res.status === 401 || res.status === 403) {
+                                showToast("权限校验未通过：请确认已登录管理员或执行了 RLS 安全策略", "error");
+                            } else {
+                                const err = await res.json().catch(() => ({}));
+                                showToast(`发布失败: ${err.message || res.statusText}`, "error");
+                            }
                         }
                     } catch (err: any) {
                         showToast(`网络请求失败: ${err.message}`, "error");
@@ -955,7 +1016,7 @@ create policy "Allow public delete" on public.ai_tools for delete using (true);`
                     }
                 });
 
-                // Edit Tool Flow
+                // Edit Tool Flow with Admin Bearer Token
                 function openEditModal(tool: ToolItem) {
                     if (editIdInput) editIdInput.value = tool.id;
                     if (editNameInput) editNameInput.value = tool.name;
@@ -981,19 +1042,19 @@ create policy "Allow public delete" on public.ai_tools for delete using (true);`
                     const tagsStr = editTagsInput?.value.trim() || "";
                     const tags = tagsStr ? tagsStr.split(/[,，]/).map((t) => t.trim()).filter(Boolean) : [category];
 
-                    const db = getDbConfig();
-                    if (!db.url || !db.key) {
-                        showToast("需连接 Supabase 才能保存更新", "error");
+                    const session = getSavedSession();
+                    if (!session || !session.access_token) {
+                        showToast("登录凭证已过期，请重新登录", "error");
                         return;
                     }
 
                     try {
-                        const endpoint = `${db.url.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(id)}`;
+                        const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(id)}`;
                         const res = await fetch(endpoint, {
                             method: "PATCH",
                             headers: {
-                                apikey: db.key,
-                                Authorization: `Bearer ${db.key}`,
+                                apikey: supabaseKey,
+                                Authorization: `Bearer ${session.access_token}`,
                                 "Content-Type": "application/json"
                             },
                             body: JSON.stringify({
@@ -1011,30 +1072,30 @@ create policy "Allow public delete" on public.ai_tools for delete using (true);`
                             editModal?.classList.add("hidden");
                             loadAllTools();
                         } else {
-                            showToast("更新失败，请确认数据表权限", "error");
+                            showToast("更新失败，请确认是否具备修改权限", "error");
                         }
                     } catch (err: any) {
                         showToast(`保存出错: ${err.message}`, "error");
                     }
                 });
 
-                // Delete Tool Flow
+                // Delete Tool Flow with Admin Bearer Token
                 async function handleDeleteTool(id: string, name: string, source: string) {
                     if (!confirm(`确定要从数据库中彻底下架「${name}」吗？`)) return;
 
-                    const db = getDbConfig();
-                    if (!db.url || !db.key) {
-                        showToast("需连接 Supabase 才能执行下架", "error");
+                    const session = getSavedSession();
+                    if (!session || !session.access_token) {
+                        showToast("登录凭证已过期，请重新登录", "error");
                         return;
                     }
 
                     try {
-                        const endpoint = `${db.url.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(id)}`;
+                        const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(id)}`;
                         const res = await fetch(endpoint, {
                             method: "DELETE",
                             headers: {
-                                apikey: db.key,
-                                Authorization: `Bearer ${db.key}`
+                                apikey: supabaseKey,
+                                Authorization: `Bearer ${session.access_token}`
                             }
                         });
 
@@ -1042,69 +1103,24 @@ create policy "Allow public delete" on public.ai_tools for delete using (true);`
                             showToast(`🗑️ 已成功下架「${name}」`, "success");
                             loadAllTools();
                         } else {
-                            showToast("删除失败，请检查 Supabase 权限", "error");
+                            showToast("删除失败，请检查数据库权限", "error");
                         }
                     } catch (err: any) {
                         showToast(`操作失败: ${err.message}`, "error");
                     }
                 }
 
-                // DB Config Modal
-                openDbConfigBtn?.addEventListener("click", () => {
-                    const cfg = getDbConfig();
-                    if (cfgUrlInput) cfgUrlInput.value = cfg.url || "";
-                    if (cfgKeyInput) cfgKeyInput.value = cfg.key || "";
-                    if (cfgPinInput) cfgPinInput.value = localStorage.getItem("bytemvp_custom_pin") || "";
-                    dbConfigModal?.classList.remove("hidden");
-                });
-
-                closeDbConfigBtn?.addEventListener("click", () => dbConfigModal?.classList.add("hidden"));
-
-                dbConfigForm?.addEventListener("submit", (e) => {
-                    e.preventDefault();
-                    const url = cfgUrlInput?.value.trim() || "";
-                    const key = cfgKeyInput?.value.trim() || "";
-                    const pin = cfgPinInput?.value.trim() || "";
-
-                    localStorage.setItem("bytemvp_supabase_config", JSON.stringify({ url, key }));
-                    if (pin) {
-                        localStorage.setItem("bytemvp_custom_pin", pin);
-                    }
-                    dbConfigModal?.classList.add("hidden");
-                    showToast("配置已保存！正在拉取云端数据...", "success");
-                    loadAllTools();
-                });
+                // RLS SQL Guide Modal
+                openSqlGuideBtn?.addEventListener("click", () => sqlGuideModal?.classList.remove("hidden"));
+                closeSqlGuideBtn?.addEventListener("click", () => sqlGuideModal?.classList.add("hidden"));
+                closeSqlModalBtn2?.addEventListener("click", () => sqlGuideModal?.classList.add("hidden"));
 
                 copySqlBtn?.addEventListener("click", async () => {
                     try {
-                        await navigator.clipboard.writeText(SQL_SCHEMA);
-                        showToast("建表 SQL 语句已复制！请前往 Supabase 执行", "success");
+                        await navigator.clipboard.writeText(RLS_SQL_CODE);
+                        showToast("安全 RLS 脚本已复制！请前往 Supabase 执行", "success");
                     } catch {
                         showToast("请手动在项目根目录复制 src/data/supabase-schema.sql", "error");
-                    }
-                });
-
-                testConnBtn?.addEventListener("click", async () => {
-                    const url = cfgUrlInput?.value.trim() || "";
-                    const key = cfgKeyInput?.value.trim() || "";
-                    if (!url || !key) {
-                        showToast("请先填入 Supabase URL 和 Key", "error");
-                        return;
-                    }
-                    testConnBtn.textContent = "测试中...";
-                    try {
-                        const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/ai_tools?select=count`, {
-                            headers: { apikey: key, Authorization: `Bearer ${key}` }
-                        });
-                        if (res.ok) {
-                            showToast("🎉 连接成功！Supabase 数据表可用", "success");
-                        } else {
-                            showToast(`连接受阻 (状态码 ${res.status})，请确保已执行建表 SQL`, "error");
-                        }
-                    } catch (err: any) {
-                        showToast(`连接失败: ${err.message}`, "error");
-                    } finally {
-                        testConnBtn.textContent = "测试连接";
                     }
                 });
             }
