@@ -243,6 +243,10 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                                     />
                                 </div>
                                 <input type="hidden" id="new-tool-icon" value="/favicon.svg" />
+                                <label class="mt-1.5 cursor-pointer text-[10px] text-accent hover:underline flex items-center gap-0.5" title="从电脑选择图片上传至 Supabase 存储桶">
+                                    <span>📁 本地上传</span>
+                                    <input type="file" id="new-tool-icon-file" accept="image/*,.svg,.ico" class="hidden" />
+                                </label>
                             </div>
 
                             <!-- Name -->
@@ -347,6 +351,18 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                         <div class="flex flex-wrap items-center gap-3">
                             <button
                                 type="button"
+                                id="sync-icons-btn"
+                                class="inline-flex items-center gap-1.5 rounded-lg bg-sky-500/10 border border-sky-500/25 px-3 py-1.5 text-xs font-semibold text-sky-600 hover:bg-sky-500 hover:text-white transition cursor-pointer active:scale-95"
+                                title="一键将外部第三方图标转存至 Supabase 存储桶，通过 CDN 高速访问"
+                            >
+                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <span id="sync-icons-btn-text">☁️ 转存图标至 Supabase</span>
+                            </button>
+
+                            <button
+                                type="button"
                                 id="save-order-btn"
                                 class="hidden inline-flex items-center gap-1.5 rounded-lg bg-emerald-600/15 border border-emerald-500/30 px-3 py-1.5 text-xs font-semibold text-emerald-600 hover:bg-emerald-600 hover:text-white transition cursor-pointer"
                                 title="手动保存当前排序"
@@ -441,8 +457,29 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                             </select>
                         </div>
                         <div>
-                            <label for="edit-tool-icon" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">图标 URL</label>
-                            <input type="text" id="edit-tool-icon" required class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
+                            <div class="flex items-center justify-between mb-1">
+                                <label for="edit-tool-icon" class="block text-xs font-semibold text-ink/70 dark:text-gray/80">图标 URL</label>
+                                <div class="flex items-center gap-2">
+                                    <label class="cursor-pointer text-[10px] text-accent hover:underline flex items-center gap-0.5" title="从电脑上传本地图标">
+                                        <span>📁 本地</span>
+                                        <input type="file" id="edit-tool-icon-file" accept="image/*,.svg,.ico" class="hidden" />
+                                    </label>
+                                    <button
+                                        type="button"
+                                        id="edit-upload-icon-btn"
+                                        class="text-[10px] text-sky-600 hover:text-sky-700 hover:underline cursor-pointer"
+                                        title="将当前图标转存至 Supabase Storage CDN"
+                                    >
+                                        ☁️ 转存至云端
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="h-8 w-8 shrink-0 rounded-lg border border-[var(--glass-border)] bg-white/70 p-1 dark:bg-black/20 flex items-center justify-center">
+                                    <img id="edit-tool-icon-preview" src="/favicon.svg" alt="图标" class="h-full w-full object-contain" onerror="this.src='/favicon.svg';" />
+                                </div>
+                                <input type="text" id="edit-tool-icon" required class="flex-1 min-w-0 rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
+                            </div>
                         </div>
                     </div>
 
@@ -517,7 +554,24 @@ create policy "Only admin update" on public.ai_tools for update using (auth.role
 
 drop policy if exists "Allow public delete" on public.ai_tools;
 drop policy if exists "Only admin delete" on public.ai_tools;
-create policy "Only admin delete" on public.ai_tools for delete using (auth.role() = 'authenticated');</code></pre>
+create policy "Only admin delete" on public.ai_tools for delete using (auth.role() = 'authenticated');
+
+-- 3. 创建图标存储桶 (tool-icons) 与权限策略（支持图标极速 CDN 加速）
+insert into storage.buckets (id, name, public)
+values ('tool-icons', 'tool-icons', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "Allow public read tool-icons" on storage.objects;
+create policy "Allow public read tool-icons" on storage.objects for select using (bucket_id = 'tool-icons');
+
+drop policy if exists "Allow admin insert tool-icons" on storage.objects;
+create policy "Allow admin insert tool-icons" on storage.objects for insert with check (bucket_id = 'tool-icons' and auth.role() = 'authenticated');
+
+drop policy if exists "Allow admin update tool-icons" on storage.objects;
+create policy "Allow admin update tool-icons" on storage.objects for update using (bucket_id = 'tool-icons' and auth.role() = 'authenticated') with check (bucket_id = 'tool-icons' and auth.role() = 'authenticated');
+
+drop policy if exists "Allow admin delete tool-icons" on storage.objects;
+create policy "Allow admin delete tool-icons" on storage.objects for delete using (bucket_id = 'tool-icons' and auth.role() = 'authenticated');</code></pre>
                     </div>
 
                     <div class="flex justify-end pt-2">
@@ -567,7 +621,23 @@ create policy "Only admin update" on public.ai_tools for update using (auth.role
 
 drop policy if exists "Allow public delete" on public.ai_tools;
 drop policy if exists "Only admin delete" on public.ai_tools;
-create policy "Only admin delete" on public.ai_tools for delete using (auth.role() = 'authenticated');`;
+create policy "Only admin delete" on public.ai_tools for delete using (auth.role() = 'authenticated');
+
+insert into storage.buckets (id, name, public)
+values ('tool-icons', 'tool-icons', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "Allow public read tool-icons" on storage.objects;
+create policy "Allow public read tool-icons" on storage.objects for select using (bucket_id = 'tool-icons');
+
+drop policy if exists "Allow admin insert tool-icons" on storage.objects;
+create policy "Allow admin insert tool-icons" on storage.objects for insert with check (bucket_id = 'tool-icons' and auth.role() = 'authenticated');
+
+drop policy if exists "Allow admin update tool-icons" on storage.objects;
+create policy "Allow admin update tool-icons" on storage.objects for update using (bucket_id = 'tool-icons' and auth.role() = 'authenticated') with check (bucket_id = 'tool-icons' and auth.role() = 'authenticated');
+
+drop policy if exists "Allow admin delete tool-icons" on storage.objects;
+create policy "Allow admin delete tool-icons" on storage.objects for delete using (bucket_id = 'tool-icons' and auth.role() = 'authenticated');`;
 
             function containsChinese(str: string): boolean {
                 return /[\u4e00-\u9fa5]/.test(str || "");
@@ -656,6 +726,7 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                 const newTagsInput = document.getElementById("new-tool-tags") as HTMLInputElement | null;
                 const newIconInput = document.getElementById("new-tool-icon") as HTMLInputElement | null;
                 const newIconPreview = document.getElementById("new-tool-icon-preview") as HTMLImageElement | null;
+                const newIconFileInput = document.getElementById("new-tool-icon-file") as HTMLInputElement | null;
                 const scrapeBtn = document.getElementById("scrape-btn");
                 const scrapeBtnText = document.getElementById("scrape-btn-text");
                 const translateAddBtn = document.getElementById("translate-add-desc-btn");
@@ -667,6 +738,8 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                 const tableFilterCat = document.getElementById("table-filter-category") as HTMLSelectElement | null;
                 const saveOrderBtn = document.getElementById("save-order-btn");
                 const saveOrderText = document.getElementById("save-order-text");
+                const syncIconsBtn = document.getElementById("sync-icons-btn") as HTMLButtonElement | null;
+                const syncIconsBtnText = document.getElementById("sync-icons-btn-text");
 
                 // Edit modal
                 const editModal = document.getElementById("edit-modal");
@@ -678,6 +751,9 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                 const editUrlInput = document.getElementById("edit-tool-url") as HTMLInputElement | null;
                 const editCatSelect = document.getElementById("edit-tool-category") as HTMLSelectElement | null;
                 const editIconInput = document.getElementById("edit-tool-icon") as HTMLInputElement | null;
+                const editIconPreview = document.getElementById("edit-tool-icon-preview") as HTMLImageElement | null;
+                const editIconFileInput = document.getElementById("edit-tool-icon-file") as HTMLInputElement | null;
+                const editUploadIconBtn = document.getElementById("edit-upload-icon-btn") as HTMLButtonElement | null;
                 const editDescInput = document.getElementById("edit-tool-desc") as HTMLTextAreaElement | null;
                 const editTagsInput = document.getElementById("edit-tool-tags") as HTMLInputElement | null;
                 const translateEditBtn = document.getElementById("translate-edit-desc-btn");
@@ -817,6 +893,102 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                     }
 
                     return response;
+                }
+
+                async function fetchIconBlob(url: string): Promise<{ blob: Blob; mimeType: string; ext: string }> {
+                    let res: Response | null = null;
+                    // 1. 优先尝试直接获取
+                    try {
+                        res = await fetch(url, { mode: "cors" });
+                        if (!res.ok) res = null;
+                    } catch {
+                        res = null;
+                    }
+
+                    // 2. 若直接获取受阻（如跨域或防盗链），通过可靠的图像代理加载
+                    if (!res) {
+                        try {
+                            const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
+                            res = await fetch(proxyUrl);
+                            if (!res.ok) res = null;
+                        } catch {
+                            res = null;
+                        }
+                    }
+
+                    if (!res || !res.ok) {
+                        throw new Error(`无法获取图标文件 (${url})`);
+                    }
+
+                    const blob = await res.blob();
+                    let mimeType = blob.type || "image/png";
+                    let ext = "png";
+
+                    const lowerUrl = url.toLowerCase();
+                    if (mimeType.includes("svg") || lowerUrl.includes(".svg")) {
+                        mimeType = "image/svg+xml";
+                        ext = "svg";
+                    } else if (mimeType.includes("webp") || lowerUrl.includes(".webp")) {
+                        mimeType = "image/webp";
+                        ext = "webp";
+                    } else if (mimeType.includes("icon") || mimeType.includes("ico") || lowerUrl.includes(".ico")) {
+                        mimeType = "image/x-icon";
+                        ext = "ico";
+                    } else if (mimeType.includes("jpeg") || mimeType.includes("jpg") || lowerUrl.includes(".jpg") || lowerUrl.includes(".jpeg")) {
+                        mimeType = "image/jpeg";
+                        ext = "jpg";
+                    } else if (mimeType.includes("png") || lowerUrl.includes(".png")) {
+                        mimeType = "image/png";
+                        ext = "png";
+                    }
+
+                    return { blob, mimeType, ext };
+                }
+
+                async function uploadBlobToSupabaseStorage(
+                    blobOrFile: Blob | File,
+                    fileSlug: string,
+                    forcedExt?: string,
+                    forcedMime?: string
+                ): Promise<string> {
+                    const rawExt = forcedExt || (blobOrFile instanceof File ? blobOrFile.name.split(".").pop() : "") || "png";
+                    const ext = rawExt.toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
+                    const cleanSlug = fileSlug.toLowerCase().replace(/[^a-z0-9_-]/g, "") || "icon";
+                    const fileName = `${cleanSlug}.${ext}`;
+                    const mimeType = forcedMime || blobOrFile.type || (ext === "svg" ? "image/svg+xml" : ext === "ico" ? "image/x-icon" : "image/png");
+
+                    const endpoint = `${supabaseUrl.replace(/\/$/, "")}/storage/v1/object/tool-icons/${fileName}`;
+                    const res = await authFetch(endpoint, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": mimeType,
+                            "x-upsert": "true"
+                        },
+                        body: blobOrFile
+                    });
+
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        if (res.status === 400 && (err.message?.includes("Bucket not found") || err.code === "NoSuchBucket")) {
+                            throw new Error("BUCKET_NOT_FOUND");
+                        }
+                        throw new Error(err.message || `存储上传失败 HTTP ${res.status}`);
+                    }
+
+                    return `${supabaseUrl.replace(/\/$/, "")}/storage/v1/object/public/tool-icons/${fileName}`;
+                }
+
+                async function transferIconToSupabase(iconUrl: string, fileSlug: string): Promise<string> {
+                    if (!iconUrl) return "/favicon.svg";
+                    if (iconUrl.includes("/storage/v1/object/public/tool-icons/")) {
+                        return iconUrl;
+                    }
+                    if (iconUrl.startsWith("/") && !iconUrl.startsWith("//")) {
+                        return iconUrl;
+                    }
+
+                    const { blob, mimeType, ext } = await fetchIconBlob(iconUrl);
+                    return await uploadBlobToSupabaseStorage(blob, fileSlug, ext, mimeType);
                 }
 
                 function enterDashboard(session: SupabaseSession) {
@@ -1051,8 +1223,9 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                             </td>
                             <td class="py-3 px-3">
                                 <div class="flex items-center gap-2.5">
-                                    <div class="h-8 w-8 shrink-0 rounded-lg border border-[var(--glass-border)] bg-white/70 p-1 dark:bg-black/20 flex items-center justify-center">
+                                    <div class="relative h-8 w-8 shrink-0 rounded-lg border border-[var(--glass-border)] bg-white/70 p-1 dark:bg-black/20 flex items-center justify-center">
                                         <img src="${tool.icon}" alt="" class="h-full w-full object-contain" onerror="this.src='/favicon.svg'" />
+                                        ${tool.icon && tool.icon.includes('/storage/v1/object/public/tool-icons/') ? `<span class="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-sky-500 text-[8px] font-bold text-white shadow-sm" title="已托管于 Supabase 极速 CDN">☁</span>` : ''}
                                     </div>
                                     <div class="min-w-0">
                                         <div class="font-bold text-ink dark:text-gray-dark truncate">${tool.name}</div>
@@ -1269,6 +1442,150 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
 
                 saveOrderBtn?.addEventListener("click", () => saveToolsOrder(allTools));
 
+                // Batch Sync Icons to Supabase Storage
+                syncIconsBtn?.addEventListener("click", async () => {
+                    const pendingTools = allTools.filter(
+                        (t) => t.icon && t.icon.startsWith("http") && !t.icon.includes("/storage/v1/object/public/tool-icons/")
+                    );
+
+                    if (pendingTools.length === 0) {
+                        showToast("🎉 所有工具的图标均已保存在 Supabase Storage CDN，无需迁移！", "success");
+                        return;
+                    }
+
+                    if (!confirm(`检测到有 ${pendingTools.length} 款工具的图标仍为第三方外链。\n\n点击确定将自动将图标下载并上传至 Supabase Storage，并将访问链接更新为全球高速 CDN 链接。\n\n是否立即开始一键转存？`)) {
+                        return;
+                    }
+
+                    if (syncIconsBtnText) syncIconsBtnText.textContent = `准备转存 (0/${pendingTools.length})...`;
+                    syncIconsBtn?.setAttribute("disabled", "true");
+
+                    let successCount = 0;
+                    let failCount = 0;
+
+                    for (let i = 0; i < pendingTools.length; i++) {
+                        const tool = pendingTools[i];
+                        if (syncIconsBtnText) syncIconsBtnText.textContent = `转存中 (${i + 1}/${pendingTools.length}): ${tool.name}...`;
+
+                        try {
+                            const publicCdnUrl = await transferIconToSupabase(tool.icon, tool.id);
+                            const patchRes = await authFetch(
+                                `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(tool.id)}`,
+                                {
+                                    method: "PATCH",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ icon: publicCdnUrl })
+                                }
+                            );
+
+                            if (patchRes.ok) {
+                                tool.icon = publicCdnUrl;
+                                successCount++;
+                            } else {
+                                failCount++;
+                            }
+                        } catch (err: any) {
+                            console.error(`Failed to transfer icon for ${tool.name}:`, err);
+                            if (err.message === "BUCKET_NOT_FOUND") {
+                                showToast("⚠️ 存储桶 tool-icons 尚未创建，请先点击右上角「RLS 安全策略」执行 SQL！", "error");
+                                openSqlGuideBtn?.click();
+                                break;
+                            }
+                            failCount++;
+                        }
+                    }
+
+                    if (syncIconsBtnText) syncIconsBtnText.textContent = "☁️ 转存图标至 Supabase";
+                    syncIconsBtn?.removeAttribute("disabled");
+
+                    if (successCount > 0) {
+                        showToast(`🎉 成功将 ${successCount} 个图标转存至 Supabase CDN！${failCount > 0 ? `(${failCount} 个失败)` : ""}`, "success");
+                        renderTable();
+                    } else if (failCount > 0) {
+                        showToast(`转存失败，请检查网络或确认存储桶 tool-icons 是否已创建`, "error");
+                    }
+                });
+
+                // Local icon file upload for Quick Add
+                newIconFileInput?.addEventListener("change", async (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (!file) return;
+
+                    showToast("正在上传本地图标至 Supabase 存储桶...", "info");
+                    const tempSlug = "icon-" + Date.now().toString(36);
+                    try {
+                        const cdnUrl = await uploadBlobToSupabaseStorage(file, tempSlug);
+                        if (newIconPreview) newIconPreview.src = cdnUrl;
+                        if (newIconInput) newIconInput.value = cdnUrl;
+                        showToast("✅ 本地图标已成功上传至 Supabase Storage CDN！", "success");
+                    } catch (err: any) {
+                        if (err.message === "BUCKET_NOT_FOUND") {
+                            showToast("⚠️ 存储桶 tool-icons 尚未创建，请先在 Supabase 执行 SQL", "error");
+                            openSqlGuideBtn?.click();
+                        } else {
+                            showToast(`图标上传失败: ${err.message}`, "error");
+                        }
+                    }
+                });
+
+                // Local icon file upload for Edit Modal
+                editIconFileInput?.addEventListener("change", async (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    const id = editIdInput?.value || "icon";
+                    if (!file) return;
+
+                    showToast("正在上传本地图标至 Supabase 存储桶...", "info");
+                    try {
+                        const cdnUrl = await uploadBlobToSupabaseStorage(file, id);
+                        if (editIconInput) editIconInput.value = cdnUrl;
+                        if (editIconPreview) editIconPreview.src = cdnUrl;
+                        showToast("✅ 图标已成功上传至 Supabase Storage CDN！保存后生效", "success");
+                    } catch (err: any) {
+                        if (err.message === "BUCKET_NOT_FOUND") {
+                            showToast("⚠️ 存储桶 tool-icons 尚未创建，请先在 Supabase 执行 SQL", "error");
+                            openSqlGuideBtn?.click();
+                        } else {
+                            showToast(`图标上传失败: ${err.message}`, "error");
+                        }
+                    }
+                });
+
+                // Manual transfer icon to Supabase in Edit Modal
+                editUploadIconBtn?.addEventListener("click", async () => {
+                    const currentUrl = editIconInput?.value.trim() || "";
+                    const id = editIdInput?.value || "icon";
+                    if (!currentUrl || !currentUrl.startsWith("http")) {
+                        showToast("请输入有效的网络图标 URL", "error");
+                        return;
+                    }
+                    if (currentUrl.includes("/storage/v1/object/public/tool-icons/")) {
+                        showToast("该图标已托管在 Supabase CDN 中", "info");
+                        return;
+                    }
+
+                    const prevText = editUploadIconBtn.textContent;
+                    editUploadIconBtn.textContent = "转存中...";
+                    try {
+                        const cdnUrl = await transferIconToSupabase(currentUrl, id);
+                        editIconInput.value = cdnUrl;
+                        if (editIconPreview) editIconPreview.src = cdnUrl;
+                        showToast("✅ 图标已成功转存至 Supabase CDN！保存后生效", "success");
+                    } catch (err: any) {
+                        if (err.message === "BUCKET_NOT_FOUND") {
+                            showToast("⚠️ 存储桶 tool-icons 尚未创建，请先执行 SQL", "error");
+                            openSqlGuideBtn?.click();
+                        } else {
+                            showToast(`转存失败: ${err.message}`, "error");
+                        }
+                    } finally {
+                        editUploadIconBtn.textContent = prevText;
+                    }
+                });
+
+                editIconInput?.addEventListener("input", () => {
+                    if (editIconPreview) editIconPreview.src = editIconInput.value.trim() || "/favicon.svg";
+                });
+
                 tableSearchInput?.addEventListener("input", renderTable);
                 tableFilterCat?.addEventListener("change", renderTable);
 
@@ -1424,13 +1741,29 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                     const parsed = new URL(url);
                     const slug = parsed.hostname.replace(/^www\./, "").split(".")[0].toLowerCase().replace(/[^a-z0-9_-]/g, "") + "-" + Date.now().toString(36);
 
+                    let finalIcon = icon;
+                    if (finalIcon.startsWith("http") && !finalIcon.includes("/storage/v1/object/public/tool-icons/")) {
+                        if (submitText) submitText.textContent = "转存图标中...";
+                        try {
+                            const cdnIcon = await transferIconToSupabase(finalIcon, slug);
+                            finalIcon = cdnIcon;
+                        } catch (err: any) {
+                            console.warn("Icon upload notice:", err);
+                            if (err.message === "BUCKET_NOT_FOUND") {
+                                showToast("提示：存储桶 tool-icons 尚未创建，图标暂以外链保存。请在右上角复制 SQL 执行建桶", "info");
+                            }
+                        }
+                    }
+
+                    if (submitText) submitText.textContent = "发布中...";
+
                     try {
                         const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools`;
                         const payload: any = {
                             id: slug,
                             name,
                             url,
-                            icon,
+                            icon: finalIcon,
                             category,
                             description: desc,
                             tags,
@@ -1460,7 +1793,8 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                         }
 
                         if (res.ok) {
-                            showToast(`🎉 成功添加「${name}」！全网访客已可实时浏览`, "success");
+                            const isCdn = finalIcon.includes("/storage/v1/object/public/tool-icons/");
+                            showToast(isCdn ? `🎉 成功添加「${name}」！图标已自动托管至 Supabase CDN` : `🎉 成功添加「${name}」！全网访客已可实时浏览`, "success");
                             quickAddForm.reset();
                             if (newIconPreview) newIconPreview.src = "/favicon.svg";
                             if (newIconInput) newIconInput.value = "/favicon.svg";
@@ -1494,6 +1828,7 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                     if (editUrlInput) editUrlInput.value = tool.url;
                     if (editCatSelect) editCatSelect.value = tool.category;
                     if (editIconInput) editIconInput.value = tool.icon;
+                    if (editIconPreview) editIconPreview.src = tool.icon || "/favicon.svg";
                     if (editDescInput) editDescInput.value = tool.description;
                     if (editTagsInput) editTagsInput.value = (tool.tags || []).join(", ");
                     editModal?.classList.remove("hidden");
@@ -1513,6 +1848,15 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                     const tagsStr = editTagsInput?.value.trim() || "";
                     const tags = tagsStr ? tagsStr.split(/[,，]/).map((t) => t.trim()).filter(Boolean) : [category];
 
+                    let finalIcon = icon;
+                    if (finalIcon.startsWith("http") && !finalIcon.includes("/storage/v1/object/public/tool-icons/")) {
+                        try {
+                            finalIcon = await transferIconToSupabase(finalIcon, id);
+                        } catch (e: any) {
+                            console.warn("Edit icon transfer notice:", e);
+                        }
+                    }
+
                     try {
                         const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(id)}`;
                         const res = await authFetch(endpoint, {
@@ -1523,7 +1867,7 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                             body: JSON.stringify({
                                 name,
                                 url,
-                                icon,
+                                icon: finalIcon,
                                 category,
                                 description: desc,
                                 tags
