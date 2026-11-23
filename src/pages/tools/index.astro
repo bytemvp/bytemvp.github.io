@@ -150,6 +150,14 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                     aria-label="AI 工具列表"
                 >
                     {
+                        presetTools.length === 0 && (
+                            <div id="loading-placeholder" class="col-span-full py-12 text-center text-ink/40 dark:text-gray/50 text-sm flex items-center justify-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-accent animate-ping"></span>
+                                <span>正在加载 AI 工具...</span>
+                            </div>
+                        )
+                    }
+                    {
                         presetTools.map((tool) => (
                             <article
                                 class="tool-card surface-card lift-card group relative flex flex-col justify-between overflow-hidden rounded-xl p-5"
@@ -543,10 +551,15 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                                 });
 
                                 renderCards();
+                            } else {
+                                renderCards();
                             }
                         } catch (e) {
                             console.warn("Public cloud sync silent notice:", e);
+                            renderCards();
                         }
+                    } else {
+                        renderCards();
                     }
                 }
 
