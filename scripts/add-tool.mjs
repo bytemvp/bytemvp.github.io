@@ -35,25 +35,55 @@ function decodeHtmlEntities(str) {
     .trim();
 }
 
+function containsChinese(str) {
+  return /[\u4e00-\u9fa5]/.test(str || '');
+}
+
 function cleanTitle(title, domain) {
-  if (!title) return '';
+  if (!title) return domain;
   let cleaned = decodeHtmlEntities(title);
-  // Remove common suffixes like " | Cursor", " - Official Site"
-  cleaned = cleaned.replace(/\s*[-–—|:]\s*(Official Site|Home|Home Page|首页|官网|官方网站|Welcome).*$/i, '');
-  // If title has "Description | Brand", try to extract Brand
-  const parts = cleaned.split(/\s*[-–—|]\s*/);
+  cleaned = cleaned.replace(/\s*[-–—|:]\s*(Official Site|Home|Home Page|首页|官网|官方网站|Welcome).*$/i, '').trim();
+  const domainBase = (domain || '').split('.')[0].toLowerCase();
+  const parts = cleaned.split(/\s*[-–—|:]\s*/);
   if (parts.length > 1) {
+    const matchingPart = parts.find((p) => p.toLowerCase().includes(domainBase));
+    if (matchingPart && matchingPart.length <= 25) {
+      return matchingPart.replace(/\s*(Official Site|Home|Home Page|首页|官网|官方网站|Welcome).*$/i, '').trim();
+    }
     const last = parts[parts.length - 1].trim();
-    if (last.length <= 20 && !/^(home|index|welcome)$/i.test(last)) {
-      cleaned = last;
+    const first = parts[0].trim();
+    if (last.length <= 25 && parts[0].length > last.length) {
+      return last;
+    }
+    if (first.length <= 25) {
+      return first;
     }
   }
-  return cleaned.trim() || domain;
+  return cleaned.replace(/\s+by\s+.*$/i, '').trim() || domain;
 }
 
 function cleanDescription(desc) {
   if (!desc) return '';
   return decodeHtmlEntities(desc).replace(/\s+/g, ' ').trim();
+}
+
+async function translateToChinese(text) {
+  if (!text || !text.trim() || containsChinese(text)) return text;
+  try {
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q=${encodeURIComponent(text.trim())}`;
+    const res = await fetchWithTimeout(url, {}, 4000);
+    if (!res.ok) return text;
+    const json = await res.json();
+    if (json && Array.isArray(json[0])) {
+      const translated = json[0].map((item) => item[0]).filter(Boolean).join('');
+      if (translated && translated.trim()) {
+        return translated.trim();
+      }
+    }
+  } catch (err) {
+    // fallback to original if failed
+  }
+  return text;
 }
 
 function generateSlug(urlStr, title) {
@@ -160,6 +190,17 @@ async function scrapeMetadata(targetUrl) {
     }
   }
   description = cleanDescription(description);
+
+  // If description is in a foreign language (e.g., English), automatically translate to Chinese
+  if (description && !containsChinese(description)) {
+    try {
+      console.log(`\x1b[36m🌐 正在将抓取到的外语简介自动翻译为中文...\x1b[0m`);
+      const zhDesc = await translateToChinese(description);
+      if (zhDesc) {
+        description = zhDesc;
+      }
+    } catch {}
+  }
 
   // Extract icon candidates
   const iconCandidates = [];
