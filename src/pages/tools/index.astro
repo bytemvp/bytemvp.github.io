@@ -506,13 +506,24 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
 
                     if (supabaseUrl && supabaseKey) {
                         try {
-                            const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?select=*&order=created_at.desc`;
-                            const res = await fetch(endpoint, {
+                            let endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?select=*&order=sort_order.asc,created_at.desc`;
+                            let res = await fetch(endpoint, {
                                 headers: {
                                     apikey: supabaseKey,
                                     Authorization: `Bearer ${supabaseKey}`
                                 }
                             });
+
+                            // Fallback if sort_order column not yet added
+                            if (!res.ok && res.status === 400) {
+                                endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?select=*&order=created_at.desc`;
+                                res = await fetch(endpoint, {
+                                    headers: {
+                                        apikey: supabaseKey,
+                                        Authorization: `Bearer ${supabaseKey}`
+                                    }
+                                });
+                            }
 
                             if (res.ok) {
                                 const cloudItems: Array<{
@@ -523,6 +534,7 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                                     category: string;
                                     description: string;
                                     tags: string[] | string;
+                                    sort_order?: number;
                                 }> = await res.json();
 
                                 cloudItems.forEach((r) => {
@@ -546,7 +558,7 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                                     if (existingIdx >= 0) {
                                         allTools[existingIdx] = item;
                                     } else {
-                                        allTools.unshift(item);
+                                        allTools.push(item);
                                     }
                                 });
 

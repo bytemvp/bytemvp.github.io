@@ -337,11 +337,26 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                     <!-- Table Header Controls: Search & Category Filter -->
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-[var(--glass-border)]">
                         <div>
-                            <h3 class="text-base font-bold text-ink dark:text-gray-dark">已收录工具列表</h3>
-                            <p class="text-xs text-ink/60 dark:text-gray">支持快速检索、在线编辑与删除下架</p>
+                            <h3 class="text-base font-bold text-ink dark:text-gray-dark flex items-center gap-2">
+                                <span>已收录工具列表</span>
+                                <span class="rounded bg-accent/15 px-2 py-0.5 text-[11px] font-semibold text-accent">支持拖拽排序</span>
+                            </h3>
+                            <p class="text-xs text-ink/60 dark:text-gray">按住左侧 ⠿ 图标即可上下拖拽调整顺序，实时持久化保存到数据库</p>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-3">
+                            <button
+                                type="button"
+                                id="save-order-btn"
+                                class="hidden inline-flex items-center gap-1.5 rounded-lg bg-emerald-600/15 border border-emerald-500/30 px-3 py-1.5 text-xs font-semibold text-emerald-600 hover:bg-emerald-600 hover:text-white transition cursor-pointer"
+                                title="手动保存当前排序"
+                            >
+                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span id="save-order-text">保存排序</span>
+                            </button>
+
                             <select
                                 id="table-filter-category"
                                 class="rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-1.5 text-xs text-ink focus:border-accent focus:outline-none dark:bg-paper dark:text-gray-dark"
@@ -370,6 +385,7 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
                                 <tr class="border-b border-[var(--glass-border)] text-ink/60 dark:text-gray/70">
+                                    <th class="py-3 px-2 font-semibold w-16 text-center">排序</th>
                                     <th class="py-3 px-3 font-semibold">工具</th>
                                     <th class="py-3 px-3 font-semibold">分类</th>
                                     <th class="py-3 px-3 font-semibold max-w-xs">功能简介</th>
@@ -483,7 +499,10 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                             <span>SQL 规则代码：</span>
                             <button type="button" id="copy-sql-btn" class="text-accent hover:underline font-bold">复制 SQL</button>
                         </div>
-                        <pre class="overflow-x-auto rounded bg-[#1c2629] p-3 text-[11px] text-[#d6e0e0] leading-relaxed"><code>-- 1. 任何人（普通访客）只能读取
+                        <pre class="overflow-x-auto rounded bg-[#1c2629] p-3 text-[11px] text-[#d6e0e0] leading-relaxed"><code>-- 0. 添加排序序号字段（支持拖拽自定义排序并永久保存）
+alter table public.ai_tools add column if not exists sort_order integer default 0;
+
+-- 1. 任何人（普通访客）只能读取
 drop policy if exists "Allow public read" on public.ai_tools;
 create policy "Allow public read" on public.ai_tools for select using (true);
 
@@ -497,7 +516,8 @@ drop policy if exists "Only admin update" on public.ai_tools;
 create policy "Only admin update" on public.ai_tools for update using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
 
 drop policy if exists "Allow public delete" on public.ai_tools;
-drop policy if exists "Only admin delete" on public.ai_tools for delete using (auth.role() = 'authenticated');</code></pre>
+drop policy if exists "Only admin delete" on public.ai_tools;
+create policy "Only admin delete" on public.ai_tools for delete using (auth.role() = 'authenticated');</code></pre>
                     </div>
 
                     <div class="flex justify-end pt-2">
@@ -521,6 +541,7 @@ drop policy if exists "Only admin delete" on public.ai_tools for delete using (a
                 description: string;
                 tags: string[];
                 createdAt?: string;
+                sort_order?: number;
                 source?: "preset" | "cloud";
             }
 
@@ -531,7 +552,8 @@ drop policy if exists "Only admin delete" on public.ai_tools for delete using (a
                 email: string;
             }
 
-            const RLS_SQL_CODE = `alter table public.ai_tools enable row level security;
+            const RLS_SQL_CODE = `alter table public.ai_tools add column if not exists sort_order integer default 0;
+alter table public.ai_tools enable row level security;
 drop policy if exists "Allow public read" on public.ai_tools;
 create policy "Allow public read" on public.ai_tools for select using (true);
 
@@ -643,6 +665,8 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                 const tableBody = document.getElementById("tools-table-body");
                 const tableSearchInput = document.getElementById("table-search-input") as HTMLInputElement | null;
                 const tableFilterCat = document.getElementById("table-filter-category") as HTMLSelectElement | null;
+                const saveOrderBtn = document.getElementById("save-order-btn");
+                const saveOrderText = document.getElementById("save-order-text");
 
                 // Edit modal
                 const editModal = document.getElementById("edit-modal");
@@ -780,13 +804,24 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                     let cloudCount = 0;
                     if (supabaseUrl && supabaseKey) {
                         try {
-                            const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?select=*&order=created_at.desc`;
-                            const cloudRes = await fetch(endpoint, {
+                            let endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?select=*&order=sort_order.asc,created_at.desc`;
+                            let cloudRes = await fetch(endpoint, {
                                 headers: {
                                     apikey: supabaseKey,
                                     Authorization: `Bearer ${supabaseKey}`
                                 }
                             });
+
+                            // Fallback if sort_order column not yet added
+                            if (!cloudRes.ok && cloudRes.status === 400) {
+                                endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?select=*&order=created_at.desc`;
+                                cloudRes = await fetch(endpoint, {
+                                    headers: {
+                                        apikey: supabaseKey,
+                                        Authorization: `Bearer ${supabaseKey}`
+                                    }
+                                });
+                            }
 
                             if (cloudRes.ok) {
                                 const cloudItems: any[] = await cloudRes.json();
@@ -807,6 +842,7 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                                         category: c.category,
                                         description: c.description,
                                         tags: parsedTags,
+                                        sort_order: typeof c.sort_order === "number" ? c.sort_order : 0,
                                         source: "cloud"
                                     };
 
@@ -814,7 +850,7 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                                     if (existingIdx >= 0) {
                                         allTools[existingIdx] = tool;
                                     } else {
-                                        allTools.unshift(tool);
+                                        allTools.push(tool);
                                     }
                                 });
                             }
@@ -847,19 +883,37 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                     });
 
                     if (filtered.length === 0) {
-                        tableBody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-ink/40 dark:text-gray/50">没有找到匹配的工具</td></tr>`;
+                        tableBody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-ink/40 dark:text-gray/50">没有找到匹配的工具</td></tr>`;
                         return;
                     }
 
                     filtered.forEach((tool) => {
                         const tr = document.createElement("tr");
-                        tr.className = "hover:bg-black/5 dark:hover:bg-white/5 transition-colors";
+                        tr.className = "tool-table-row hover:bg-black/5 dark:hover:bg-white/5 transition-colors group cursor-default border-b border-[var(--glass-border)]/50";
+                        tr.setAttribute("draggable", "true");
+                        tr.setAttribute("data-id", tool.id);
 
                         const sourceBadge = tool.source === "cloud"
                             ? `<span class="rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600">云端实时</span>`
                             : `<span class="rounded bg-black/5 px-2 py-0.5 text-[10px] font-medium text-ink/60 dark:bg-white/10 dark:text-gray">预置默认</span>`;
 
                         tr.innerHTML = `
+                            <td class="py-2.5 px-2 text-center select-none">
+                                <div class="flex items-center justify-center gap-1">
+                                    <span
+                                        class="drag-handle inline-flex items-center justify-center p-1 rounded text-ink/35 hover:text-accent cursor-grab active:cursor-grabbing hover:bg-black/5 dark:hover:bg-white/10 transition"
+                                        title="按住上下拖拽调整顺序"
+                                    >
+                                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M7 2a2 2 0 100 4 2 2 0 000-4zm6 0a2 2 0 100 4 2 2 0 000-4zM7 8a2 2 0 100 4 2 2 0 000-4zm6 0a2 2 0 100 4 2 2 0 000-4zM7 14a2 2 0 100 4 2 2 0 000-4zm6 0a2 2 0 100 4 2 2 0 000-4z" />
+                                        </svg>
+                                    </span>
+                                    <div class="flex flex-col text-[9px] text-ink/40">
+                                        <button type="button" class="move-up-btn hover:text-accent hover:font-bold px-0.5 leading-tight" title="上移一位" data-id="${tool.id}">▲</button>
+                                        <button type="button" class="move-down-btn hover:text-accent hover:font-bold px-0.5 leading-tight" title="下移一位" data-id="${tool.id}">▼</button>
+                                    </div>
+                                </div>
+                            </td>
                             <td class="py-3 px-3">
                                 <div class="flex items-center gap-2.5">
                                     <div class="h-8 w-8 shrink-0 rounded-lg border border-[var(--glass-border)] bg-white/70 p-1 dark:bg-black/20 flex items-center justify-center">
@@ -908,6 +962,103 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                         tableBody.appendChild(tr);
                     });
 
+                    // Attach Drag & Drop reorder handlers
+                    let draggedId: string | null = null;
+                    const rows = tableBody.querySelectorAll<HTMLTableRowElement>(".tool-table-row");
+
+                    rows.forEach((row) => {
+                        row.addEventListener("dragstart", (e) => {
+                            draggedId = row.getAttribute("data-id");
+                            row.classList.add("opacity-40", "bg-accent/10");
+                            if (e.dataTransfer) {
+                                e.dataTransfer.effectAllowed = "move";
+                                e.dataTransfer.setData("text/plain", draggedId || "");
+                            }
+                        });
+
+                        row.addEventListener("dragend", () => {
+                            row.classList.remove("opacity-40", "bg-accent/10");
+                            rows.forEach((r) => {
+                                r.classList.remove("border-t-2", "border-b-2", "border-accent");
+                            });
+                            draggedId = null;
+                        });
+
+                        row.addEventListener("dragover", (e) => {
+                            e.preventDefault();
+                            if (!draggedId || draggedId === row.getAttribute("data-id")) return;
+                            if (e.dataTransfer) {
+                                e.dataTransfer.dropEffect = "move";
+                            }
+                            const rect = row.getBoundingClientRect();
+                            const isUpper = e.clientY < rect.top + rect.height / 2;
+                            if (isUpper) {
+                                row.classList.add("border-t-2", "border-accent");
+                                row.classList.remove("border-b-2");
+                            } else {
+                                row.classList.add("border-b-2", "border-accent");
+                                row.classList.remove("border-t-2");
+                            }
+                        });
+
+                        row.addEventListener("dragleave", () => {
+                            row.classList.remove("border-t-2", "border-b-2", "border-accent");
+                        });
+
+                        row.addEventListener("drop", (e) => {
+                            e.preventDefault();
+                            row.classList.remove("border-t-2", "border-b-2", "border-accent");
+                            const targetId = row.getAttribute("data-id");
+                            if (!draggedId || !targetId || draggedId === targetId) return;
+
+                            const rect = row.getBoundingClientRect();
+                            const isUpper = e.clientY < rect.top + rect.height / 2;
+
+                            const fromIndex = allTools.findIndex((t) => t.id === draggedId);
+                            let toIndex = allTools.findIndex((t) => t.id === targetId);
+
+                            if (fromIndex !== -1 && toIndex !== -1) {
+                                const [movedItem] = allTools.splice(fromIndex, 1);
+                                toIndex = allTools.findIndex((t) => t.id === targetId);
+                                if (isUpper) {
+                                    allTools.splice(toIndex, 0, movedItem);
+                                } else {
+                                    allTools.splice(toIndex + 1, 0, movedItem);
+                                }
+
+                                renderTable();
+                                saveToolsOrder(allTools);
+                            }
+                        });
+                    });
+
+                    // Quick move up / down buttons
+                    tableBody.querySelectorAll<HTMLButtonElement>(".move-up-btn").forEach((btn) => {
+                        btn.addEventListener("click", () => {
+                            const id = btn.getAttribute("data-id");
+                            const idx = allTools.findIndex((t) => t.id === id);
+                            if (idx > 0) {
+                                const [item] = allTools.splice(idx, 1);
+                                allTools.splice(idx - 1, 0, item);
+                                renderTable();
+                                saveToolsOrder(allTools);
+                            }
+                        });
+                    });
+
+                    tableBody.querySelectorAll<HTMLButtonElement>(".move-down-btn").forEach((btn) => {
+                        btn.addEventListener("click", () => {
+                            const id = btn.getAttribute("data-id");
+                            const idx = allTools.findIndex((t) => t.id === id);
+                            if (idx !== -1 && idx < allTools.length - 1) {
+                                const [item] = allTools.splice(idx, 1);
+                                allTools.splice(idx + 1, 0, item);
+                                renderTable();
+                                saveToolsOrder(allTools);
+                            }
+                        });
+                    });
+
                     // Attach edit & delete handlers
                     tableBody.querySelectorAll<HTMLButtonElement>(".edit-btn").forEach((btn) => {
                         btn.addEventListener("click", () => {
@@ -926,6 +1077,64 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                         });
                     });
                 }
+
+                // Save tools order to Supabase
+                async function saveToolsOrder(toolsList: ToolItem[]) {
+                    const session = getSavedSession();
+                    if (!session || !session.access_token) {
+                        showToast("登录凭证已过期，请重新登录后再排序", "error");
+                        return;
+                    }
+
+                    if (saveOrderBtn && saveOrderText) {
+                        saveOrderBtn.classList.remove("hidden");
+                        saveOrderText.textContent = "保存中...";
+                    }
+
+                    toolsList.forEach((tool, idx) => {
+                        tool.sort_order = idx;
+                    });
+
+                    try {
+                        const promises = toolsList.map((tool, idx) =>
+                            fetch(`${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(tool.id)}`, {
+                                method: "PATCH",
+                                headers: {
+                                    apikey: supabaseKey,
+                                    Authorization: `Bearer ${session.access_token}`,
+                                    "Content-Type": "application/json",
+                                    Prefer: "return=minimal"
+                                },
+                                body: JSON.stringify({ sort_order: idx })
+                            })
+                        );
+
+                        const responses = await Promise.all(promises);
+                        const hasMissingColumn = responses.some((r) => r.status === 400);
+                        const allOk = responses.every((r) => r.ok);
+
+                        if (allOk) {
+                            showToast("🎉 排序已自动同步保存至云端数据库！", "success");
+                            if (saveOrderText) saveOrderText.textContent = "已保存";
+                            setTimeout(() => {
+                                if (saveOrderBtn) saveOrderBtn.classList.add("hidden");
+                                if (saveOrderText) saveOrderText.textContent = "保存排序";
+                            }, 2000);
+                        } else if (hasMissingColumn) {
+                            showToast("⚠️ 数据库缺少 sort_order 字段，请在 Supabase 执行 SQL", "error");
+                            openSqlGuideBtn?.click();
+                            if (saveOrderText) saveOrderText.textContent = "字段未添加";
+                        } else {
+                            showToast("部分排序保存失败，请检查数据库权限", "error");
+                            if (saveOrderText) saveOrderText.textContent = "重试保存";
+                        }
+                    } catch (err: any) {
+                        showToast(`网络保存失败: ${err.message}`, "error");
+                        if (saveOrderText) saveOrderText.textContent = "重试保存";
+                    }
+                }
+
+                saveOrderBtn?.addEventListener("click", () => saveToolsOrder(allTools));
 
                 tableSearchInput?.addEventListener("input", renderTable);
                 tableFilterCat?.addEventListener("change", renderTable);
@@ -1092,7 +1301,18 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
 
                     try {
                         const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools`;
-                        const res = await fetch(endpoint, {
+                        const payload: any = {
+                            id: slug,
+                            name,
+                            url,
+                            icon,
+                            category,
+                            description: desc,
+                            tags,
+                            sort_order: allTools.length
+                        };
+
+                        let res = await fetch(endpoint, {
                             method: "POST",
                             headers: {
                                 apikey: supabaseKey,
@@ -1100,16 +1320,23 @@ create policy "Only admin delete" on public.ai_tools for delete using (auth.role
                                 "Content-Type": "application/json",
                                 Prefer: "return=representation"
                             },
-                            body: JSON.stringify({
-                                id: slug,
-                                name,
-                                url,
-                                icon,
-                                category,
-                                description: desc,
-                                tags
-                            })
+                            body: JSON.stringify(payload)
                         });
+
+                        // Fallback if sort_order column not yet added
+                        if (!res.ok && res.status === 400) {
+                            delete payload.sort_order;
+                            res = await fetch(endpoint, {
+                                method: "POST",
+                                headers: {
+                                    apikey: supabaseKey,
+                                    Authorization: `Bearer ${session.access_token}`,
+                                    "Content-Type": "application/json",
+                                    Prefer: "return=representation"
+                                },
+                                body: JSON.stringify(payload)
+                            });
+                        }
 
                         if (res.ok) {
                             showToast(`🎉 成功添加「${name}」！全网访客已可实时浏览`, "success");
