@@ -135,9 +135,6 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                     <div>
                         正在展示: <span id="visible-count" class="font-bold text-accent">{presetTools.length}</span> 个工具
                     </div>
-                    <div id="filter-hint" class="hidden">
-                        按 <kbd class="rounded border border-[var(--glass-border)] px-1 py-0.5 text-[10px] bg-paper dark:bg-paper-deep">Esc</kbd> 快速重置搜索
-                    </div>
                 </div>
             </section>
 
@@ -285,7 +282,6 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                 const emptyState = document.getElementById("empty-state");
                 const visibleCountSpan = document.getElementById("visible-count");
                 const totalCounterSpan = document.getElementById("total-tools-counter");
-                const filterHint = document.getElementById("filter-hint");
                 const resetBtn = document.getElementById("reset-filters-btn");
 
                 if (!toolsGrid) return;
@@ -463,14 +459,6 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                         } else {
                             clearSearchBtn.classList.add("hidden");
                             clearSearchBtn.classList.remove("flex");
-                        }
-                    }
-
-                    if (filterHint) {
-                        if (query.length > 0 || activeCategory !== "全部") {
-                            filterHint.classList.remove("hidden");
-                        } else {
-                            filterHint.classList.add("hidden");
                         }
                     }
 
