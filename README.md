@@ -4,11 +4,9 @@ Byte MVP 的产品官网：单页静态站点，展示开源产品（当前为 [
 
 ## 页面结构
 
-整站只有一个首页（`src/pages/index.astro`），自上而下：
-
-1. **动态 Logo**（`src/components/LogoAnimated.astro`）：像素风 B｜MVP 标志，王冠闪烁、B 像素变化、故障线漂移；纯 CSS 动画，颜色走主题变量，自动适配明暗模式，并尊重 `prefers-reduced-motion`
-2. **产品介绍**：Night Rest 产品卡（简介、GitHub 链接、源码构建命令）+ 特性网格；产品数据集中在页面 frontmatter 的 `product` 对象中维护
-3. **Footer**：无边框居中版权行，`body` flex 布局 + `mt-auto` 吸底
+1. **产品首页**（`src/pages/index.astro`）：动态 Logo（`LogoAnimated.astro`）+ Night Rest 产品卡与特性网格。
+2. **AI 工具精选**（`src/pages/tools/index.astro`，路由 `/tools`）：访客端纯净只读展示，包含分类筛选、实时搜索与外链直达；自动拉取云端数据，全网展示内容完全统一。
+3. **AI 工具后台管理**（`src/pages/tools-manage/index.astro`，路由 `/tools-manage`）：隐蔽后台控制台，带口令门禁，支持快速输入网址自动抓取图标/简介、发布到云端，以及在线编辑与下架。
 
 Header 中的像素 B 直接引用 `public/favicon.svg`（`<img>`），与浏览器标签图标共用同一文件；宽度用 `em` 相对字号缩放。修改 Logo 只需改 `public/favicon.svg` 一个文件（动态大 Logo 在 `LogoAnimated.astro` 内联 SVG 中单独维护）。
 
@@ -26,6 +24,7 @@ Header 中的像素 B 直接引用 `public/favicon.svg`（`<img>`），与浏览
 | `npm run build` | Build production site to `./dist/` |
 | `npm run preview` | Preview the built site locally |
 | `npm run check` | Build + TypeScript check |
+| `npm run add-tool` | 交互式输入网址，自动抓取图标与介绍并录入 AI 工具库 |
 
 ## Deployment
 

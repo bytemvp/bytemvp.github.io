@@ -1,0 +1,127 @@
+[
+  {
+    "id": "cursor",
+    "name": "Cursor",
+    "url": "https://www.cursor.com",
+    "icon": "/tools-icons/cursor.png",
+    "category": "开发编程",
+    "description": "基于 VS Code 打造的新一代 AI 编程编辑器，深度集成代码补全、工程级 Agent 对话与多文件联动重构。",
+    "tags": [
+      "代码编辑器",
+      "AI Agent",
+      "代码重构"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "v0",
+    "name": "v0 by Vercel",
+    "url": "https://v0.dev",
+    "icon": "/tools-icons/v0.ico",
+    "category": "开发编程",
+    "description": "Vercel 出品的生成式前端 UI 助手，输入自然语言即可生成现代化 React、Tailwind CSS 代码与组件。",
+    "tags": [
+      "前端生成",
+      "React",
+      "Tailwind CSS"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "claude",
+    "name": "Claude",
+    "url": "https://claude.ai",
+    "icon": "/tools-icons/claude.ico",
+    "category": "写作对话",
+    "description": "Anthropic 研发的顶尖 AI 助手，以出色的长文本理解、复杂推理逻辑、严谨写作和编程能力著称。",
+    "tags": [
+      "长文本理解",
+      "逻辑推理",
+      "高质量写作"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "chatgpt",
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com",
+    "icon": "/tools-icons/chatgpt.ico",
+    "category": "写作对话",
+    "description": "OpenAI 旗下风靡全球的多模态 AI 聊天与思考引擎，支持语音对话、高级数据分析与海量知识库问答。",
+    "tags": [
+      "多模态",
+      "问答交互",
+      "数据分析"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "midjourney",
+    "name": "Midjourney",
+    "url": "https://www.midjourney.com",
+    "icon": "/tools-icons/midjourney.ico",
+    "category": "图像设计",
+    "description": "行业领跑的 AI 艺术与视觉图像生成工具，擅长极具视觉冲击力与艺术美感的概念图绘制与灵感创作。",
+    "tags": [
+      "文生图",
+      "视觉艺术",
+      "概念设计"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "notion",
+    "name": "Notion AI",
+    "url": "https://www.notion.so",
+    "icon": "/tools-icons/notion.ico",
+    "category": "效率办公",
+    "description": "无缝嵌入个人与团队工作空间的智能副驾驶，支持一键总结会议、提炼待办、头脑风暴与知识库问答。",
+    "tags": [
+      "知识库",
+      "协作文档",
+      "会议纪要"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "perplexity",
+    "name": "Perplexity",
+    "url": "https://www.perplexity.ai",
+    "icon": "/tools-icons/perplexity.ico",
+    "category": "学习研究",
+    "description": "新一代 AI 对话式搜索引擎，基于实时网络检索并附带清晰信源标注，助你快速获取深度答案与行业洞察。",
+    "tags": [
+      "AI 搜索",
+      "信源溯源",
+      "行业调研"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "suno",
+    "name": "Suno",
+    "url": "https://suno.com",
+    "icon": "/tools-icons/suno.ico",
+    "category": "音频视频",
+    "description": "革命性的生成式音乐创作平台，仅需一段文字描述即可自动创作出旋律动听、人声逼真的完整流行歌曲与配乐。",
+    "tags": [
+      "AI 音乐",
+      "旋律生成",
+      "音频创意"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "copilot",
+    "name": "GitHub Copilot",
+    "url": "https://github.com/features/copilot",
+    "icon": "/tools-icons/copilot.ico",
+    "category": "开发编程",
+    "description": "GitHub 官方 AI 结对编程助手，支持代码补全、聊天重构与智能生成。",
+    "tags": [
+      "AI 编程",
+      "代码生成"
+    ],
+    "createdAt": "2026-11-23"
+  }
+]

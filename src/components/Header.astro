@@ -1,34 +1,56 @@
 ---
 import ThemeToggle from "./ThemeToggle.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+
+const pathname = Astro.url.pathname.replace(/\/$/, "");
+const isHome = pathname === "";
+const isTools = pathname.startsWith("/tools");
 ---
 
 <header
     class="sticky top-3 z-50 mx-auto w-[calc(100%-1rem)] max-w-6xl rounded-lg border border-[var(--glass-border)] bg-paper shadow-card backdrop-blur-md dark:bg-paper"
 >
-    <nav class="flex items-center justify-between gap-3 px-3 py-3 md:px-4">
-        <h2
-            class="m-0 flex min-w-0 items-center text-base font-bold md:text-lg"
-        >
-            <a
-                class="inline-flex min-w-0 max-w-full items-center gap-[3px] rounded-lg px-2 py-1 text-ink transition-colors hover:text-accent-dark dark:text-gray-dark"
-                href="/"
+    <nav class="flex items-center justify-between gap-3 px-3 py-2.5 md:px-4">
+        <div class="flex min-w-0 items-center gap-3 sm:gap-6">
+            <h2
+                class="m-0 flex min-w-0 items-center text-base font-bold md:text-lg"
             >
-                <!-- favicon.svg acts as the title's first letter -->
-                <!-- <img
-                    src="/favicon.svg"
-                    alt="B"
-                    width="64"
-                    height="64"
-                    class="h-[1.15em] w-auto shrink-0"
-                /> -->
-                <span class="truncate">{SITE_TITLE}</span>
-            </a>
-        </h2>
-        <div class="flex items-center gap-2 md:gap-3">
+                <a
+                    class="inline-flex min-w-0 max-w-full items-center gap-[3px] rounded-lg px-2 py-1 text-ink transition-colors hover:text-accent-dark dark:text-gray-dark"
+                    href="/"
+                >
+                    <span class="truncate font-extrabold tracking-tight">Byte MVP</span>
+                </a>
+            </h2>
+            <div class="flex items-center gap-1 sm:gap-1.5 text-sm font-medium">
+                <a
+                    href="/"
+                    class:list={[
+                        "rounded-md px-2.5 py-1 transition-colors",
+                        isHome
+                            ? "bg-accent/10 text-accent font-semibold dark:bg-accent/20 dark:text-accent-dark"
+                            : "text-ink/80 hover:bg-black/5 hover:text-ink dark:text-gray-dark/80 dark:hover:bg-white/5 dark:hover:text-black",
+                    ]}
+                >
+                    首页
+                </a>
+                <a
+                    href="/tools"
+                    class:list={[
+                        "rounded-md px-2.5 py-1 transition-colors",
+                        isTools
+                            ? "bg-accent/10 text-accent font-semibold dark:bg-accent/20 dark:text-accent-dark"
+                            : "text-ink/80 hover:bg-black/5 hover:text-ink dark:text-gray-dark/80 dark:hover:bg-white/5 dark:hover:text-black",
+                    ]}
+                >
+                    AI 工具
+                </a>
+            </div>
+        </div>
+        <div class="flex shrink-0 items-center gap-2 md:gap-3">
             <ThemeToggle />
             <a
-                class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--glass-border)] bg-paper text-ink transition hover:border-accent hover:text-accent-dark hover:shadow-card dark:bg-paper-deep dark:text-gray-dark"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--glass-border)] bg-paper text-ink transition hover:border-accent hover:text-accent-dark hover:shadow-card dark:bg-paper-deep dark:text-gray-dark md:h-10 md:w-10"
                 href="https://github.com/bytemvp"
                 target="_blank"
                 rel="noreferrer"

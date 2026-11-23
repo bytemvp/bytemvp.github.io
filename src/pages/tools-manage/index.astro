@@ -1,0 +1,1115 @@
+---
+import BaseHead from "../../components/BaseHead.astro";
+import { SITE_TITLE, SUPABASE_URL, SUPABASE_ANON_KEY, DEFAULT_ADMIN_PIN } from "../../consts";
+import toolsData from "../../data/tools.json";
+
+const presetTools = toolsData;
+const pageTitle = `AI 工具后台管理 · ${SITE_TITLE}`;
+const pageDescription = "Byte MVP AI 工具后台管理控制台";
+---
+
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <BaseHead title={pageTitle} description={pageDescription} />
+        <!-- Disallow indexing on the admin page -->
+        <meta name="robots" content="noindex, nofollow" />
+    </head>
+    <body class="min-h-screen bg-paper text-ink dark:bg-paper dark:text-gray-dark flex flex-col font-sans">
+        <!-- ==================== 1. PIN GATEKEEPER SCREEN ==================== -->
+        <div id="auth-gate-screen" class="flex flex-1 items-center justify-center p-4">
+            <div class="w-full max-w-sm rounded-2xl border border-[var(--glass-border)] bg-paper/80 p-8 shadow-2xl backdrop-blur-md dark:bg-paper-deep text-center">
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent/15 text-accent mb-4 shadow-sm">
+                    <svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+
+                <h1 class="text-xl font-extrabold tracking-tight text-ink dark:text-gray-dark">
+                    Byte MVP 管理后台
+                </h1>
+                <p class="mt-1 text-xs text-ink/60 dark:text-gray">
+                    请输入管理口令以进入 AI 工具控制台
+                </p>
+
+                <form id="gate-form" class="mt-6 space-y-4">
+                    <div>
+                        <label for="gate-pin-input" class="sr-only">管理口令</label>
+                        <input
+                            type="password"
+                            id="gate-pin-input"
+                            required
+                            autofocus
+                            placeholder="输入管理口令"
+                            class="w-full text-center rounded-xl border border-[var(--glass-border)] bg-paper py-3 text-sm text-ink placeholder-ink/40 tracking-widest focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 dark:bg-paper dark:text-gray-dark"
+                        />
+                    </div>
+                    <div class="flex items-center justify-center gap-2 text-xs text-ink/70 dark:text-gray">
+                        <input type="checkbox" id="gate-remember-check" checked class="rounded border-[var(--glass-border)] text-accent focus:ring-accent" />
+                        <label for="gate-remember-check">在此浏览器记住登录状态</label>
+                    </div>
+                    <button
+                        type="submit"
+                        class="w-full rounded-xl bg-accent py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-accent-dark cursor-pointer active:scale-95"
+                    >
+                        验证并进入控制台
+                    </button>
+                    <p class="text-[11px] text-ink/40 dark:text-gray/50">
+                        初始口令默认为: <code class="text-accent">admin123</code>（进入后可自定义）
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==================== 2. MAIN ADMIN DASHBOARD ==================== -->
+        <div
+            id="admin-dashboard-screen"
+            class="hidden flex-1 flex-col"
+            data-default-pin={DEFAULT_ADMIN_PIN}
+            data-env-supabase-url={SUPABASE_URL}
+            data-env-supabase-key={SUPABASE_ANON_KEY}
+        >
+            <!-- Admin Top Navigation Bar -->
+            <header class="sticky top-0 z-40 border-b border-[var(--glass-border)] bg-paper/90 backdrop-blur-md dark:bg-paper/90">
+                <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+                    <div class="flex items-center gap-3">
+                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white font-bold text-sm">
+                            B
+                        </span>
+                        <div>
+                            <h2 class="text-base font-bold text-ink dark:text-gray-dark flex items-center gap-2">
+                                <span>AI 工具后台管理</span>
+                                <span class="rounded bg-accent/15 px-2 py-0.5 text-[11px] font-semibold text-accent">Admin Console</span>
+                            </h2>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2.5 sm:gap-3 text-xs font-medium">
+                        <a
+                            href="/tools"
+                            target="_blank"
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-1.5 text-ink hover:border-accent hover:text-accent-dark dark:bg-paper-deep dark:text-gray-dark"
+                        >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                            <span>预览前台 (/tools)</span>
+                        </a>
+
+                        <button
+                            id="open-db-config-btn"
+                            type="button"
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-1.5 text-ink hover:border-accent hover:text-accent-dark dark:bg-paper-deep dark:text-gray-dark cursor-pointer"
+                        >
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>云数据库配置</span>
+                        </button>
+
+                        <button
+                            id="logout-btn"
+                            type="button"
+                            class="inline-flex items-center gap-1 rounded-lg bg-red-500/10 px-3 py-1.5 text-red-600 hover:bg-red-500 hover:text-white transition cursor-pointer"
+                        >
+                            <span>退出登录</span>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main class="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 space-y-8">
+                <!-- Status & Metrics Cards -->
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <div class="surface-card rounded-xl p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase text-ink/50 dark:text-gray/60">收录工具总数</p>
+                            <h3 id="stat-total-count" class="mt-1 text-2xl font-bold text-accent">0</h3>
+                        </div>
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 text-accent">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="surface-card rounded-xl p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase text-ink/50 dark:text-gray/60">云端新增工具</p>
+                            <h3 id="stat-cloud-count" class="mt-1 text-2xl font-bold text-emerald-600">0</h3>
+                        </div>
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="surface-card rounded-xl p-5 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase text-ink/50 dark:text-gray/60">Supabase 状态</p>
+                            <p id="stat-db-status" class="mt-1 text-sm font-bold text-amber-500">检测中...</p>
+                        </div>
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 1: Quick Add Tool Form (顶部快捷录入) -->
+                <section class="surface-card rounded-2xl p-6 shadow-sm">
+                    <div class="flex items-center gap-2 pb-4 border-b border-[var(--glass-border)]">
+                        <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-accent text-white text-xs font-bold">
+                            +
+                        </span>
+                        <div>
+                            <h3 class="text-base font-bold text-ink dark:text-gray-dark">快捷录入新工具</h3>
+                            <p class="text-xs text-ink/60 dark:text-gray">填写工具网址，系统将自动抓取网站图标、名称、简介，并智能推荐分类</p>
+                        </div>
+                    </div>
+
+                    <form id="quick-add-form" class="mt-5 space-y-4">
+                        <!-- URL + Scrape Action -->
+                        <div>
+                            <label for="new-tool-url" class="block text-xs font-semibold uppercase text-ink/70 dark:text-gray/80 mb-1.5">
+                                工具官方网址 (URL) <span class="text-red-500">*</span>
+                            </label>
+                            <div class="flex gap-2">
+                                <input
+                                    type="url"
+                                    id="new-tool-url"
+                                    required
+                                    placeholder="例如: https://cursor.com 或 https://claude.ai"
+                                    class="flex-1 rounded-xl border border-[var(--glass-border)] bg-paper px-4 py-2.5 text-sm text-ink placeholder-ink/40 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 dark:bg-paper dark:text-gray-dark"
+                                />
+                                <button
+                                    type="button"
+                                    id="scrape-btn"
+                                    class="inline-flex items-center gap-1.5 rounded-xl bg-accent/15 px-4 py-2.5 text-xs font-bold text-accent transition hover:bg-accent hover:text-white cursor-pointer shrink-0 active:scale-95"
+                                >
+                                    <svg id="scrape-icon" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    <span id="scrape-btn-text">自动抓取信息</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Name, Category, Icon row -->
+                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-12">
+                            <!-- Icon preview -->
+                            <div class="sm:col-span-2 flex flex-col items-center justify-center">
+                                <label class="block text-xs font-semibold uppercase text-ink/70 dark:text-gray/80 mb-1">图标预览</label>
+                                <div class="relative flex h-12 w-12 items-center justify-center rounded-xl border border-[var(--glass-border)] bg-white/70 p-1 shadow-sm dark:bg-black/20">
+                                    <img
+                                        id="new-tool-icon-preview"
+                                        src="/favicon.svg"
+                                        alt="图标"
+                                        class="h-full w-full object-contain"
+                                        onerror="this.onerror=null; this.src='/favicon.svg';"
+                                    />
+                                </div>
+                                <input type="hidden" id="new-tool-icon" value="/favicon.svg" />
+                            </div>
+
+                            <!-- Name -->
+                            <div class="sm:col-span-6">
+                                <label for="new-tool-name" class="block text-xs font-semibold uppercase text-ink/70 dark:text-gray/80 mb-1.5">
+                                    工具名称 <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    id="new-tool-name"
+                                    required
+                                    placeholder="例如: Cursor"
+                                    class="w-full rounded-xl border border-[var(--glass-border)] bg-paper px-3.5 py-2 text-sm text-ink placeholder-ink/40 focus:border-accent focus:outline-none dark:bg-paper dark:text-gray-dark"
+                                />
+                            </div>
+
+                            <!-- Category -->
+                            <div class="sm:col-span-4">
+                                <label for="new-tool-category" class="block text-xs font-semibold uppercase text-ink/70 dark:text-gray/80 mb-1.5">
+                                    归属分类 <span class="text-red-500">*</span>
+                                </label>
+                                <select
+                                    id="new-tool-category"
+                                    class="w-full rounded-xl border border-[var(--glass-border)] bg-paper px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none dark:bg-paper dark:text-gray-dark"
+                                >
+                                    <option value="开发编程">开发编程</option>
+                                    <option value="写作对话">写作对话</option>
+                                    <option value="图像设计">图像设计</option>
+                                    <option value="效率办公">效率办公</option>
+                                    <option value="音频视频">音频视频</option>
+                                    <option value="学习研究">学习研究</option>
+                                    <option value="其他实用">其他实用</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label for="new-tool-desc" class="block text-xs font-semibold uppercase text-ink/70 dark:text-gray/80 mb-1.5">
+                                工具功能简介 <span class="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                id="new-tool-desc"
+                                rows="2"
+                                required
+                                placeholder="输入简洁明了的功能特色与亮点介绍..."
+                                class="w-full rounded-xl border border-[var(--glass-border)] bg-paper px-3.5 py-2 text-sm text-ink placeholder-ink/40 focus:border-accent focus:outline-none dark:bg-paper dark:text-gray-dark"
+                            ></textarea>
+                        </div>
+
+                        <!-- Tags + Submit -->
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-2">
+                            <div class="flex-1">
+                                <label for="new-tool-tags" class="sr-only">标签</label>
+                                <input
+                                    type="text"
+                                    id="new-tool-tags"
+                                    placeholder="标签（逗号隔开，例如：代码补全, AI Agent, VS Code）"
+                                    class="w-full rounded-xl border border-[var(--glass-border)] bg-paper px-3.5 py-2 text-xs text-ink placeholder-ink/40 focus:border-accent focus:outline-none dark:bg-paper dark:text-gray-dark"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                id="submit-btn"
+                                class="inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-accent-dark cursor-pointer shrink-0 active:scale-95"
+                            >
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                                <span id="submit-btn-text">立即发布至云端</span>
+                            </button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- SECTION 2: Tools Management Table (下方工具管理表格) -->
+                <section class="surface-card rounded-2xl p-6 shadow-sm">
+                    <!-- Table Header Controls: Search & Category Filter -->
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-5 border-b border-[var(--glass-border)]">
+                        <div>
+                            <h3 class="text-base font-bold text-ink dark:text-gray-dark">已收录工具列表</h3>
+                            <p class="text-xs text-ink/60 dark:text-gray">支持快速检索、在线编辑与删除下架</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            <select
+                                id="table-filter-category"
+                                class="rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-1.5 text-xs text-ink focus:border-accent focus:outline-none dark:bg-paper dark:text-gray-dark"
+                            >
+                                <option value="全部">全部类别</option>
+                                <option value="开发编程">开发编程</option>
+                                <option value="写作对话">写作对话</option>
+                                <option value="图像设计">图像设计</option>
+                                <option value="效率办公">效率办公</option>
+                                <option value="音频视频">音频视频</option>
+                                <option value="学习研究">学习研究</option>
+                                <option value="其他实用">其他实用</option>
+                            </select>
+
+                            <input
+                                type="text"
+                                id="table-search-input"
+                                placeholder="搜索名称或描述..."
+                                class="rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-1.5 text-xs text-ink placeholder-ink/40 focus:border-accent focus:outline-none dark:bg-paper dark:text-gray-dark w-44"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Responsive Table -->
+                    <div class="overflow-x-auto mt-4">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="border-b border-[var(--glass-border)] text-ink/60 dark:text-gray/70">
+                                    <th class="py-3 px-3 font-semibold">工具</th>
+                                    <th class="py-3 px-3 font-semibold">分类</th>
+                                    <th class="py-3 px-3 font-semibold max-w-xs">功能简介</th>
+                                    <th class="py-3 px-3 font-semibold">来源</th>
+                                    <th class="py-3 px-3 font-semibold text-right">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tools-table-body" class="divide-y divide-[var(--glass-border)]/50">
+                                <!-- Populated dynamically by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- ==================== 3. EDIT MODAL ==================== -->
+        <div id="edit-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="relative w-full max-w-lg rounded-2xl border border-[var(--glass-border)] bg-paper p-6 shadow-2xl dark:bg-paper-deep">
+                <div class="flex items-center justify-between pb-3 border-b border-[var(--glass-border)]">
+                    <h3 class="text-base font-bold text-ink dark:text-gray-dark">✏️ 编辑工具信息</h3>
+                    <button id="close-edit-modal-btn" class="text-ink/40 hover:text-ink dark:text-gray/50 p-1">
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M6.28 5.22a.75.75 0 001.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="edit-form" class="mt-4 space-y-3.5">
+                    <input type="hidden" id="edit-tool-id" />
+
+                    <div>
+                        <label for="edit-tool-name" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">工具名称</label>
+                        <input type="text" id="edit-tool-name" required class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
+                    </div>
+
+                    <div>
+                        <label for="edit-tool-url" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">官方网址</label>
+                        <input type="url" id="edit-tool-url" required class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="edit-tool-category" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">分类</label>
+                            <select id="edit-tool-category" class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark">
+                                <option value="开发编程">开发编程</option>
+                                <option value="写作对话">写作对话</option>
+                                <option value="图像设计">图像设计</option>
+                                <option value="效率办公">效率办公</option>
+                                <option value="音频视频">音频视频</option>
+                                <option value="学习研究">学习研究</option>
+                                <option value="其他实用">其他实用</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="edit-tool-icon" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">图标 URL</label>
+                            <input type="text" id="edit-tool-icon" required class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="edit-tool-desc" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">功能简介</label>
+                        <textarea id="edit-tool-desc" rows="3" required class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="edit-tool-tags" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">标签 (逗号分隔)</label>
+                        <input type="text" id="edit-tool-tags" class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-3 border-t border-[var(--glass-border)]">
+                        <button type="button" id="cancel-edit-btn" class="px-4 py-1.5 text-xs text-ink/70 hover:text-ink dark:text-gray">取消</button>
+                        <button type="submit" class="rounded-lg bg-accent px-5 py-1.5 text-xs font-bold text-white hover:bg-accent-dark">保存修改</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ==================== 4. DATABASE SETTINGS MODAL ==================== -->
+        <div id="db-config-modal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="relative w-full max-w-lg rounded-2xl border border-[var(--glass-border)] bg-paper p-6 shadow-2xl dark:bg-paper-deep">
+                <div class="flex items-center justify-between pb-3 border-b border-[var(--glass-border)]">
+                    <h3 class="text-base font-bold text-ink dark:text-gray-dark">⚙️ Supabase 云数据库配置</h3>
+                    <button id="close-db-config-btn" class="text-ink/40 hover:text-ink dark:text-gray/50 p-1">
+                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M6.28 5.22a.75.75 0 001.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="db-config-form" class="mt-4 space-y-3.5">
+                    <div>
+                        <label for="cfg-url" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">Supabase Project URL</label>
+                        <input type="url" id="cfg-url" placeholder="https://xxxxxxxx.supabase.co" class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
+                    </div>
+
+                    <div>
+                        <label for="cfg-key" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">Supabase Anon Public Key</label>
+                        <input type="password" id="cfg-key" placeholder="eyJhbGciOi..." class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
+                    </div>
+
+                    <div>
+                        <label for="cfg-pin" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">自定义管理口令</label>
+                        <input type="password" id="cfg-pin" placeholder="自定义你的后台进入口令 (留空则使用默认 admin123)" class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark" />
+                    </div>
+
+                    <!-- 1-Click SQL Copy -->
+                    <div class="rounded-xl bg-black/5 p-3 text-xs dark:bg-white/5 space-y-1">
+                        <div class="flex items-center justify-between font-semibold">
+                            <span>💡 初次部署？需在 Supabase 运行建表 SQL</span>
+                            <button type="button" id="copy-sql-btn" class="text-accent hover:underline font-bold">复制 SQL</button>
+                        </div>
+                        <p class="text-[11px] text-ink/60 dark:text-gray">进入 Supabase 后台 -> SQL Editor，粘贴执行即可创建数据表并启用公开读取策略。</p>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-3 border-t border-[var(--glass-border)]">
+                        <button type="button" id="test-conn-btn" class="rounded-lg border border-[var(--glass-border)] px-3 py-1.5 text-xs text-ink hover:border-accent dark:text-gray-dark">测试连接</button>
+                        <button type="submit" class="rounded-lg bg-accent px-5 py-1.5 text-xs font-bold text-white hover:bg-accent-dark">保存配置</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Global Toast Container -->
+        <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+        <!-- ==================== CLIENT JAVASCRIPT ==================== -->
+        <script>
+            interface ToolItem {
+                id: string;
+                name: string;
+                url: string;
+                icon: string;
+                category: string;
+                description: string;
+                tags: string[];
+                createdAt?: string;
+                source?: "preset" | "cloud";
+            }
+
+            const SQL_SCHEMA = `create table if not exists public.ai_tools (
+  id text primary key,
+  name text not null,
+  url text not null,
+  icon text,
+  category text not null,
+  description text,
+  tags text[] default '{}',
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+alter table public.ai_tools enable row level security;
+drop policy if exists "Allow public read" on public.ai_tools;
+create policy "Allow public read" on public.ai_tools for select using (true);
+drop policy if exists "Allow public insert" on public.ai_tools;
+create policy "Allow public insert" on public.ai_tools for insert with check (true);
+drop policy if exists "Allow public update" on public.ai_tools;
+create policy "Allow public update" on public.ai_tools for update using (true);
+drop policy if exists "Allow public delete" on public.ai_tools;
+create policy "Allow public delete" on public.ai_tools for delete using (true);`;
+
+            function showToast(message: string, type: "success" | "error" | "info" = "info") {
+                const container = document.getElementById("toast-container");
+                if (!container) return;
+                const toast = document.createElement("div");
+                toast.className = `pointer-events-auto flex items-center gap-2 rounded-xl border border-[var(--glass-border)] bg-paper px-4 py-3 text-sm shadow-xl transition-all duration-300 dark:bg-paper-deep text-ink dark:text-gray-dark`;
+
+                let icon = `<span class="h-2 w-2 rounded-full bg-accent"></span>`;
+                if (type === "error") icon = `<span class="h-2 w-2 rounded-full bg-red-500"></span>`;
+                else if (type === "success") icon = `<span class="h-2 w-2 rounded-full bg-emerald-500"></span>`;
+
+                toast.innerHTML = `${icon}<span>${message}</span>`;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.opacity = "0";
+                    setTimeout(() => toast.remove(), 300);
+                }, 3500);
+            }
+
+            function initAdmin() {
+                const dashboard = document.getElementById("admin-dashboard-screen");
+                const gateScreen = document.getElementById("auth-gate-screen");
+                const gateForm = document.getElementById("gate-form") as HTMLFormElement | null;
+                const gatePinInput = document.getElementById("gate-pin-input") as HTMLInputElement | null;
+                const gateRememberCheck = document.getElementById("gate-remember-check") as HTMLInputElement | null;
+                const logoutBtn = document.getElementById("logout-btn");
+
+                // Metrics
+                const statTotal = document.getElementById("stat-total-count");
+                const statCloud = document.getElementById("stat-cloud-count");
+                const statDbStatus = document.getElementById("stat-db-status");
+
+                // Quick Add Elements
+                const quickAddForm = document.getElementById("quick-add-form") as HTMLFormElement | null;
+                const newUrlInput = document.getElementById("new-tool-url") as HTMLInputElement | null;
+                const newNameInput = document.getElementById("new-tool-name") as HTMLInputElement | null;
+                const newCatSelect = document.getElementById("new-tool-category") as HTMLSelectElement | null;
+                const newDescInput = document.getElementById("new-tool-desc") as HTMLTextAreaElement | null;
+                const newTagsInput = document.getElementById("new-tool-tags") as HTMLInputElement | null;
+                const newIconInput = document.getElementById("new-tool-icon") as HTMLInputElement | null;
+                const newIconPreview = document.getElementById("new-tool-icon-preview") as HTMLImageElement | null;
+                const scrapeBtn = document.getElementById("scrape-btn");
+                const scrapeBtnText = document.getElementById("scrape-btn-text");
+
+                // Table elements
+                const tableBody = document.getElementById("tools-table-body");
+                const tableSearchInput = document.getElementById("table-search-input") as HTMLInputElement | null;
+                const tableFilterCat = document.getElementById("table-filter-category") as HTMLSelectElement | null;
+
+                // Edit modal
+                const editModal = document.getElementById("edit-modal");
+                const editForm = document.getElementById("edit-form") as HTMLFormElement | null;
+                const closeEditBtn = document.getElementById("close-edit-modal-btn");
+                const cancelEditBtn = document.getElementById("cancel-edit-btn");
+                const editIdInput = document.getElementById("edit-tool-id") as HTMLInputElement | null;
+                const editNameInput = document.getElementById("edit-tool-name") as HTMLInputElement | null;
+                const editUrlInput = document.getElementById("edit-tool-url") as HTMLInputElement | null;
+                const editCatSelect = document.getElementById("edit-tool-category") as HTMLSelectElement | null;
+                const editIconInput = document.getElementById("edit-tool-icon") as HTMLInputElement | null;
+                const editDescInput = document.getElementById("edit-tool-desc") as HTMLTextAreaElement | null;
+                const editTagsInput = document.getElementById("edit-tool-tags") as HTMLInputElement | null;
+
+                // DB Config modal
+                const dbConfigModal = document.getElementById("db-config-modal");
+                const openDbConfigBtn = document.getElementById("open-db-config-btn");
+                const closeDbConfigBtn = document.getElementById("close-db-config-btn");
+                const dbConfigForm = document.getElementById("db-config-form") as HTMLFormElement | null;
+                const cfgUrlInput = document.getElementById("cfg-url") as HTMLInputElement | null;
+                const cfgKeyInput = document.getElementById("cfg-key") as HTMLInputElement | null;
+                const cfgPinInput = document.getElementById("cfg-pin") as HTMLInputElement | null;
+                const copySqlBtn = document.getElementById("copy-sql-btn");
+                const testConnBtn = document.getElementById("test-conn-btn");
+
+                const defaultPin = dashboard?.getAttribute("data-default-pin") || "admin123";
+                const envUrl = dashboard?.getAttribute("data-env-supabase-url") || "";
+                const envKey = dashboard?.getAttribute("data-env-supabase-key") || "";
+
+                let allTools: ToolItem[] = [];
+
+                function getActivePin(): string {
+                    return localStorage.getItem("bytemvp_custom_pin") || defaultPin;
+                }
+
+                function getDbConfig(): { url: string; key: string } {
+                    const localRaw = localStorage.getItem("bytemvp_supabase_config");
+                    if (localRaw) {
+                        try {
+                            const parsed = JSON.parse(localRaw);
+                            if (parsed.url && parsed.key) return parsed;
+                        } catch {}
+                    }
+                    return { url: envUrl, key: envKey };
+                }
+
+                // Authentication Check
+                function checkAuth(): boolean {
+                    const authed = localStorage.getItem("bytemvp_admin_authed");
+                    return authed === "true";
+                }
+
+                function enterDashboard() {
+                    gateScreen?.classList.add("hidden");
+                    dashboard?.classList.remove("hidden");
+                    dashboard?.classList.add("flex");
+                    loadAllTools();
+                }
+
+                if (checkAuth()) {
+                    enterDashboard();
+                }
+
+                gateForm?.addEventListener("submit", (e) => {
+                    e.preventDefault();
+                    const entered = gatePinInput?.value.trim() || "";
+                    if (entered === getActivePin()) {
+                        if (gateRememberCheck?.checked) {
+                            localStorage.setItem("bytemvp_admin_authed", "true");
+                        }
+                        enterDashboard();
+                        showToast("🎉 欢迎进入管理控制台！", "success");
+                    } else {
+                        showToast("口令错误，请重新输入", "error");
+                        gatePinInput?.select();
+                    }
+                });
+
+                logoutBtn?.addEventListener("click", () => {
+                    localStorage.removeItem("bytemvp_admin_authed");
+                    window.location.reload();
+                });
+
+                // Load Tools (Preset + Cloud)
+                async function loadAllTools() {
+                    allTools = [];
+                    // Load preset tools first
+                    try {
+                        const res = await fetch("/src/data/tools.json");
+                        if (res.ok) {
+                            const presets = await res.json();
+                            presets.forEach((p: any) => {
+                                allTools.push({ ...p, source: "preset" });
+                            });
+                        }
+                    } catch {}
+
+                    const db = getDbConfig();
+                    let cloudCount = 0;
+
+                    if (db.url && db.key) {
+                        if (statDbStatus) {
+                            statDbStatus.textContent = "已连接云端";
+                            statDbStatus.className = "mt-1 text-sm font-bold text-emerald-600";
+                        }
+                        try {
+                            const endpoint = `${db.url.replace(/\/$/, "")}/rest/v1/ai_tools?select=*&order=created_at.desc`;
+                            const cloudRes = await fetch(endpoint, {
+                                headers: {
+                                    apikey: db.key,
+                                    Authorization: `Bearer ${db.key}`
+                                }
+                            });
+
+                            if (cloudRes.ok) {
+                                const cloudItems: any[] = await cloudRes.json();
+                                cloudCount = cloudItems.length;
+
+                                cloudItems.forEach((c) => {
+                                    const parsedTags = Array.isArray(c.tags)
+                                        ? c.tags
+                                        : typeof c.tags === "string"
+                                        ? c.tags.split(",").map((s: string) => s.trim())
+                                        : [];
+
+                                    const tool: ToolItem = {
+                                        id: c.id,
+                                        name: c.name,
+                                        url: c.url,
+                                        icon: c.icon,
+                                        category: c.category,
+                                        description: c.description,
+                                        tags: parsedTags,
+                                        source: "cloud"
+                                    };
+
+                                    const existingIdx = allTools.findIndex((t) => t.id === tool.id || t.url === tool.url);
+                                    if (existingIdx >= 0) {
+                                        allTools[existingIdx] = tool;
+                                    } else {
+                                        allTools.unshift(tool);
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            if (statDbStatus) {
+                                statDbStatus.textContent = "连接异常";
+                                statDbStatus.className = "mt-1 text-sm font-bold text-red-500";
+                            }
+                        }
+                    } else {
+                        if (statDbStatus) {
+                            statDbStatus.textContent = "未配置云端";
+                            statDbStatus.className = "mt-1 text-sm font-bold text-amber-500";
+                        }
+                    }
+
+                    if (statTotal) statTotal.textContent = String(allTools.length);
+                    if (statCloud) statCloud.textContent = String(cloudCount);
+
+                    renderTable();
+                }
+
+                // Render Table Rows
+                function renderTable() {
+                    if (!tableBody) return;
+                    tableBody.innerHTML = "";
+
+                    const search = (tableSearchInput?.value || "").toLowerCase().trim();
+                    const category = tableFilterCat?.value || "全部";
+
+                    const filtered = allTools.filter((t) => {
+                        const matchCat = category === "全部" || t.category === category;
+                        const matchSearch = !search ||
+                            t.name.toLowerCase().includes(search) ||
+                            t.description.toLowerCase().includes(search) ||
+                            (t.tags || []).join(" ").toLowerCase().includes(search);
+                        return matchCat && matchSearch;
+                    });
+
+                    if (filtered.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-ink/40 dark:text-gray/50">没有找到匹配的工具</td></tr>`;
+                        return;
+                    }
+
+                    filtered.forEach((tool) => {
+                        const tr = document.createElement("tr");
+                        tr.className = "hover:bg-black/5 dark:hover:bg-white/5 transition-colors";
+
+                        const sourceBadge = tool.source === "cloud"
+                            ? `<span class="rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600">云端实时</span>`
+                            : `<span class="rounded bg-black/5 px-2 py-0.5 text-[10px] font-medium text-ink/60 dark:bg-white/10 dark:text-gray">预置默认</span>`;
+
+                        tr.innerHTML = `
+                            <td class="py-3 px-3">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="h-8 w-8 shrink-0 rounded-lg border border-[var(--glass-border)] bg-white/70 p-1 dark:bg-black/20 flex items-center justify-center">
+                                        <img src="${tool.icon}" alt="" class="h-full w-full object-contain" onerror="this.src='/favicon.svg'" />
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="font-bold text-ink dark:text-gray-dark truncate">${tool.name}</div>
+                                        <a href="${tool.url}" target="_blank" class="text-[11px] text-accent hover:underline truncate block max-w-xs">${tool.url}</a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 px-3">
+                                <span class="font-medium text-ink/80 dark:text-gray-dark">${tool.category}</span>
+                            </td>
+                            <td class="py-3 px-3 max-w-xs">
+                                <p class="text-ink/70 dark:text-gray/80 truncate" title="${tool.description}">${tool.description}</p>
+                            </td>
+                            <td class="py-3 px-3">${sourceBadge}</td>
+                            <td class="py-3 px-3 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button
+                                        type="button"
+                                        class="edit-btn p-1.5 rounded-lg text-ink/70 hover:bg-black/5 hover:text-accent dark:text-gray dark:hover:bg-white/10"
+                                        title="编辑"
+                                        data-id="${tool.id}"
+                                    >
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="delete-btn p-1.5 rounded-lg text-red-500 hover:bg-red-500/10"
+                                        title="删除"
+                                        data-id="${tool.id}"
+                                        data-name="${tool.name}"
+                                        data-source="${tool.source}"
+                                    >
+                                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        tableBody.appendChild(tr);
+                    });
+
+                    // Attach edit & delete handlers
+                    tableBody.querySelectorAll<HTMLButtonElement>(".edit-btn").forEach((btn) => {
+                        btn.addEventListener("click", () => {
+                            const id = btn.getAttribute("data-id");
+                            const tool = allTools.find((t) => t.id === id);
+                            if (tool) openEditModal(tool);
+                        });
+                    });
+
+                    tableBody.querySelectorAll<HTMLButtonElement>(".delete-btn").forEach((btn) => {
+                        btn.addEventListener("click", () => {
+                            const id = btn.getAttribute("data-id") || "";
+                            const name = btn.getAttribute("data-name") || "";
+                            const source = btn.getAttribute("data-source") || "";
+                            handleDeleteTool(id, name, source);
+                        });
+                    });
+                }
+
+                tableSearchInput?.addEventListener("input", renderTable);
+                tableFilterCat?.addEventListener("change", renderTable);
+
+                // Auto Scrape URL
+                async function handleScrape() {
+                    const rawUrl = newUrlInput?.value.trim() || "";
+                    if (!rawUrl) {
+                        showToast("请先输入官方网址", "error");
+                        newUrlInput?.focus();
+                        return;
+                    }
+
+                    let validUrl = rawUrl;
+                    if (!/^https?:\/\//i.test(validUrl)) {
+                        validUrl = "https://" + validUrl;
+                        if (newUrlInput) newUrlInput.value = validUrl;
+                    }
+
+                    let parsed: URL;
+                    try {
+                        parsed = new URL(validUrl);
+                    } catch {
+                        showToast("网址格式有误", "error");
+                        return;
+                    }
+
+                    if (scrapeBtnText) scrapeBtnText.textContent = "抓取中...";
+                    scrapeBtn?.setAttribute("disabled", "true");
+
+                    const domain = parsed.hostname.replace(/^www\./, "");
+                    const iconUrl = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
+                    if (newIconPreview) newIconPreview.src = iconUrl;
+                    if (newIconInput) newIconInput.value = iconUrl;
+
+                    let titleGuess = domain.split(".")[0];
+                    titleGuess = titleGuess.charAt(0).toUpperCase() + titleGuess.slice(1);
+                    if (newNameInput && !newNameInput.value) {
+                        newNameInput.value = titleGuess;
+                    }
+
+                    try {
+                        const res = await fetch(`https://api.microlink.io?url=${encodeURIComponent(validUrl)}`);
+                        if (res.ok) {
+                            const json = await res.json();
+                            const data = json.data;
+                            if (data.title && newNameInput) {
+                                newNameInput.value = data.title.replace(/\s*[-–—|:]\s*(Official Site|Home|首页|官网).*$/i, "").trim() || titleGuess;
+                            }
+                            if (data.description && newDescInput) {
+                                newDescInput.value = data.description.trim();
+                            }
+                            if (data.logo?.url) {
+                                if (newIconPreview) newIconPreview.src = data.logo.url;
+                                if (newIconInput) newIconInput.value = data.logo.url;
+                            }
+
+                            // Smart Category
+                            const text = `${data.title || ""} ${data.description || ""}`.toLowerCase();
+                            if (newCatSelect) {
+                                if (/code|coding|dev|program|vscode|开发|编程|前端|后端|代码/.test(text)) {
+                                    newCatSelect.value = "开发编程";
+                                } else if (/image|photo|draw|art|design|图片|图像|绘图|设计/.test(text)) {
+                                    newCatSelect.value = "图像设计";
+                                } else if (/chat|gpt|conversation|write|translate|对话|写作|文本/.test(text)) {
+                                    newCatSelect.value = "写作对话";
+                                } else if (/music|audio|voice|video|音乐|音频|视频/.test(text)) {
+                                    newCatSelect.value = "音频视频";
+                                } else if (/search|research|paper|搜索|研究|学术/.test(text)) {
+                                    newCatSelect.value = "学习研究";
+                                } else if (/notion|note|productivity|office|效率|办公|笔记/.test(text)) {
+                                    newCatSelect.value = "效率办公";
+                                }
+                            }
+                            showToast("✅ 已成功提取网站图标与描述", "success");
+                        }
+                    } catch {
+                        showToast("抓取部分超时，已使用域名图标兜底", "info");
+                    } finally {
+                        if (scrapeBtnText) scrapeBtnText.textContent = "自动抓取信息";
+                        scrapeBtn?.removeAttribute("disabled");
+                    }
+                }
+
+                scrapeBtn?.addEventListener("click", handleScrape);
+                newUrlInput?.addEventListener("blur", () => {
+                    if (newUrlInput.value && (!newNameInput?.value || !newDescInput?.value)) {
+                        handleScrape();
+                    }
+                });
+
+                // Submit Quick Add Tool
+                quickAddForm?.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const url = newUrlInput?.value.trim() || "";
+                    const name = newNameInput?.value.trim() || "";
+                    const category = newCatSelect?.value || "其他实用";
+                    const desc = newDescInput?.value.trim() || "";
+                    const icon = newIconInput?.value || "/favicon.svg";
+                    const tagsStr = newTagsInput?.value.trim() || "";
+                    const tags = tagsStr ? tagsStr.split(/[,，]/).map((t) => t.trim()).filter(Boolean) : [category];
+
+                    if (!url || !name || !desc) {
+                        showToast("请完整填写网址、名称与简介", "error");
+                        return;
+                    }
+
+                    const db = getDbConfig();
+                    if (!db.url || !db.key) {
+                        showToast("未检测到 Supabase 配置，请先点击右上角「云数据库配置」填入 URL 与 Key！", "error");
+                        openDbConfigBtn?.click();
+                        return;
+                    }
+
+                    const submitBtn = document.getElementById("submit-btn");
+                    const submitText = document.getElementById("submit-btn-text");
+                    if (submitText) submitText.textContent = "发布中...";
+                    submitBtn?.setAttribute("disabled", "true");
+
+                    const parsed = new URL(url);
+                    const slug = parsed.hostname.replace(/^www\./, "").split(".")[0].toLowerCase().replace(/[^a-z0-9_-]/g, "") + "-" + Date.now().toString(36);
+
+                    try {
+                        const endpoint = `${db.url.replace(/\/$/, "")}/rest/v1/ai_tools`;
+                        const res = await fetch(endpoint, {
+                            method: "POST",
+                            headers: {
+                                apikey: db.key,
+                                Authorization: `Bearer ${db.key}`,
+                                "Content-Type": "application/json",
+                                Prefer: "return=representation"
+                            },
+                            body: JSON.stringify({
+                                id: slug,
+                                name,
+                                url,
+                                icon,
+                                category,
+                                description: desc,
+                                tags
+                            })
+                        });
+
+                        if (res.ok) {
+                            showToast(`🎉 成功添加「${name}」！全网访客已可实时浏览`, "success");
+                            quickAddForm.reset();
+                            if (newIconPreview) newIconPreview.src = "/favicon.svg";
+                            if (newIconInput) newIconInput.value = "/favicon.svg";
+                            loadAllTools();
+                        } else {
+                            const err = await res.json().catch(() => ({}));
+                            showToast(`发布失败: ${err.message || res.statusText}`, "error");
+                        }
+                    } catch (err: any) {
+                        showToast(`网络请求失败: ${err.message}`, "error");
+                    } finally {
+                        if (submitText) submitText.textContent = "立即发布至云端";
+                        submitBtn?.removeAttribute("disabled");
+                    }
+                });
+
+                // Edit Tool Flow
+                function openEditModal(tool: ToolItem) {
+                    if (editIdInput) editIdInput.value = tool.id;
+                    if (editNameInput) editNameInput.value = tool.name;
+                    if (editUrlInput) editUrlInput.value = tool.url;
+                    if (editCatSelect) editCatSelect.value = tool.category;
+                    if (editIconInput) editIconInput.value = tool.icon;
+                    if (editDescInput) editDescInput.value = tool.description;
+                    if (editTagsInput) editTagsInput.value = (tool.tags || []).join(", ");
+                    editModal?.classList.remove("hidden");
+                }
+
+                closeEditBtn?.addEventListener("click", () => editModal?.classList.add("hidden"));
+                cancelEditBtn?.addEventListener("click", () => editModal?.classList.add("hidden"));
+
+                editForm?.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const id = editIdInput?.value || "";
+                    const name = editNameInput?.value.trim() || "";
+                    const url = editUrlInput?.value.trim() || "";
+                    const category = editCatSelect?.value || "其他实用";
+                    const icon = editIconInput?.value || "/favicon.svg";
+                    const desc = editDescInput?.value.trim() || "";
+                    const tagsStr = editTagsInput?.value.trim() || "";
+                    const tags = tagsStr ? tagsStr.split(/[,，]/).map((t) => t.trim()).filter(Boolean) : [category];
+
+                    const db = getDbConfig();
+                    if (!db.url || !db.key) {
+                        showToast("需连接 Supabase 才能保存更新", "error");
+                        return;
+                    }
+
+                    try {
+                        const endpoint = `${db.url.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(id)}`;
+                        const res = await fetch(endpoint, {
+                            method: "PATCH",
+                            headers: {
+                                apikey: db.key,
+                                Authorization: `Bearer ${db.key}`,
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                name,
+                                url,
+                                icon,
+                                category,
+                                description: desc,
+                                tags
+                            })
+                        });
+
+                        if (res.ok) {
+                            showToast(`✅ 已成功更新「${name}」！`, "success");
+                            editModal?.classList.add("hidden");
+                            loadAllTools();
+                        } else {
+                            showToast("更新失败，请确认数据表权限", "error");
+                        }
+                    } catch (err: any) {
+                        showToast(`保存出错: ${err.message}`, "error");
+                    }
+                });
+
+                // Delete Tool Flow
+                async function handleDeleteTool(id: string, name: string, source: string) {
+                    if (!confirm(`确定要从数据库中彻底下架「${name}」吗？`)) return;
+
+                    const db = getDbConfig();
+                    if (!db.url || !db.key) {
+                        showToast("需连接 Supabase 才能执行下架", "error");
+                        return;
+                    }
+
+                    try {
+                        const endpoint = `${db.url.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(id)}`;
+                        const res = await fetch(endpoint, {
+                            method: "DELETE",
+                            headers: {
+                                apikey: db.key,
+                                Authorization: `Bearer ${db.key}`
+                            }
+                        });
+
+                        if (res.ok) {
+                            showToast(`🗑️ 已成功下架「${name}」`, "success");
+                            loadAllTools();
+                        } else {
+                            showToast("删除失败，请检查 Supabase 权限", "error");
+                        }
+                    } catch (err: any) {
+                        showToast(`操作失败: ${err.message}`, "error");
+                    }
+                }
+
+                // DB Config Modal
+                openDbConfigBtn?.addEventListener("click", () => {
+                    const cfg = getDbConfig();
+                    if (cfgUrlInput) cfgUrlInput.value = cfg.url || "";
+                    if (cfgKeyInput) cfgKeyInput.value = cfg.key || "";
+                    if (cfgPinInput) cfgPinInput.value = localStorage.getItem("bytemvp_custom_pin") || "";
+                    dbConfigModal?.classList.remove("hidden");
+                });
+
+                closeDbConfigBtn?.addEventListener("click", () => dbConfigModal?.classList.add("hidden"));
+
+                dbConfigForm?.addEventListener("submit", (e) => {
+                    e.preventDefault();
+                    const url = cfgUrlInput?.value.trim() || "";
+                    const key = cfgKeyInput?.value.trim() || "";
+                    const pin = cfgPinInput?.value.trim() || "";
+
+                    localStorage.setItem("bytemvp_supabase_config", JSON.stringify({ url, key }));
+                    if (pin) {
+                        localStorage.setItem("bytemvp_custom_pin", pin);
+                    }
+                    dbConfigModal?.classList.add("hidden");
+                    showToast("配置已保存！正在拉取云端数据...", "success");
+                    loadAllTools();
+                });
+
+                copySqlBtn?.addEventListener("click", async () => {
+                    try {
+                        await navigator.clipboard.writeText(SQL_SCHEMA);
+                        showToast("建表 SQL 语句已复制！请前往 Supabase 执行", "success");
+                    } catch {
+                        showToast("请手动在项目根目录复制 src/data/supabase-schema.sql", "error");
+                    }
+                });
+
+                testConnBtn?.addEventListener("click", async () => {
+                    const url = cfgUrlInput?.value.trim() || "";
+                    const key = cfgKeyInput?.value.trim() || "";
+                    if (!url || !key) {
+                        showToast("请先填入 Supabase URL 和 Key", "error");
+                        return;
+                    }
+                    testConnBtn.textContent = "测试中...";
+                    try {
+                        const res = await fetch(`${url.replace(/\/$/, "")}/rest/v1/ai_tools?select=count`, {
+                            headers: { apikey: key, Authorization: `Bearer ${key}` }
+                        });
+                        if (res.ok) {
+                            showToast("🎉 连接成功！Supabase 数据表可用", "success");
+                        } else {
+                            showToast(`连接受阻 (状态码 ${res.status})，请确保已执行建表 SQL`, "error");
+                        }
+                    } catch (err: any) {
+                        showToast(`连接失败: ${err.message}`, "error");
+                    } finally {
+                        testConnBtn.textContent = "测试连接";
+                    }
+                });
+            }
+
+            document.addEventListener("DOMContentLoaded", initAdmin);
+        </script>
+    </body>
+</html>

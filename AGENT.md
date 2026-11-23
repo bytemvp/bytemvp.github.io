@@ -16,14 +16,23 @@
 ```text
 src/
 ├── components/       # 全站共享组件：头部、主题切换、元信息、页脚
+├── data/
+│   └── tools.json    # AI 工具精选数据源
 ├── pages/
-│   └── index.astro   # 唯一页面：hero 与产品介绍
+│   ├── index.astro        # 首页：hero 与产品介绍
+│   ├── tools/
+│   │   └── index.astro    # 访客端：AI 工具精选页面（分类、搜索、卡片网格，纯净只读）
+│   └── tools-manage/
+│       └── index.astro    # 管理端：隐蔽后台控制台（口令验证、快捷抓取录入、在线编辑下架）
 ├── styles/global.css # Tailwind layers、主题变量、全局/共享组件样式
 ├── consts.ts         # SITE_TITLE、SITE_DESCRIPTION 等站点常量
 └── env.d.ts          # Astro 客户端类型引用
 public/
 ├── fonts/            # Atkinson regular/bold 字体
+├── tools-icons/      # AI 工具的高清图标缓存
 └── ...               # favicon、图片资源
+scripts/
+└── add-tool.mjs      # 自动抓取网页元数据与图标并录入 tools.json 的 CLI 工具
 ```
 
 根目录中的 `astro.config.mjs` 注册 Tailwind、Sitemap，并设置 `site` 为 GitHub Pages 域名；`tailwind.config.mjs` 扫描 `src` 下的 Astro/HTML/JS/JSX/MD/MDX/TS/TSX 文件，并把 CSS 变量映射为 Tailwind token。

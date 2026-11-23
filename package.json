@@ -15,8 +15,9 @@
 		"astro": "astro",
 		"build": "astro build",
 		"check": "astro build && tsc",
-		"dev": "astro dev",
-		"preview": "astro preview"
+		"dev": "astro dev --host 0.0.0.0",
+		"preview": "astro preview",
+		"add-tool": "node scripts/add-tool.mjs"
 	},
 	"type": "module"
 }
