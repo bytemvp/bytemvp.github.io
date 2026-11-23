@@ -40,17 +40,23 @@
 <script>
 	import { toggleTheme } from "./theme";
 
-	const themeToggle = document.getElementById("theme-toggle");
-	if (themeToggle) {
-		const getToggleLabel = (theme: string) =>
-			theme === "dark" ? "\u5207\u6362\u5230\u6d45\u8272\u6a21\u5f0f" : "\u5207\u6362\u5230\u6df1\u8272\u6a21\u5f0f";
+	function setupThemeToggle() {
+		const themeToggle = document.getElementById("theme-toggle");
+		if (themeToggle && !themeToggle.hasAttribute("data-theme-listener")) {
+			themeToggle.setAttribute("data-theme-listener", "true");
+			const getToggleLabel = (theme: string) =>
+				theme === "dark" ? "切换到浅色模式" : "切换到深色模式";
 
-		themeToggle.addEventListener("click", () => {
-			const newTheme = toggleTheme();
-			themeToggle.setAttribute("aria-label", getToggleLabel(newTheme));
-		});
+			themeToggle.addEventListener("click", () => {
+				const newTheme = toggleTheme();
+				themeToggle.setAttribute("aria-label", getToggleLabel(newTheme));
+			});
 
-		const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
-		themeToggle.setAttribute("aria-label", getToggleLabel(currentTheme));
+			const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+			themeToggle.setAttribute("aria-label", getToggleLabel(currentTheme));
+		}
 	}
+
+	document.addEventListener("astro:page-load", setupThemeToggle);
+	setupThemeToggle();
 </script>

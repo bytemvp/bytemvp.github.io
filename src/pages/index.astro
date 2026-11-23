@@ -27,15 +27,25 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
                     <div class="pt-4 flex flex-wrap items-center justify-center gap-3">
                         <a
                             href="/tools"
-                            class="cta-primary inline-flex min-h-11 items-center justify-center rounded-xl px-6 text-sm font-bold text-white transition hover:shadow-pop active:scale-95"
+                            data-astro-prefetch="hover"
+                            id="explore-tools-btn"
+                            class="cta-primary group relative overflow-hidden inline-flex min-h-12 items-center justify-center rounded-xl px-7 text-sm font-bold text-white transition-all duration-300 hover:shadow-pop hover:scale-[1.03] active:scale-95 cursor-pointer"
                         >
-                            探索 AI 工具箱 →
+                            <!-- Shimmer light reflection -->
+                            <span class="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-1000 ease-out group-hover:translate-x-full"></span>
+
+                            <span class="relative z-10 flex items-center gap-2">
+                                <span>探索 AI 工具箱</span>
+                                <svg class="h-4 w-4 transition-transform duration-300 ease-out group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </span>
                         </a>
                         <a
                             href="https://github.com/bytemvp"
                             target="_blank"
                             rel="noreferrer"
-                            class="cta-secondary inline-flex min-h-11 items-center justify-center rounded-xl px-6 text-sm font-bold text-ink transition hover:text-accent-dark hover:shadow-card dark:text-gray-dark active:scale-95"
+                            class="cta-secondary inline-flex min-h-12 items-center justify-center rounded-xl px-6 text-sm font-bold text-ink transition-all duration-200 hover:text-accent-dark hover:shadow-card hover:scale-[1.02] dark:text-gray-dark active:scale-95"
                         >
                             GitHub 组织
                         </a>
@@ -44,5 +54,43 @@ import { SITE_TITLE, SITE_DESCRIPTION } from "../consts";
             </div>
         </main>
         <Footer />
+
+        <script>
+            function initExploreBtnEffect() {
+                const btn = document.getElementById("explore-tools-btn");
+                if (btn && !btn.hasAttribute("data-ripple-init")) {
+                    btn.setAttribute("data-ripple-init", "true");
+                    btn.addEventListener("click", (e) => {
+                        const rect = btn.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+
+                        const ripple = document.createElement("span");
+                        ripple.style.position = "absolute";
+                        ripple.style.left = `${x}px`;
+                        ripple.style.top = `${y}px`;
+                        ripple.style.width = "10px";
+                        ripple.style.height = "10px";
+                        ripple.style.borderRadius = "9999px";
+                        ripple.style.background = "rgba(255, 255, 255, 0.45)";
+                        ripple.style.transform = "translate(-50%, -50%) scale(0)";
+                        ripple.style.transition = "transform 400ms cubic-bezier(0, 0, 0.2, 1), opacity 400ms ease-out";
+                        ripple.style.pointerEvents = "none";
+                        ripple.style.zIndex = "5";
+
+                        btn.appendChild(ripple);
+                        requestAnimationFrame(() => {
+                            ripple.style.transform = "translate(-50%, -50%) scale(25)";
+                            ripple.style.opacity = "0";
+                        });
+
+                        setTimeout(() => ripple.remove(), 450);
+                    });
+                }
+            }
+
+            document.addEventListener("astro:page-load", initExploreBtnEffect);
+            initExploreBtnEffect();
+        </script>
     </body>
 </html>
