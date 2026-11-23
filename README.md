@@ -1,10 +1,10 @@
 # Byte MVP
 
-Byte MVP 的产品官网：单页静态站点，展示开源产品（当前为 [Night Rest／夜息](https://github.com/bytemvp/night-rest)）。基于 [Astro](https://astro.build) 构建，纯静态输出，可部署到 GitHub Pages 与 Cloudflare Pages。
+Byte MVP 官方网站：基于 [Astro](https://astro.build) 构建，纯静态输出，可部署到 GitHub Pages 与 Cloudflare Pages。
 
 ## 页面结构
 
-1. **产品首页**（`src/pages/index.astro`）：动态 Logo（`LogoAnimated.astro`）+ Night Rest 产品卡与特性网格。
+1. **品牌首页**（`src/pages/index.astro`）：动态像素 Logo（`LogoAnimated.astro`）+ 品牌 Slogan 与导航入口。
 2. **AI 工具精选**（`src/pages/tools/index.astro`，路由 `/tools`）：访客端纯净只读展示，包含分类筛选、实时搜索与外链直达；自动拉取云端数据，全网展示内容完全统一。
 3. **AI 工具后台管理**（`src/pages/tools-manage/index.astro`，路由 `/tools-manage`）：隐蔽后台控制台，带口令门禁，支持快速输入网址自动抓取图标/简介、发布到云端，以及在线编辑与下架。
 
