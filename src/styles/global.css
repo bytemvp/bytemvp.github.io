@@ -216,47 +216,11 @@
 		box-shadow: var(--box-shadow);
 	}
 
-	.hero-shell {
-		position: relative;
-		overflow: hidden;
-		border: 1px solid var(--glass-border);
-		background: var(--hero-gradient);
-		box-shadow: none;
-	}
-
-	.hero-shell::before {
-		position: absolute;
-		inset: 0;
-		z-index: 0;
-		pointer-events: none;
-		content: "";
-		background:
-			radial-gradient(ellipse at 86% 12%, rgba(95, 147, 184, 0.14), transparent 32%),
-			radial-gradient(ellipse at 8% 92%, rgba(63, 199, 159, 0.1), transparent 34%);
-	}
-
-	.hero-shell > * {
-		position: relative;
-		z-index: 1;
-	}
-
 	.gradient-text {
 		background: linear-gradient(135deg, var(--accent), var(--sky));
 		-webkit-background-clip: text;
 		background-clip: text;
 		color: transparent;
-	}
-
-	.neon-pill {
-		border: 1px solid var(--glass-border);
-		background: rgba(255, 255, 254, 0.6);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-	}
-
-	[data-theme="dark"] .neon-pill {
-		border-color: var(--glass-border);
-		background: rgba(214, 224, 224, 0.08);
-		box-shadow: inset 0 1px 0 rgba(214, 224, 224, 0.08);
 	}
 
 	.cta-primary {
@@ -282,37 +246,6 @@
 	.lift-card:hover {
 		border-color: var(--accent);
 		box-shadow: var(--pop-shadow);
-	}
-
-	.prose {
-		@apply text-lg leading-8;
-	}
-
-	.prose p,
-	.prose ul,
-	.prose ol {
-		@apply mb-6;
-	}
-
-	.prose a {
-		@apply font-bold text-accent underline decoration-[3px] underline-offset-4;
-	}
-
-	.prose ul {
-		@apply list-disc pl-6;
-	}
-
-	.prose ol {
-		@apply list-decimal pl-6;
-	}
-
-	.prose li {
-		@apply mb-2;
-	}
-
-	.prose h2,
-	.prose h3 {
-		@apply mb-4 mt-10;
 	}
 }
 

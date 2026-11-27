@@ -1,6 +1,12 @@
 ---
 import BaseHead from "../../components/BaseHead.astro";
-import { SITE_TITLE, SUPABASE_URL, SUPABASE_ANON_KEY } from "../../consts";
+import {
+    SITE_TITLE,
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY,
+    TOOL_CATEGORIES,
+    MANAGE_CATEGORIES,
+} from "../../consts";
 import toolsData from "../../data/tools.json";
 
 const presetTools = toolsData;
@@ -272,13 +278,9 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                                     id="new-tool-category"
                                     class="w-full rounded-xl border border-[var(--glass-border)] bg-paper px-3 py-2 text-sm text-ink focus:border-accent focus:outline-none dark:bg-paper dark:text-gray-dark"
                                 >
-                                    <option value="开发编程">开发编程</option>
-                                    <option value="写作对话">写作对话</option>
-                                    <option value="图像设计">图像设计</option>
-                                    <option value="效率办公">效率办公</option>
-                                    <option value="音频视频">音频视频</option>
-                                    <option value="学习研究">学习研究</option>
-                                    <option value="其他实用">其他实用</option>
+                                    {MANAGE_CATEGORIES.map((cat) => (
+                                        <option value={cat}>{cat}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -377,14 +379,9 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                                 id="table-filter-category"
                                 class="rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-1.5 text-xs text-ink focus:border-accent focus:outline-none dark:bg-paper dark:text-gray-dark"
                             >
-                                <option value="全部">全部类别</option>
-                                <option value="开发编程">开发编程</option>
-                                <option value="写作对话">写作对话</option>
-                                <option value="图像设计">图像设计</option>
-                                <option value="效率办公">效率办公</option>
-                                <option value="音频视频">音频视频</option>
-                                <option value="学习研究">学习研究</option>
-                                <option value="其他实用">其他实用</option>
+                                {TOOL_CATEGORIES.map((cat) => (
+                                    <option value={cat}>{cat === "全部" ? "全部类别" : cat}</option>
+                                ))}
                             </select>
 
                             <input
@@ -447,13 +444,9 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                         <div>
                             <label for="edit-tool-category" class="block text-xs font-semibold text-ink/70 dark:text-gray/80 mb-1">分类</label>
                             <select id="edit-tool-category" class="w-full rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-2 text-xs text-ink focus:border-accent dark:bg-paper dark:text-gray-dark">
-                                <option value="开发编程">开发编程</option>
-                                <option value="写作对话">写作对话</option>
-                                <option value="图像设计">图像设计</option>
-                                <option value="效率办公">效率办公</option>
-                                <option value="音频视频">音频视频</option>
-                                <option value="学习研究">学习研究</option>
-                                <option value="其他实用">其他实用</option>
+                                {MANAGE_CATEGORIES.map((cat) => (
+                                    <option value={cat}>{cat}</option>
+                                ))}
                             </select>
                         </div>
                         <div>
@@ -586,25 +579,30 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
 
         <!-- ==================== CLIENT JAVASCRIPT ==================== -->
         <script>
-            interface ToolItem {
-                id: string;
-                name: string;
-                url: string;
-                icon: string;
-                category: string;
-                description: string;
-                tags: string[];
-                createdAt?: string;
-                sort_order?: number;
-                source?: "preset" | "cloud";
-            }
-
-            interface SupabaseSession {
-                access_token: string;
-                refresh_token: string;
-                expires_at: number;
-                email: string;
-            }
+            import {
+                fetchCloudTools,
+                isCdnIcon,
+                type SupabaseSession,
+                type ToolItem,
+            } from "../../lib/supabase";
+            import {
+                authFetch,
+                clearTokenRefreshTimer,
+                deleteIconFromSupabaseStorage,
+                getSavedSession,
+                refreshSession,
+                saveSession,
+                scheduleTokenRefresh,
+                transferIconToSupabase,
+                uploadBlobToSupabaseStorage,
+            } from "../../lib/admin-client";
+            import {
+                cleanToolTitle,
+                containsChinese,
+                escapeHtml,
+                sanitizeUrl,
+                translateToChinese,
+            } from "../../lib/utils";
 
             const RLS_SQL_CODE = `alter table public.ai_tools add column if not exists sort_order integer default 0;
 alter table public.ai_tools enable row level security;
@@ -639,62 +637,25 @@ create policy "Allow admin update tool-icons" on storage.objects for update usin
 drop policy if exists "Allow admin delete tool-icons" on storage.objects;
 create policy "Allow admin delete tool-icons" on storage.objects for delete using (bucket_id = 'tool-icons' and auth.role() = 'authenticated');`;
 
-            function containsChinese(str: string): boolean {
-                return /[\u4e00-\u9fa5]/.test(str || "");
-            }
-
-            function cleanToolTitle(title: string, domain: string): string {
-                if (!title) return domain;
-                let cleaned = title.replace(/\s*[-–—|:]\s*(Official Site|Home|Home Page|首页|官网|官方网站|Welcome).*$/i, "").trim();
-                const domainBase = (domain || "").split(".")[0].toLowerCase();
-                const parts = cleaned.split(/\s*[-–—|:]\s*/);
-                if (parts.length > 1) {
-                    const matchingPart = parts.find((p) => p.toLowerCase().includes(domainBase));
-                    if (matchingPart && matchingPart.length <= 25) {
-                        return matchingPart.replace(/\s*(Official Site|Home|Home Page|首页|官网|官方网站|Welcome).*$/i, "").trim();
-                    }
-                    const last = parts[parts.length - 1].trim();
-                    const first = parts[0].trim();
-                    if (last.length <= 25 && parts[0].length > last.length) {
-                        return last;
-                    }
-                    if (first.length <= 25) {
-                        return first;
-                    }
-                }
-                return cleaned.replace(/\s+by\s+.*$/i, "").trim() || domain;
-            }
-
-            async function translateToChinese(text: string): Promise<string> {
-                if (!text || !text.trim() || containsChinese(text)) return text;
-                try {
-                    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=zh-CN&dt=t&q=${encodeURIComponent(text.trim())}`;
-                    const res = await fetch(url);
-                    if (!res.ok) return text;
-                    const json = await res.json();
-                    if (json && Array.isArray(json[0])) {
-                        const translated = json[0].map((item: any) => item[0]).filter(Boolean).join("");
-                        if (translated && translated.trim()) {
-                            return translated.trim();
-                        }
-                    }
-                } catch (err) {
-                    console.warn("Translation failed, falling back to original:", err);
-                }
-                return text;
-            }
-
             function showToast(message: string, type: "success" | "error" | "info" = "info") {
                 const container = document.getElementById("toast-container");
                 if (!container) return;
                 const toast = document.createElement("div");
                 toast.className = `pointer-events-auto flex items-center gap-2 rounded-xl border border-[var(--glass-border)] bg-paper px-4 py-3 text-sm shadow-xl transition-all duration-300 dark:bg-paper-deep text-ink dark:text-gray-dark`;
 
-                let icon = `<span class="h-2 w-2 rounded-full bg-accent"></span>`;
-                if (type === "error") icon = `<span class="h-2 w-2 rounded-full bg-red-500"></span>`;
-                else if (type === "success") icon = `<span class="h-2 w-2 rounded-full bg-emerald-500"></span>`;
+                const dot = document.createElement("span");
+                dot.className =
+                    type === "error"
+                        ? "h-2 w-2 rounded-full bg-red-500 shrink-0"
+                        : type === "success"
+                        ? "h-2 w-2 rounded-full bg-emerald-500 shrink-0"
+                        : "h-2 w-2 rounded-full bg-accent shrink-0";
 
-                toast.innerHTML = `${icon}<span>${message}</span>`;
+                const textSpan = document.createElement("span");
+                textSpan.textContent = message;
+
+                toast.appendChild(dot);
+                toast.appendChild(textSpan);
                 container.appendChild(toast);
                 setTimeout(() => {
                     toast.style.opacity = "0";
@@ -705,6 +666,8 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
             function initAdmin() {
                 const dashboard = document.getElementById("admin-dashboard-screen");
                 const gateScreen = document.getElementById("auth-gate-screen");
+                if (!dashboard || dashboard.hasAttribute("data-admin-init")) return;
+                dashboard.setAttribute("data-admin-init", "true");
                 const loginForm = document.getElementById("login-form") as HTMLFormElement | null;
                 const emailInput = document.getElementById("admin-email") as HTMLInputElement | null;
                 const passInput = document.getElementById("admin-password") as HTMLInputElement | null;
@@ -770,255 +733,37 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                 const supabaseKey = dashboard?.getAttribute("data-supabase-key") || "";
 
                 let allTools: ToolItem[] = [];
-                let refreshTimer: any = null;
 
-                function getSavedSession(): SupabaseSession | null {
-                    try {
-                        const raw = localStorage.getItem("bytemvp_supabase_session");
-                        if (raw) return JSON.parse(raw);
-                    } catch {}
-                    return null;
-                }
-
-                function saveSession(session: SupabaseSession | null) {
-                    if (session) {
-                        localStorage.setItem("bytemvp_supabase_session", JSON.stringify(session));
-                    } else {
-                        localStorage.removeItem("bytemvp_supabase_session");
-                        if (refreshTimer) {
-                            clearTimeout(refreshTimer);
-                            refreshTimer = null;
-                        }
-                    }
-                }
-
-                async function refreshSession(session: SupabaseSession): Promise<SupabaseSession | null> {
-                    if (!session || !session.refresh_token || !supabaseUrl || !supabaseKey) {
-                        return null;
-                    }
-                    try {
-                        const endpoint = `${supabaseUrl.replace(/\/$/, "")}/auth/v1/token?grant_type=refresh_token`;
-                        const res = await fetch(endpoint, {
-                            method: "POST",
-                            headers: {
-                                apikey: supabaseKey,
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({ refresh_token: session.refresh_token })
-                        });
-
-                        if (res.ok) {
-                            const data = await res.json();
-                            if (data.access_token) {
-                                const refreshed: SupabaseSession = {
-                                    access_token: data.access_token,
-                                    refresh_token: data.refresh_token || session.refresh_token,
-                                    expires_at: Date.now() + (data.expires_in || 3600) * 1000,
-                                    email: data.user?.email || session.email
-                                };
-                                saveSession(refreshed);
-                                scheduleTokenRefresh(refreshed);
-                                return refreshed;
-                            }
-                        }
-                    } catch (e) {
-                        console.warn("Session refresh notice:", e);
-                    }
-                    return null;
-                }
-
-                async function getValidSession(): Promise<SupabaseSession | null> {
-                    let session = getSavedSession();
-                    if (!session) return null;
-
-                    // If token expires in less than 5 minutes (or already expired), automatically refresh now
-                    const bufferMs = 5 * 60 * 1000;
-                    if (Date.now() >= (session.expires_at || 0) - bufferMs) {
-                        if (session.refresh_token) {
-                            const refreshed = await refreshSession(session);
-                            if (refreshed) {
-                                return refreshed;
-                            }
-                        }
-                    }
-
-                    return session.access_token ? session : null;
-                }
-
-                function scheduleTokenRefresh(session: SupabaseSession) {
-                    if (refreshTimer) clearTimeout(refreshTimer);
-                    // Proactively refresh 5 minutes before token expires, minimum 1 minute
-                    const remainingMs = Math.max((session.expires_at || 0) - Date.now(), 0);
-                    const refreshDelay = Math.max(remainingMs - 5 * 60 * 1000, 60 * 1000);
-
-                    refreshTimer = setTimeout(async () => {
-                        const curSession = getSavedSession();
-                        if (curSession && curSession.refresh_token) {
-                            const refreshed = await refreshSession(curSession);
-                            if (refreshed) {
-                                scheduleTokenRefresh(refreshed);
-                            }
-                        }
-                    }, refreshDelay);
-                }
-
-                // Transparent authenticated request wrapper with automatic Bearer token and 401 retry
-                async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
-                    let session = await getValidSession();
-                    if (!session || !session.access_token) {
-                        throw new Error("UNAUTHORIZED");
-                    }
-
-                    const headers = new Headers(options.headers || {});
-                    headers.set("apikey", supabaseKey);
-                    headers.set("Authorization", `Bearer ${session.access_token}`);
-
-                    let response = await fetch(url, {
-                        ...options,
-                        headers
-                    });
-
-                    // If 401 Unauthorized, token might have just expired on server: perform immediate transparent refresh and retry once
-                    if (response.status === 401 && session.refresh_token) {
-                        const refreshed = await refreshSession(session);
-                        if (refreshed && refreshed.access_token) {
-                            headers.set("Authorization", `Bearer ${refreshed.access_token}`);
-                            response = await fetch(url, {
-                                ...options,
-                                headers
-                            });
-                        } else {
-                            throw new Error("UNAUTHORIZED");
-                        }
-                    }
-
-                    return response;
-                }
-
-                async function fetchIconBlob(url: string): Promise<{ blob: Blob; mimeType: string; ext: string }> {
-                    let res: Response | null = null;
-                    // 1. 优先尝试直接获取
-                    try {
-                        res = await fetch(url, { mode: "cors" });
-                        if (!res.ok) res = null;
-                    } catch {
-                        res = null;
-                    }
-
-                    // 2. 若直接获取受阻（如跨域或防盗链），通过可靠的图像代理加载
-                    if (!res) {
-                        try {
-                            const proxyUrl = `https://images.weserv.nl/?url=${encodeURIComponent(url)}`;
-                            res = await fetch(proxyUrl);
-                            if (!res.ok) res = null;
-                        } catch {
-                            res = null;
-                        }
-                    }
-
-                    if (!res || !res.ok) {
-                        throw new Error(`无法获取图标文件 (${url})`);
-                    }
-
-                    const blob = await res.blob();
-                    let mimeType = blob.type || "image/png";
-                    let ext = "png";
-
-                    const lowerUrl = url.toLowerCase();
-                    if (mimeType.includes("svg") || lowerUrl.includes(".svg")) {
-                        mimeType = "image/svg+xml";
-                        ext = "svg";
-                    } else if (mimeType.includes("webp") || lowerUrl.includes(".webp")) {
-                        mimeType = "image/webp";
-                        ext = "webp";
-                    } else if (mimeType.includes("icon") || mimeType.includes("ico") || lowerUrl.includes(".ico")) {
-                        mimeType = "image/x-icon";
-                        ext = "ico";
-                    } else if (mimeType.includes("jpeg") || mimeType.includes("jpg") || lowerUrl.includes(".jpg") || lowerUrl.includes(".jpeg")) {
-                        mimeType = "image/jpeg";
-                        ext = "jpg";
-                    } else if (mimeType.includes("png") || lowerUrl.includes(".png")) {
-                        mimeType = "image/png";
-                        ext = "png";
-                    }
-
-                    return { blob, mimeType, ext };
-                }
-
-                async function uploadBlobToSupabaseStorage(
-                    blobOrFile: Blob | File,
-                    fileSlug: string,
-                    forcedExt?: string,
-                    forcedMime?: string
-                ): Promise<string> {
-                    const rawExt = forcedExt || (blobOrFile instanceof File ? blobOrFile.name.split(".").pop() : "") || "png";
-                    const ext = rawExt.toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
-                    const cleanSlug = fileSlug.toLowerCase().replace(/[^a-z0-9_-]/g, "") || "icon";
-                    const fileName = `${cleanSlug}.${ext}`;
-                    const mimeType = forcedMime || blobOrFile.type || (ext === "svg" ? "image/svg+xml" : ext === "ico" ? "image/x-icon" : "image/png");
-
-                    const endpoint = `${supabaseUrl.replace(/\/$/, "")}/storage/v1/object/tool-icons/${fileName}`;
-                    const res = await authFetch(endpoint, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": mimeType,
-                            "x-upsert": "true"
-                        },
-                        body: blobOrFile
-                    });
-
-                    if (!res.ok) {
-                        const err = await res.json().catch(() => ({}));
-                        if (res.status === 400 && (err.message?.includes("Bucket not found") || err.code === "NoSuchBucket")) {
-                            throw new Error("BUCKET_NOT_FOUND");
-                        }
-                        throw new Error(err.message || `存储上传失败 HTTP ${res.status}`);
-                    }
-
-                    return `${supabaseUrl.replace(/\/$/, "")}/storage/v1/object/public/tool-icons/${fileName}`;
-                }
-
-                async function transferIconToSupabase(iconUrl: string, fileSlug: string): Promise<string> {
-                    if (!iconUrl) return "/favicon.svg";
-                    if (iconUrl.includes("/storage/v1/object/public/tool-icons/")) {
-                        return iconUrl;
-                    }
-                    if (iconUrl.startsWith("/") && !iconUrl.startsWith("//")) {
-                        return iconUrl;
-                    }
-
-                    const { blob, mimeType, ext } = await fetchIconBlob(iconUrl);
-                    return await uploadBlobToSupabaseStorage(blob, fileSlug, ext, mimeType);
-                }
+                const apiFetch = (url: string, options: RequestInit = {}) =>
+                    authFetch(supabaseUrl, supabaseKey, url, options);
 
                 function enterDashboard(session: SupabaseSession) {
                     gateScreen?.classList.add("hidden");
                     dashboard?.classList.remove("hidden");
                     dashboard?.classList.add("flex");
                     if (adminUserEmail) adminUserEmail.textContent = session.email || "管理员";
-                    scheduleTokenRefresh(session);
+                    scheduleTokenRefresh(supabaseUrl, supabaseKey, session);
                     loadAllTools();
                 }
 
-                // Auto-refresh when tab gains focus or user returns to tab after hours
-                document.addEventListener("visibilitychange", async () => {
-                    if (document.visibilityState === "visible") {
-                        const curSession = getSavedSession();
-                        if (curSession && Date.now() >= (curSession.expires_at || 0) - 5 * 60 * 1000) {
-                            const refreshed = await refreshSession(curSession);
-                            if (refreshed) {
-                                scheduleTokenRefresh(refreshed);
+                // Auto-refresh when tab gains focus or user returns to tab after hours (bind once globally)
+                if (!(window as unknown as { __adminVisibilityBound?: boolean }).__adminVisibilityBound) {
+                    (window as unknown as { __adminVisibilityBound?: boolean }).__adminVisibilityBound = true;
+                    document.addEventListener("visibilitychange", async () => {
+                        if (document.visibilityState === "visible") {
+                            const curSession = getSavedSession();
+                            if (curSession && Date.now() >= (curSession.expires_at || 0) - 5 * 60 * 1000) {
+                                await refreshSession(supabaseUrl, supabaseKey, curSession);
                             }
                         }
-                    }
-                });
+                    });
+                }
 
                 // Check existing session on startup
                 const existingSession = getSavedSession();
                 if (existingSession && (existingSession.access_token || existingSession.refresh_token)) {
-                    // If already expired, refresh in background or before entering
                     if (Date.now() >= (existingSession.expires_at || 0) - 60 * 1000 && existingSession.refresh_token) {
-                        refreshSession(existingSession).then((refreshed) => {
+                        refreshSession(supabaseUrl, supabaseKey, existingSession).then((refreshed) => {
                             if (refreshed) {
                                 enterDashboard(refreshed);
                             } else if (existingSession.access_token) {
@@ -1096,7 +841,6 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                 async function loadAllTools() {
                     allTools = [];
 
-                    // 1. Load preset tools from static script tag
                     const presetEl = document.getElementById("preset-tools-data");
                     if (presetEl && presetEl.textContent) {
                         try {
@@ -1104,63 +848,24 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                             presets.forEach((p: any) => {
                                 allTools.push({ ...p, source: "preset" });
                             });
-                        } catch {}
+                        } catch {
+                            // Ignore malformed JSON
+                        }
                     }
 
-                    // 2. Load cloud tools from Supabase
                     let cloudCount = 0;
                     if (supabaseUrl && supabaseKey) {
                         try {
-                            let endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?select=*&order=sort_order.asc,created_at.desc`;
-                            let cloudRes = await fetch(endpoint, {
-                                headers: {
-                                    apikey: supabaseKey,
-                                    Authorization: `Bearer ${supabaseKey}`
+                            const cloudItems = await fetchCloudTools(supabaseUrl, supabaseKey);
+                            cloudCount = cloudItems.length;
+                            cloudItems.forEach((tool) => {
+                                const existingIdx = allTools.findIndex((t) => t.id === tool.id || t.url === tool.url);
+                                if (existingIdx >= 0) {
+                                    allTools[existingIdx] = tool;
+                                } else {
+                                    allTools.push(tool);
                                 }
                             });
-
-                            // Fallback if sort_order column not yet added
-                            if (!cloudRes.ok && cloudRes.status === 400) {
-                                endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?select=*&order=created_at.desc`;
-                                cloudRes = await fetch(endpoint, {
-                                    headers: {
-                                        apikey: supabaseKey,
-                                        Authorization: `Bearer ${supabaseKey}`
-                                    }
-                                });
-                            }
-
-                            if (cloudRes.ok) {
-                                const cloudItems: any[] = await cloudRes.json();
-                                cloudCount = cloudItems.length;
-
-                                cloudItems.forEach((c) => {
-                                    const parsedTags = Array.isArray(c.tags)
-                                        ? c.tags
-                                        : typeof c.tags === "string"
-                                        ? c.tags.split(",").map((s: string) => s.trim())
-                                        : [];
-
-                                    const tool: ToolItem = {
-                                        id: c.id,
-                                        name: c.name,
-                                        url: c.url,
-                                        icon: c.icon,
-                                        category: c.category,
-                                        description: c.description,
-                                        tags: parsedTags,
-                                        sort_order: typeof c.sort_order === "number" ? c.sort_order : 0,
-                                        source: "cloud"
-                                    };
-
-                                    const existingIdx = allTools.findIndex((t) => t.id === tool.id || t.url === tool.url);
-                                    if (existingIdx >= 0) {
-                                        allTools[existingIdx] = tool;
-                                    } else {
-                                        allTools.push(tool);
-                                    }
-                                });
-                            }
                         } catch (e) {
                             console.warn("Cloud load notice", e);
                         }
@@ -1195,6 +900,13 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                     }
 
                     filtered.forEach((tool) => {
+                        const safeId = escapeHtml(tool.id);
+                        const safeName = escapeHtml(tool.name);
+                        const safeCategory = escapeHtml(tool.category);
+                        const safeDesc = escapeHtml(tool.description);
+                        const safeUrl = escapeHtml(sanitizeUrl(tool.url));
+                        const safeIcon = escapeHtml(sanitizeUrl(tool.icon, "/favicon.svg"));
+
                         const tr = document.createElement("tr");
                         tr.className = "tool-table-row hover:bg-black/5 dark:hover:bg-white/5 transition-colors group cursor-default border-b border-[var(--glass-border)]/50";
                         tr.setAttribute("draggable", "true");
@@ -1216,28 +928,28 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                                         </svg>
                                     </span>
                                     <div class="flex flex-col text-[9px] text-ink/40">
-                                        <button type="button" class="move-up-btn hover:text-accent hover:font-bold px-0.5 leading-tight" title="上移一位" data-id="${tool.id}">▲</button>
-                                        <button type="button" class="move-down-btn hover:text-accent hover:font-bold px-0.5 leading-tight" title="下移一位" data-id="${tool.id}">▼</button>
+                                        <button type="button" class="move-up-btn hover:text-accent hover:font-bold px-0.5 leading-tight" title="上移一位" data-id="${safeId}">▲</button>
+                                        <button type="button" class="move-down-btn hover:text-accent hover:font-bold px-0.5 leading-tight" title="下移一位" data-id="${safeId}">▼</button>
                                     </div>
                                 </div>
                             </td>
                             <td class="py-3 px-3">
                                 <div class="flex items-center gap-2.5">
                                     <div class="relative h-8 w-8 shrink-0 rounded-lg border border-[var(--glass-border)] bg-white/70 p-1 dark:bg-black/20 flex items-center justify-center">
-                                        <img src="${tool.icon}" alt="" class="h-full w-full object-contain" onerror="this.src='/favicon.svg'" />
-                                        ${tool.icon && tool.icon.includes('/storage/v1/object/public/tool-icons/') ? `<span class="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-sky-500 text-[8px] font-bold text-white shadow-sm" title="已托管于 Supabase 极速 CDN">☁</span>` : ''}
+                                        <img src="${safeIcon}" alt="" class="h-full w-full object-contain" onerror="this.src='/favicon.svg'" />
+                                        ${isCdnIcon(tool.icon) ? `<span class="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-sky-500 text-[8px] font-bold text-white shadow-sm" title="已托管于 Supabase 极速 CDN">☁</span>` : ''}
                                     </div>
                                     <div class="min-w-0">
-                                        <div class="font-bold text-ink dark:text-gray-dark truncate">${tool.name}</div>
-                                        <a href="${tool.url}" target="_blank" class="text-[11px] text-accent hover:underline truncate block max-w-xs">${tool.url}</a>
+                                        <div class="font-bold text-ink dark:text-gray-dark truncate">${safeName}</div>
+                                        <a href="${safeUrl}" target="_blank" rel="noreferrer" class="text-[11px] text-accent hover:underline truncate block max-w-xs">${safeUrl}</a>
                                     </div>
                                 </div>
                             </td>
                             <td class="py-3 px-3">
-                                <span class="font-medium text-ink/80 dark:text-gray-dark">${tool.category}</span>
+                                <span class="font-medium text-ink/80 dark:text-gray-dark">${safeCategory}</span>
                             </td>
                             <td class="py-3 px-3 max-w-xs">
-                                <p class="text-ink/70 dark:text-gray/80 truncate" title="${tool.description}">${tool.description}</p>
+                                <p class="text-ink/70 dark:text-gray/80 truncate" title="${safeDesc}">${safeDesc}</p>
                             </td>
                             <td class="py-3 px-3">${sourceBadge}</td>
                             <td class="py-3 px-3 text-right">
@@ -1246,7 +958,7 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                                         type="button"
                                         class="edit-btn p-1.5 rounded-lg text-ink/70 hover:bg-black/5 hover:text-accent dark:text-gray dark:hover:bg-white/10"
                                         title="编辑"
-                                        data-id="${tool.id}"
+                                        data-id="${safeId}"
                                     >
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -1256,9 +968,7 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                                         type="button"
                                         class="delete-btn p-1.5 rounded-lg text-red-500 hover:bg-red-500/10"
                                         title="删除"
-                                        data-id="${tool.id}"
-                                        data-name="${tool.name}"
-                                        data-source="${tool.source}"
+                                        data-id="${safeId}"
                                     >
                                         <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -1379,41 +1089,49 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                     tableBody.querySelectorAll<HTMLButtonElement>(".delete-btn").forEach((btn) => {
                         btn.addEventListener("click", () => {
                             const id = btn.getAttribute("data-id") || "";
-                            const name = btn.getAttribute("data-name") || "";
-                            const source = btn.getAttribute("data-source") || "";
-                            handleDeleteTool(id, name, source);
+                            const tool = allTools.find((t) => t.id === id);
+                            if (tool) handleDeleteTool(tool);
                         });
                     });
                 }
 
-                // Save tools order to Supabase
+                // Save tools order to Supabase (only PATCH rows whose sort_order changed)
                 async function saveToolsOrder(toolsList: ToolItem[]) {
+                    const changedItems: Array<{ tool: ToolItem; nextOrder: number }> = [];
+                    toolsList.forEach((tool, idx) => {
+                        if (tool.sort_order !== idx) {
+                            changedItems.push({ tool, nextOrder: idx });
+                        }
+                    });
+
+                    if (changedItems.length === 0) return;
+
                     if (saveOrderBtn && saveOrderText) {
                         saveOrderBtn.classList.remove("hidden");
                         saveOrderText.textContent = "保存中...";
                     }
 
-                    toolsList.forEach((tool, idx) => {
-                        tool.sort_order = idx;
-                    });
-
                     try {
-                        const promises = toolsList.map((tool, idx) =>
-                            authFetch(`${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(tool.id)}`, {
-                                method: "PATCH",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    Prefer: "return=minimal"
-                                },
-                                body: JSON.stringify({ sort_order: idx })
-                            })
+                        const responses = await Promise.all(
+                            changedItems.map(({ tool, nextOrder }) =>
+                                apiFetch(`${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(tool.id)}`, {
+                                    method: "PATCH",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        Prefer: "return=minimal"
+                                    },
+                                    body: JSON.stringify({ sort_order: nextOrder })
+                                })
+                            )
                         );
 
-                        const responses = await Promise.all(promises);
                         const hasMissingColumn = responses.some((r) => r.status === 400);
                         const allOk = responses.every((r) => r.ok);
 
                         if (allOk) {
+                            changedItems.forEach(({ tool, nextOrder }) => {
+                                tool.sort_order = nextOrder;
+                            });
                             showToast("🎉 排序已自动同步保存至云端数据库！", "success");
                             if (saveOrderText) saveOrderText.textContent = "已保存";
                             setTimeout(() => {
@@ -1445,7 +1163,7 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                 // Batch Sync Icons to Supabase Storage
                 syncIconsBtn?.addEventListener("click", async () => {
                     const pendingTools = allTools.filter(
-                        (t) => t.icon && t.icon.startsWith("http") && !t.icon.includes("/storage/v1/object/public/tool-icons/")
+                        (t) => t.icon && t.icon.startsWith("http") && !isCdnIcon(t.icon)
                     );
 
                     if (pendingTools.length === 0) {
@@ -1468,8 +1186,8 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                         if (syncIconsBtnText) syncIconsBtnText.textContent = `转存中 (${i + 1}/${pendingTools.length}): ${tool.name}...`;
 
                         try {
-                            const publicCdnUrl = await transferIconToSupabase(tool.icon, tool.id);
-                            const patchRes = await authFetch(
+                            const publicCdnUrl = await transferIconToSupabase(supabaseUrl, supabaseKey, tool.icon, tool.id);
+                            const patchRes = await apiFetch(
                                 `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(tool.id)}`,
                                 {
                                     method: "PATCH",
@@ -1514,7 +1232,7 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                     showToast("正在上传本地图标至 Supabase 存储桶...", "info");
                     const tempSlug = "icon-" + Date.now().toString(36);
                     try {
-                        const cdnUrl = await uploadBlobToSupabaseStorage(file, tempSlug);
+                        const cdnUrl = await uploadBlobToSupabaseStorage(supabaseUrl, supabaseKey, file, tempSlug);
                         if (newIconPreview) newIconPreview.src = cdnUrl;
                         if (newIconInput) newIconInput.value = cdnUrl;
                         showToast("✅ 本地图标已成功上传至 Supabase Storage CDN！", "success");
@@ -1536,7 +1254,7 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
 
                     showToast("正在上传本地图标至 Supabase 存储桶...", "info");
                     try {
-                        const cdnUrl = await uploadBlobToSupabaseStorage(file, id);
+                        const cdnUrl = await uploadBlobToSupabaseStorage(supabaseUrl, supabaseKey, file, id);
                         if (editIconInput) editIconInput.value = cdnUrl;
                         if (editIconPreview) editIconPreview.src = cdnUrl;
                         showToast("✅ 图标已成功上传至 Supabase Storage CDN！保存后生效", "success");
@@ -1558,7 +1276,7 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                         showToast("请输入有效的网络图标 URL", "error");
                         return;
                     }
-                    if (currentUrl.includes("/storage/v1/object/public/tool-icons/")) {
+                    if (isCdnIcon(currentUrl)) {
                         showToast("该图标已托管在 Supabase CDN 中", "info");
                         return;
                     }
@@ -1566,8 +1284,8 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                     const prevText = editUploadIconBtn.textContent;
                     editUploadIconBtn.textContent = "转存中...";
                     try {
-                        const cdnUrl = await transferIconToSupabase(currentUrl, id);
-                        editIconInput.value = cdnUrl;
+                        const cdnUrl = await transferIconToSupabase(supabaseUrl, supabaseKey, currentUrl, id);
+                        if (editIconInput) editIconInput.value = cdnUrl;
                         if (editIconPreview) editIconPreview.src = cdnUrl;
                         showToast("✅ 图标已成功转存至 Supabase CDN！保存后生效", "success");
                     } catch (err: any) {
@@ -1733,31 +1451,38 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                         return;
                     }
 
+                    let parsedUrl: URL;
+                    try {
+                        parsedUrl = new URL(url);
+                    } catch {
+                        showToast("工具网址格式无效，请以 http:// 或 https:// 开头", "error");
+                        newUrlInput?.focus();
+                        return;
+                    }
+
                     const submitBtn = document.getElementById("submit-btn");
                     const submitText = document.getElementById("submit-btn-text");
                     if (submitText) submitText.textContent = "发布中...";
                     submitBtn?.setAttribute("disabled", "true");
 
-                    const parsed = new URL(url);
-                    const slug = parsed.hostname.replace(/^www\./, "").split(".")[0].toLowerCase().replace(/[^a-z0-9_-]/g, "") + "-" + Date.now().toString(36);
+                    try {
+                        const slug = parsedUrl.hostname.replace(/^www\./, "").split(".")[0].toLowerCase().replace(/[^a-z0-9_-]/g, "") + "-" + Date.now().toString(36);
 
-                    let finalIcon = icon;
-                    if (finalIcon.startsWith("http") && !finalIcon.includes("/storage/v1/object/public/tool-icons/")) {
-                        if (submitText) submitText.textContent = "转存图标中...";
-                        try {
-                            const cdnIcon = await transferIconToSupabase(finalIcon, slug);
-                            finalIcon = cdnIcon;
-                        } catch (err: any) {
-                            console.warn("Icon upload notice:", err);
-                            if (err.message === "BUCKET_NOT_FOUND") {
-                                showToast("提示：存储桶 tool-icons 尚未创建，图标暂以外链保存。请在右上角复制 SQL 执行建桶", "info");
+                        let finalIcon = icon;
+                        if (finalIcon.startsWith("http") && !isCdnIcon(finalIcon)) {
+                            if (submitText) submitText.textContent = "转存图标中...";
+                            try {
+                                finalIcon = await transferIconToSupabase(supabaseUrl, supabaseKey, finalIcon, slug);
+                            } catch (err: any) {
+                                console.warn("Icon upload notice:", err);
+                                if (err.message === "BUCKET_NOT_FOUND") {
+                                    showToast("提示：存储桶 tool-icons 尚未创建，图标暂以外链保存。请在右上角复制 SQL 执行建桶", "info");
+                                }
                             }
                         }
-                    }
 
-                    if (submitText) submitText.textContent = "发布中...";
+                        if (submitText) submitText.textContent = "发布中...";
 
-                    try {
                         const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools`;
                         const payload: any = {
                             id: slug,
@@ -1770,7 +1495,7 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                             sort_order: allTools.length
                         };
 
-                        let res = await authFetch(endpoint, {
+                        let res = await apiFetch(endpoint, {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
@@ -1782,7 +1507,7 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                         // Fallback if sort_order column not yet added
                         if (!res.ok && res.status === 400) {
                             delete payload.sort_order;
-                            res = await authFetch(endpoint, {
+                            res = await apiFetch(endpoint, {
                                 method: "POST",
                                 headers: {
                                     "Content-Type": "application/json",
@@ -1793,7 +1518,7 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                         }
 
                         if (res.ok) {
-                            const isCdn = finalIcon.includes("/storage/v1/object/public/tool-icons/");
+                            const isCdn = isCdnIcon(finalIcon);
                             showToast(isCdn ? `🎉 成功添加「${name}」！图标已自动托管至 Supabase CDN` : `🎉 成功添加「${name}」！全网访客已可实时浏览`, "success");
                             quickAddForm.reset();
                             if (newIconPreview) newIconPreview.src = "/favicon.svg";
@@ -1849,9 +1574,9 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                     const tags = tagsStr ? tagsStr.split(/[,，]/).map((t) => t.trim()).filter(Boolean) : [category];
 
                     let finalIcon = icon;
-                    if (finalIcon.startsWith("http") && !finalIcon.includes("/storage/v1/object/public/tool-icons/")) {
+                    if (finalIcon.startsWith("http") && !isCdnIcon(finalIcon)) {
                         try {
-                            finalIcon = await transferIconToSupabase(finalIcon, id);
+                            finalIcon = await transferIconToSupabase(supabaseUrl, supabaseKey, finalIcon, id);
                         } catch (e: any) {
                             console.warn("Edit icon transfer notice:", e);
                         }
@@ -1859,7 +1584,7 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
 
                     try {
                         const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(id)}`;
-                        const res = await authFetch(endpoint, {
+                        const res = await apiFetch(endpoint, {
                             method: "PATCH",
                             headers: {
                                 "Content-Type": "application/json"
@@ -1892,18 +1617,19 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                     }
                 });
 
-                // Delete Tool Flow with Admin Bearer Token
-                async function handleDeleteTool(id: string, name: string, source: string) {
-                    if (!confirm(`确定要从数据库中彻底下架「${name}」吗？`)) return;
+                // Delete Tool Flow with Admin Bearer Token (also removes orphaned Storage icon)
+                async function handleDeleteTool(tool: ToolItem) {
+                    if (!confirm(`确定要从数据库中彻底下架「${tool.name}」吗？`)) return;
 
                     try {
-                        const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(id)}`;
-                        const res = await authFetch(endpoint, {
+                        const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(tool.id)}`;
+                        const res = await apiFetch(endpoint, {
                             method: "DELETE"
                         });
 
                         if (res.ok) {
-                            showToast(`🗑️ 已成功下架「${name}」`, "success");
+                            await deleteIconFromSupabaseStorage(supabaseUrl, supabaseKey, tool.icon);
+                            showToast(`🗑️ 已成功下架「${tool.name}」`, "success");
                             loadAllTools();
                         } else {
                             showToast("删除失败，请检查数据库权限", "error");
@@ -1934,7 +1660,8 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                 });
             }
 
-            document.addEventListener("DOMContentLoaded", initAdmin);
+            document.addEventListener("astro:page-load", initAdmin);
+            document.addEventListener("astro:before-swap", clearTokenRefreshTimer);
         </script>
     </body>
 </html>
