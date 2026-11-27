@@ -261,6 +261,7 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
 
         <!-- Client-side Public Script: Search, Filter & Cloud Sync -->
         <script>
+            import { TOOL_CATEGORIES } from "../../consts";
             import { fetchCloudTools, TOOLS_CACHE_KEY, type ToolItem } from "../../lib/supabase";
             import { escapeHtml, sanitizeUrl } from "../../lib/utils";
 
@@ -291,8 +292,15 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                 if (!toolsGrid || toolsGrid.hasAttribute("data-tools-init")) return;
                 toolsGrid.setAttribute("data-tools-init", "true");
 
-                let activeCategory = "全部";
-                let searchQuery = "";
+                // Restore category & search query from URL (?cat=...&q=...)
+                const initialParams = new URLSearchParams(window.location.search);
+                const paramCat = initialParams.get("cat") || "全部";
+                let activeCategory = (TOOL_CATEGORIES as readonly string[]).includes(paramCat) ? paramCat : "全部";
+                let searchQuery = initialParams.get("q") || "";
+                if (searchInput && searchQuery) {
+                    searchInput.value = searchQuery;
+                }
+
                 const presetTools: ToolItem[] = [];
                 let allTools: ToolItem[] = [];
 
@@ -321,6 +329,22 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
 
                 allTools = [...presetTools];
 
+                function syncFilterUrl() {
+                    const nextParams = new URLSearchParams();
+                    if (activeCategory !== "全部") {
+                        nextParams.set("cat", activeCategory);
+                    }
+                    const trimmed = searchQuery.trim();
+                    if (trimmed) {
+                        nextParams.set("q", trimmed);
+                    }
+                    const qs = nextParams.toString();
+                    const nextUrl = `${window.location.pathname}${qs ? `?${qs}` : ""}`;
+                    if (nextUrl !== `${window.location.pathname}${window.location.search}`) {
+                        window.history.replaceState(null, "", nextUrl);
+                    }
+                }
+
                 function renderCards() {
                     if (!toolsGrid) return;
                     toolsGrid.innerHTML = "";
@@ -344,7 +368,7 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                             .slice(0, 3)
                             .map((tag) => {
                                 const safeTag = escapeHtml(tag);
-                                return `<span class="inline-block rounded px-2 py-0.5 text-[11px] font-medium bg-black/5 text-ink/70 dark:bg-white/5 dark:text-gray/90 truncate max-w-[120px]">#${safeTag}</span>`;
+                                return `<button type="button" data-tag="${safeTag}" class="tag-filter-btn inline-block rounded px-2 py-0.5 text-[11px] font-medium bg-black/5 text-ink/70 hover:bg-accent/15 hover:text-accent dark:bg-white/5 dark:text-gray/90 dark:hover:bg-accent/20 dark:hover:text-accent transition truncate max-w-[120px] cursor-pointer" title="点击筛选「${safeTag}」标签">#${safeTag}</button>`;
                             })
                             .join("");
 
@@ -383,7 +407,7 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                                 </p>
                             </div>
                             <div class="mt-5 pt-3 border-t border-[var(--glass-border)]/60 flex items-center justify-between gap-2">
-                                <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+                                <div class="relative z-20 flex flex-wrap items-center gap-1.5 min-w-0">
                                     ${tagsHtml}
                                 </div>
                                 <span class="shrink-0 text-xs font-semibold text-accent group-hover:underline">
@@ -492,6 +516,8 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                             pill.classList.add("bg-paper", "text-ink/80", "dark:bg-paper", "dark:text-gray-dark/80");
                         }
                     });
+
+                    syncFilterUrl();
                 }
 
                 // 2. SWR Cache + Fetch remote tools from Supabase
@@ -586,6 +612,21 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                             filterTools();
                         }
                     });
+                });
+
+                // Tag click-to-filter via event delegation
+                toolsGrid.addEventListener("click", (e) => {
+                    const tagBtn = (e.target as HTMLElement)?.closest<HTMLButtonElement>(".tag-filter-btn");
+                    if (!tagBtn) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const tag = tagBtn.getAttribute("data-tag") || "";
+                    if (tag) {
+                        searchQuery = tag;
+                        if (searchInput) searchInput.value = tag;
+                        filterTools();
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
                 });
 
                 resetBtn?.addEventListener("click", () => {

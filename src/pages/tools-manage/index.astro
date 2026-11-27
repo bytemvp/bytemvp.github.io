@@ -346,11 +346,24 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                             <h3 class="text-base font-bold text-ink dark:text-gray-dark flex items-center gap-2">
                                 <span>已收录工具列表</span>
                                 <span class="rounded bg-accent/15 px-2 py-0.5 text-[11px] font-semibold text-accent">支持拖拽排序</span>
+                                <span id="sort-lock-badge" class="hidden rounded bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-600">筛选中已锁定排序</span>
                             </h3>
                             <p class="text-xs text-ink/60 dark:text-gray">按住左侧 ⠿ 图标即可上下拖拽调整顺序，实时持久化保存到数据库</p>
                         </div>
 
                         <div class="flex flex-wrap items-center gap-3">
+                            <button
+                                type="button"
+                                id="export-json-btn"
+                                class="inline-flex items-center gap-1.5 rounded-lg border border-[var(--glass-border)] bg-paper px-3 py-1.5 text-xs font-semibold text-ink/80 hover:border-accent hover:text-accent dark:bg-paper-deep dark:text-gray-dark transition cursor-pointer active:scale-95"
+                                title="将当前云端工具列表导出为 JSON 本地备份文件"
+                            >
+                                <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                <span>导出备份</span>
+                            </button>
+
                             <button
                                 type="button"
                                 id="sync-icons-btn"
@@ -500,8 +513,8 @@ const pageDescription = "Byte MVP AI 工具后台管理控制台";
                     </div>
 
                     <div class="flex justify-end gap-2 pt-3 border-t border-[var(--glass-border)]">
-                        <button type="button" id="cancel-edit-btn" class="px-4 py-1.5 text-xs text-ink/70 hover:text-ink dark:text-gray">取消</button>
-                        <button type="submit" class="rounded-lg bg-accent px-5 py-1.5 text-xs font-bold text-white hover:bg-accent-dark">保存修改</button>
+                        <button type="button" id="cancel-edit-btn" class="px-4 py-1.5 text-xs text-ink/70 hover:text-ink dark:text-gray cursor-pointer">取消</button>
+                        <button type="submit" id="edit-save-btn" class="rounded-lg bg-accent px-5 py-1.5 text-xs font-bold text-white hover:bg-accent-dark cursor-pointer disabled:opacity-60">保存修改</button>
                     </div>
                 </form>
             </div>
@@ -582,6 +595,7 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
             import {
                 fetchCloudTools,
                 isCdnIcon,
+                TOOLS_CACHE_KEY,
                 type SupabaseSession,
                 type ToolItem,
             } from "../../lib/supabase";
@@ -597,7 +611,10 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                 uploadBlobToSupabaseStorage,
             } from "../../lib/admin-client";
             import {
-                cleanToolTitle,
+                normalizeToolUrl,
+                scrapeToolMetadata,
+            } from "../../lib/scraper";
+            import {
                 containsChinese,
                 escapeHtml,
                 sanitizeUrl,
@@ -703,10 +720,13 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                 const saveOrderText = document.getElementById("save-order-text");
                 const syncIconsBtn = document.getElementById("sync-icons-btn") as HTMLButtonElement | null;
                 const syncIconsBtnText = document.getElementById("sync-icons-btn-text");
+                const exportJsonBtn = document.getElementById("export-json-btn") as HTMLButtonElement | null;
+                const sortLockBadge = document.getElementById("sort-lock-badge");
 
                 // Edit modal
                 const editModal = document.getElementById("edit-modal");
                 const editForm = document.getElementById("edit-form") as HTMLFormElement | null;
+                const editSaveBtn = document.getElementById("edit-save-btn") as HTMLButtonElement | null;
                 const closeEditBtn = document.getElementById("close-edit-modal-btn");
                 const cancelEditBtn = document.getElementById("cancel-edit-btn");
                 const editIdInput = document.getElementById("edit-tool-id") as HTMLInputElement | null;
@@ -858,6 +878,11 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                         try {
                             const cloudItems = await fetchCloudTools(supabaseUrl, supabaseKey);
                             cloudCount = cloudItems.length;
+                            try {
+                                localStorage.setItem(TOOLS_CACHE_KEY, JSON.stringify(cloudItems));
+                            } catch {
+                                // Ignore storage quota error
+                            }
                             cloudItems.forEach((tool) => {
                                 const existingIdx = allTools.findIndex((t) => t.id === tool.id || t.url === tool.url);
                                 if (existingIdx >= 0) {
@@ -884,6 +909,15 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
 
                     const search = (tableSearchInput?.value || "").toLowerCase().trim();
                     const category = tableFilterCat?.value || "全部";
+                    const isFiltered = Boolean(search) || category !== "全部";
+
+                    if (sortLockBadge) {
+                        if (isFiltered) {
+                            sortLockBadge.classList.remove("hidden");
+                        } else {
+                            sortLockBadge.classList.add("hidden");
+                        }
+                    }
 
                     const filtered = allTools.filter((t) => {
                         const matchCat = category === "全部" || t.category === category;
@@ -909,27 +943,30 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
 
                         const tr = document.createElement("tr");
                         tr.className = "tool-table-row hover:bg-black/5 dark:hover:bg-white/5 transition-colors group cursor-default border-b border-[var(--glass-border)]/50";
-                        tr.setAttribute("draggable", "true");
+                        tr.setAttribute("draggable", isFiltered ? "false" : "true");
                         tr.setAttribute("data-id", tool.id);
 
                         const sourceBadge = tool.source === "cloud"
                             ? `<span class="rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600">云端实时</span>`
                             : `<span class="rounded bg-black/5 px-2 py-0.5 text-[10px] font-medium text-ink/60 dark:bg-white/10 dark:text-gray">预置默认</span>`;
 
+                        const sortLockClass = isFiltered ? "opacity-25 pointer-events-none" : "";
+                        const sortTitle = isFiltered ? "筛选状态下已锁定排序，清空筛选后可拖拽" : "按住上下拖拽调整顺序";
+
                         tr.innerHTML = `
                             <td class="py-2.5 px-2 text-center select-none">
-                                <div class="flex items-center justify-center gap-1">
+                                <div class="flex items-center justify-center gap-1 ${sortLockClass}" title="${sortTitle}">
                                     <span
-                                        class="drag-handle inline-flex items-center justify-center p-1 rounded text-ink/35 hover:text-accent cursor-grab active:cursor-grabbing hover:bg-black/5 dark:hover:bg-white/10 transition"
-                                        title="按住上下拖拽调整顺序"
+                                        class="drag-handle inline-flex items-center justify-center p-1 rounded text-ink/35 hover:text-accent ${isFiltered ? "cursor-not-allowed" : "cursor-grab active:cursor-grabbing"} hover:bg-black/5 dark:hover:bg-white/10 transition"
+                                        title="${sortTitle}"
                                     >
                                         <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M7 2a2 2 0 100 4 2 2 0 000-4zm6 0a2 2 0 100 4 2 2 0 000-4zM7 8a2 2 0 100 4 2 2 0 000-4zm6 0a2 2 0 100 4 2 2 0 000-4zM7 14a2 2 0 100 4 2 2 0 000-4zm6 0a2 2 0 100 4 2 2 0 000-4z" />
                                         </svg>
                                     </span>
                                     <div class="flex flex-col text-[9px] text-ink/40">
-                                        <button type="button" class="move-up-btn hover:text-accent hover:font-bold px-0.5 leading-tight" title="上移一位" data-id="${safeId}">▲</button>
-                                        <button type="button" class="move-down-btn hover:text-accent hover:font-bold px-0.5 leading-tight" title="下移一位" data-id="${safeId}">▼</button>
+                                        <button type="button" class="move-up-btn hover:text-accent hover:font-bold px-0.5 leading-tight" ${isFiltered ? "disabled" : ""} title="上移一位" data-id="${safeId}">▲</button>
+                                        <button type="button" class="move-down-btn hover:text-accent hover:font-bold px-0.5 leading-tight" ${isFiltered ? "disabled" : ""} title="下移一位" data-id="${safeId}">▼</button>
                                     </div>
                                 </div>
                             </td>
@@ -980,102 +1017,104 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                         tableBody.appendChild(tr);
                     });
 
-                    // Attach Drag & Drop reorder handlers
-                    let draggedId: string | null = null;
-                    const rows = tableBody.querySelectorAll<HTMLTableRowElement>(".tool-table-row");
+                    if (!isFiltered) {
+                        // Attach Drag & Drop reorder handlers only when viewing the full unfiltered list
+                        let draggedId: string | null = null;
+                        const rows = tableBody.querySelectorAll<HTMLTableRowElement>(".tool-table-row");
 
-                    rows.forEach((row) => {
-                        row.addEventListener("dragstart", (e) => {
-                            draggedId = row.getAttribute("data-id");
-                            row.classList.add("opacity-40", "bg-accent/10");
-                            if (e.dataTransfer) {
-                                e.dataTransfer.effectAllowed = "move";
-                                e.dataTransfer.setData("text/plain", draggedId || "");
-                            }
-                        });
-
-                        row.addEventListener("dragend", () => {
-                            row.classList.remove("opacity-40", "bg-accent/10");
-                            rows.forEach((r) => {
-                                r.classList.remove("border-t-2", "border-b-2", "border-accent");
-                            });
-                            draggedId = null;
-                        });
-
-                        row.addEventListener("dragover", (e) => {
-                            e.preventDefault();
-                            if (!draggedId || draggedId === row.getAttribute("data-id")) return;
-                            if (e.dataTransfer) {
-                                e.dataTransfer.dropEffect = "move";
-                            }
-                            const rect = row.getBoundingClientRect();
-                            const isUpper = e.clientY < rect.top + rect.height / 2;
-                            if (isUpper) {
-                                row.classList.add("border-t-2", "border-accent");
-                                row.classList.remove("border-b-2");
-                            } else {
-                                row.classList.add("border-b-2", "border-accent");
-                                row.classList.remove("border-t-2");
-                            }
-                        });
-
-                        row.addEventListener("dragleave", () => {
-                            row.classList.remove("border-t-2", "border-b-2", "border-accent");
-                        });
-
-                        row.addEventListener("drop", (e) => {
-                            e.preventDefault();
-                            row.classList.remove("border-t-2", "border-b-2", "border-accent");
-                            const targetId = row.getAttribute("data-id");
-                            if (!draggedId || !targetId || draggedId === targetId) return;
-
-                            const rect = row.getBoundingClientRect();
-                            const isUpper = e.clientY < rect.top + rect.height / 2;
-
-                            const fromIndex = allTools.findIndex((t) => t.id === draggedId);
-                            let toIndex = allTools.findIndex((t) => t.id === targetId);
-
-                            if (fromIndex !== -1 && toIndex !== -1) {
-                                const [movedItem] = allTools.splice(fromIndex, 1);
-                                toIndex = allTools.findIndex((t) => t.id === targetId);
-                                if (isUpper) {
-                                    allTools.splice(toIndex, 0, movedItem);
-                                } else {
-                                    allTools.splice(toIndex + 1, 0, movedItem);
+                        rows.forEach((row) => {
+                            row.addEventListener("dragstart", (e) => {
+                                draggedId = row.getAttribute("data-id");
+                                row.classList.add("opacity-40", "bg-accent/10");
+                                if (e.dataTransfer) {
+                                    e.dataTransfer.effectAllowed = "move";
+                                    e.dataTransfer.setData("text/plain", draggedId || "");
                                 }
+                            });
 
-                                renderTable();
-                                saveToolsOrder(allTools);
-                            }
-                        });
-                    });
+                            row.addEventListener("dragend", () => {
+                                row.classList.remove("opacity-40", "bg-accent/10");
+                                rows.forEach((r) => {
+                                    r.classList.remove("border-t-2", "border-b-2", "border-accent");
+                                });
+                                draggedId = null;
+                            });
 
-                    // Quick move up / down buttons
-                    tableBody.querySelectorAll<HTMLButtonElement>(".move-up-btn").forEach((btn) => {
-                        btn.addEventListener("click", () => {
-                            const id = btn.getAttribute("data-id");
-                            const idx = allTools.findIndex((t) => t.id === id);
-                            if (idx > 0) {
-                                const [item] = allTools.splice(idx, 1);
-                                allTools.splice(idx - 1, 0, item);
-                                renderTable();
-                                saveToolsOrder(allTools);
-                            }
-                        });
-                    });
+                            row.addEventListener("dragover", (e) => {
+                                e.preventDefault();
+                                if (!draggedId || draggedId === row.getAttribute("data-id")) return;
+                                if (e.dataTransfer) {
+                                    e.dataTransfer.dropEffect = "move";
+                                }
+                                const rect = row.getBoundingClientRect();
+                                const isUpper = e.clientY < rect.top + rect.height / 2;
+                                if (isUpper) {
+                                    row.classList.add("border-t-2", "border-accent");
+                                    row.classList.remove("border-b-2");
+                                } else {
+                                    row.classList.add("border-b-2", "border-accent");
+                                    row.classList.remove("border-t-2");
+                                }
+                            });
 
-                    tableBody.querySelectorAll<HTMLButtonElement>(".move-down-btn").forEach((btn) => {
-                        btn.addEventListener("click", () => {
-                            const id = btn.getAttribute("data-id");
-                            const idx = allTools.findIndex((t) => t.id === id);
-                            if (idx !== -1 && idx < allTools.length - 1) {
-                                const [item] = allTools.splice(idx, 1);
-                                allTools.splice(idx + 1, 0, item);
-                                renderTable();
-                                saveToolsOrder(allTools);
-                            }
+                            row.addEventListener("dragleave", () => {
+                                row.classList.remove("border-t-2", "border-b-2", "border-accent");
+                            });
+
+                            row.addEventListener("drop", (e) => {
+                                e.preventDefault();
+                                row.classList.remove("border-t-2", "border-b-2", "border-accent");
+                                const targetId = row.getAttribute("data-id");
+                                if (!draggedId || !targetId || draggedId === targetId) return;
+
+                                const rect = row.getBoundingClientRect();
+                                const isUpper = e.clientY < rect.top + rect.height / 2;
+
+                                const fromIndex = allTools.findIndex((t) => t.id === draggedId);
+                                let toIndex = allTools.findIndex((t) => t.id === targetId);
+
+                                if (fromIndex !== -1 && toIndex !== -1) {
+                                    const [movedItem] = allTools.splice(fromIndex, 1);
+                                    toIndex = allTools.findIndex((t) => t.id === targetId);
+                                    if (isUpper) {
+                                        allTools.splice(toIndex, 0, movedItem);
+                                    } else {
+                                        allTools.splice(toIndex + 1, 0, movedItem);
+                                    }
+
+                                    renderTable();
+                                    saveToolsOrder(allTools);
+                                }
+                            });
                         });
-                    });
+
+                        // Quick move up / down buttons
+                        tableBody.querySelectorAll<HTMLButtonElement>(".move-up-btn").forEach((btn) => {
+                            btn.addEventListener("click", () => {
+                                const id = btn.getAttribute("data-id");
+                                const idx = allTools.findIndex((t) => t.id === id);
+                                if (idx > 0) {
+                                    const [item] = allTools.splice(idx, 1);
+                                    allTools.splice(idx - 1, 0, item);
+                                    renderTable();
+                                    saveToolsOrder(allTools);
+                                }
+                            });
+                        });
+
+                        tableBody.querySelectorAll<HTMLButtonElement>(".move-down-btn").forEach((btn) => {
+                            btn.addEventListener("click", () => {
+                                const id = btn.getAttribute("data-id");
+                                const idx = allTools.findIndex((t) => t.id === id);
+                                if (idx !== -1 && idx < allTools.length - 1) {
+                                    const [item] = allTools.splice(idx, 1);
+                                    allTools.splice(idx + 1, 0, item);
+                                    renderTable();
+                                    saveToolsOrder(allTools);
+                                }
+                            });
+                        });
+                    }
 
                     // Attach edit & delete handlers
                     tableBody.querySelectorAll<HTMLButtonElement>(".edit-btn").forEach((btn) => {
@@ -1132,6 +1171,11 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                             changedItems.forEach(({ tool, nextOrder }) => {
                                 tool.sort_order = nextOrder;
                             });
+                            try {
+                                localStorage.setItem(TOOLS_CACHE_KEY, JSON.stringify(allTools));
+                            } catch {
+                                // Ignore cache errors
+                            }
                             showToast("🎉 排序已自动同步保存至云端数据库！", "success");
                             if (saveOrderText) saveOrderText.textContent = "已保存";
                             setTimeout(() => {
@@ -1159,6 +1203,26 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                 }
 
                 saveOrderBtn?.addEventListener("click", () => saveToolsOrder(allTools));
+
+                // Export current cloud tools list as JSON backup
+                exportJsonBtn?.addEventListener("click", () => {
+                    if (allTools.length === 0) {
+                        showToast("当前列表为空，暂无数据可导出", "info");
+                        return;
+                    }
+                    const exportPayload = allTools.map(({ source: _source, ...rest }) => rest);
+                    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    const dateStr = new Date().toISOString().slice(0, 10);
+                    a.href = url;
+                    a.download = `bytemvp-tools-backup-${dateStr}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                    showToast(`📥 已导出 ${allTools.length} 款工具数据备份`, "success");
+                });
 
                 // Batch Sync Icons to Supabase Storage
                 syncIconsBtn?.addEventListener("click", async () => {
@@ -1316,81 +1380,36 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                         return;
                     }
 
-                    let validUrl = rawUrl;
-                    if (!/^https?:\/\//i.test(validUrl)) {
-                        validUrl = "https://" + validUrl;
-                        if (newUrlInput) newUrlInput.value = validUrl;
-                    }
-
-                    let parsed: URL;
-                    try {
-                        parsed = new URL(validUrl);
-                    } catch {
-                        showToast("网址格式有误", "error");
-                        return;
-                    }
-
                     if (scrapeBtnText) scrapeBtnText.textContent = "抓取中...";
                     scrapeBtn?.setAttribute("disabled", "true");
 
-                    const domain = parsed.hostname.replace(/^www\./, "");
-                    const iconUrl = `https://icons.duckduckgo.com/ip3/${domain}.ico`;
-                    if (newIconPreview) newIconPreview.src = iconUrl;
-                    if (newIconInput) newIconInput.value = iconUrl;
-
-                    let titleGuess = domain.split(".")[0];
-                    titleGuess = titleGuess.charAt(0).toUpperCase() + titleGuess.slice(1);
-                    if (newNameInput && !newNameInput.value) {
-                        newNameInput.value = titleGuess;
-                    }
-
                     try {
-                        const res = await fetch(`https://api.microlink.io?url=${encodeURIComponent(validUrl)}`);
-                        if (res.ok) {
-                            const json = await res.json();
-                            const data = json.data;
-                            if (data.title && newNameInput) {
-                                newNameInput.value = cleanToolTitle(data.title, domain) || titleGuess;
-                            }
-                            if (data.description && newDescInput) {
-                                let desc = data.description.trim();
-                                if (desc && !containsChinese(desc)) {
-                                    if (scrapeBtnText) scrapeBtnText.textContent = "翻译为中文中...";
-                                    try {
-                                        const translated = await translateToChinese(desc);
-                                        if (translated) desc = translated;
-                                    } catch (e) {
-                                        console.warn("Auto translate notice:", e);
-                                    }
-                                }
-                                newDescInput.value = desc;
-                            }
-                            if (data.logo?.url) {
-                                if (newIconPreview) newIconPreview.src = data.logo.url;
-                                if (newIconInput) newIconInput.value = data.logo.url;
-                            }
+                        const result = await scrapeToolMetadata(rawUrl, (stage) => {
+                            if (scrapeBtnText) scrapeBtnText.textContent = stage;
+                        });
 
-                            // Smart Category
-                            const text = `${data.title || ""} ${data.description || ""}`.toLowerCase();
-                            if (newCatSelect) {
-                                if (/code|coding|dev|program|vscode|开发|编程|前端|后端|代码/.test(text)) {
-                                    newCatSelect.value = "开发编程";
-                                } else if (/image|photo|draw|art|design|图片|图像|绘图|设计/.test(text)) {
-                                    newCatSelect.value = "图像设计";
-                                } else if (/chat|gpt|conversation|write|translate|对话|写作|文本/.test(text)) {
-                                    newCatSelect.value = "写作对话";
-                                } else if (/music|audio|voice|video|音乐|音频|视频/.test(text)) {
-                                    newCatSelect.value = "音频视频";
-                                } else if (/search|research|paper|搜索|研究|学术/.test(text)) {
-                                    newCatSelect.value = "学习研究";
-                                } else if (/notion|note|productivity|office|效率|办公|笔记/.test(text)) {
-                                    newCatSelect.value = "效率办公";
-                                }
-                            }
-                            showToast("✅ 已成功提取并生成中文简介与图标", "success");
+                        if (newUrlInput) newUrlInput.value = result.validUrl;
+                        if (newIconPreview) newIconPreview.src = result.icon;
+                        if (newIconInput) newIconInput.value = result.icon;
+
+                        if (newNameInput && (result.scrapedOk || !newNameInput.value)) {
+                            newNameInput.value = result.name;
                         }
+                        if (newDescInput && result.description) {
+                            newDescInput.value = result.description;
+                        }
+                        if (newCatSelect && result.scrapedOk) {
+                            newCatSelect.value = result.category;
+                        }
+
+                        showToast(
+                            result.scrapedOk
+                                ? "✅ 已成功提取并生成中文简介与图标"
+                                : "抓取部分超时，已使用域名图标兜底",
+                            result.scrapedOk ? "success" : "info"
+                        );
                     } catch {
-                        showToast("抓取部分超时，已使用域名图标兜底", "info");
+                        showToast("网址格式有误", "error");
                     } finally {
                         if (scrapeBtnText) scrapeBtnText.textContent = "自动抓取信息";
                         scrapeBtn?.removeAttribute("disabled");
@@ -1457,6 +1476,12 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                     } catch {
                         showToast("工具网址格式无效，请以 http:// 或 https:// 开头", "error");
                         newUrlInput?.focus();
+                        return;
+                    }
+
+                    const normUrl = normalizeToolUrl(url);
+                    const dupTool = allTools.find((t) => normalizeToolUrl(t.url) === normUrl);
+                    if (dupTool && !confirm(`列表中已存在相同网址的工具「${dupTool.name}」，确定要重复添加吗？`)) {
                         return;
                     }
 
@@ -1561,6 +1586,9 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
 
                 closeEditBtn?.addEventListener("click", () => editModal?.classList.add("hidden"));
                 cancelEditBtn?.addEventListener("click", () => editModal?.classList.add("hidden"));
+                editModal?.addEventListener("click", (e) => {
+                    if (e.target === editModal) editModal.classList.add("hidden");
+                });
 
                 editForm?.addEventListener("submit", async (e) => {
                     e.preventDefault();
@@ -1573,16 +1601,21 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                     const tagsStr = editTagsInput?.value.trim() || "";
                     const tags = tagsStr ? tagsStr.split(/[,，]/).map((t) => t.trim()).filter(Boolean) : [category];
 
-                    let finalIcon = icon;
-                    if (finalIcon.startsWith("http") && !isCdnIcon(finalIcon)) {
-                        try {
-                            finalIcon = await transferIconToSupabase(supabaseUrl, supabaseKey, finalIcon, id);
-                        } catch (e: any) {
-                            console.warn("Edit icon transfer notice:", e);
-                        }
+                    if (editSaveBtn) {
+                        editSaveBtn.textContent = "保存中...";
+                        editSaveBtn.setAttribute("disabled", "true");
                     }
 
                     try {
+                        let finalIcon = icon;
+                        if (finalIcon.startsWith("http") && !isCdnIcon(finalIcon)) {
+                            try {
+                                finalIcon = await transferIconToSupabase(supabaseUrl, supabaseKey, finalIcon, id);
+                            } catch (e: any) {
+                                console.warn("Edit icon transfer notice:", e);
+                            }
+                        }
+
                         const endpoint = `${supabaseUrl.replace(/\/$/, "")}/rest/v1/ai_tools?id=eq.${encodeURIComponent(id)}`;
                         const res = await apiFetch(endpoint, {
                             method: "PATCH",
@@ -1614,6 +1647,11 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                             return;
                         }
                         showToast(`保存出错: ${err.message}`, "error");
+                    } finally {
+                        if (editSaveBtn) {
+                            editSaveBtn.textContent = "保存修改";
+                            editSaveBtn.removeAttribute("disabled");
+                        }
                     }
                 });
 
@@ -1649,6 +1687,20 @@ create policy "Allow admin delete tool-icons" on storage.objects for delete usin
                 openSqlGuideBtn?.addEventListener("click", () => sqlGuideModal?.classList.remove("hidden"));
                 closeSqlGuideBtn?.addEventListener("click", () => sqlGuideModal?.classList.add("hidden"));
                 closeSqlModalBtn2?.addEventListener("click", () => sqlGuideModal?.classList.add("hidden"));
+                sqlGuideModal?.addEventListener("click", (e) => {
+                    if (e.target === sqlGuideModal) sqlGuideModal.classList.add("hidden");
+                });
+
+                // Close open modals on Escape key (bind once globally)
+                if (!(window as unknown as { __adminEscModalBound?: boolean }).__adminEscModalBound) {
+                    (window as unknown as { __adminEscModalBound?: boolean }).__adminEscModalBound = true;
+                    window.addEventListener("keydown", (e) => {
+                        if (e.key === "Escape") {
+                            document.getElementById("edit-modal")?.classList.add("hidden");
+                            document.getElementById("sql-guide-modal")?.classList.add("hidden");
+                        }
+                    });
+                }
 
                 copySqlBtn?.addEventListener("click", async () => {
                     try {
