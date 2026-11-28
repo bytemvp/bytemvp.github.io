@@ -1,1 +1,262 @@
-[]
+[
+  {
+    "id": "chatgpt-mwt3iut0",
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com",
+    "icon": "/tools-icons/chatgpt-mwt3iut0.svg",
+    "category": "写作对话",
+    "description": "ChatGPT 可帮助您获得答案、寻找灵感并提高工作效率。",
+    "tags": [
+      "大模型",
+      "聊天"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "gemini-mwt2r8b8",
+    "name": "Google Gemini",
+    "url": "https://gemini.google.com",
+    "icon": "/tools-icons/gemini-mwt2r8b8.png",
+    "category": "写作对话",
+    "description": "来认识一下 Google 的人工智能助手 Gemini。获得写作、规划、头脑风暴等方面的帮助。体验生成式人工智能的力量。",
+    "tags": [
+      "大模型",
+      "聊天"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "deepseek-mwt41l6i",
+    "name": "Deepseek",
+    "url": "https://deepseek.com",
+    "icon": "/tools-icons/deepseek-mwt41l6i.ico",
+    "category": "写作对话",
+    "description": "探索未至之境！",
+    "tags": [
+      "大模型",
+      "聊天"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "claude-mwt4964q",
+    "name": "Claude",
+    "url": "https://claude.ai/",
+    "icon": "/tools-icons/claude-mwt4964q.ico",
+    "category": "写作对话",
+    "description": "A\\的大模型",
+    "tags": [
+      "大模型",
+      "聊天"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "grok-mwt44clt",
+    "name": "Grok",
+    "url": "https://grok.com/",
+    "icon": "/tools-icons/grok-mwt44clt.ico",
+    "category": "写作对话",
+    "description": "老马的xAI",
+    "tags": [
+      "大模型",
+      "聊天"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "openai-mwt4cpbb",
+    "name": "Codex",
+    "url": "https://openai.com/zh-Hans-CN/codex/",
+    "icon": "/tools-icons/openai-mwt4cpbb.ico",
+    "category": "开发编程",
+    "description": "加快开发步伐，走得更远，将最宏大的构想变为现实。",
+    "tags": [
+      "AI Agent"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "claude-mwt4ba68",
+    "name": "Claude Code",
+    "url": "https://claude.com/product/claude-code",
+    "icon": "/tools-icons/claude-mwt4ba68.ico",
+    "category": "开发编程",
+    "description": "为 Claude 提供错误修复、测试或多日迁移服务。您设置其权限。从桌面、终端、IDE、Slack 或网络进行引导和审查。",
+    "tags": [
+      "AI Agent"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "pi-mwt5i0k5",
+    "name": "Pi",
+    "url": "https://pi.dev/",
+    "icon": "/tools-icons/pi-mwt5i0k5.svg",
+    "category": "开发编程",
+    "description": "Pi 是一个最小的Agent工具。",
+    "tags": [
+      "AI Agent"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "herdr-mwt3tvfm",
+    "name": "Herdr",
+    "url": "https://herdr.dev/",
+    "icon": "/tools-icons/herdr-mwt3tvfm.ico",
+    "category": "开发编程",
+    "description": "Herdr 是一个用于运行编码代理的本机应用程序。您的代理可以更改它的任何部分，从侧边栏到全新的面板。关闭它，您的代理将继续工作。",
+    "tags": [
+      "AI Agent",
+      "命令行"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "antigravity-mwt3ygs3",
+    "name": "Antigravity",
+    "url": "https://antigravity.google/",
+    "icon": "/tools-icons/antigravity-mwt3ygs3.ico",
+    "category": "开发编程",
+    "description": "Google Antigravity 以安全可信为基石——无论你是深耕大型企业级代码库的专业工程师，还是在业余时间探索直觉式编程（Vibe Coding）的独立开发者，都能安心交付。",
+    "tags": [
+      "AI Agent"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "deepseek-mwt4f3ft",
+    "name": "Deepseek Harness",
+    "url": "https://www.deepseek.com/harness/",
+    "icon": "/tools-icons/deepseek-mwt4f3ft.ico",
+    "category": "开发编程",
+    "description": "无论处理日常工作、编写代码，还是构建自己的 Harness，都可以从这里开始。DeepSeek Harness 面向全球开放测试并同步开源，以可自由组合的插件，拓展 Agent 能力。",
+    "tags": [
+      "AI Agent"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "orca-mwt3n2f2",
+    "name": "Orca",
+    "url": "https://orca.dev/",
+    "icon": "/tools-icons/orca-mwt3n2f2.png",
+    "category": "开发编程",
+    "description": "Orca 是与编码代理一起提供的代理开发环境 (ADE)。跨隔离工作树并行运行 Claude Code、Codex、Gemini、Cursor CLI 和所有其他 CLI 代理。比任何 IDE 更快地完成工作。每天都会发布新功能。免费、开源、跨平台。",
+    "tags": [
+      "AI Agent",
+      "Agent编排"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "t3-mwt3zpmb",
+    "name": "T3 Code",
+    "url": "https://t3.codes/",
+    "icon": "/tools-icons/t3-mwt3zpmb.ico",
+    "category": "开发编程",
+    "description": "在同一个界面里调度 Claude Code、Codex、Antigravity、OpenCode、Cursor 和 Grok。用你自己的订阅。整个项目都可以 fork。",
+    "tags": [
+      "AI Agent"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "paseo-mwt47sn0",
+    "name": "Paseo",
+    "url": "https://paseo.sh/",
+    "icon": "/tools-icons/paseo-mwt47sn0.ico",
+    "category": "开发编程",
+    "description": "同时运行多个编程 Agent，在任何机器上。\n在桌前，也在手机上。",
+    "tags": [
+      "AI Agent"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "artificialanalysis-mwt4lkhj",
+    "name": "Artificialanalysis",
+    "url": "https://artificialanalysis.ai/",
+    "icon": "/tools-icons/artificialanalysis-mwt4lkhj.ico",
+    "category": "学习研究",
+    "description": "了解 AI 格局，为你的使用场景选择最佳模型和服务商",
+    "tags": [
+      "benchmark"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "swebench-mwt4nura",
+    "name": "SWE-bench",
+    "url": "https://www.swebench.com/",
+    "icon": "/tools-icons/swebench-mwt4nura.ico",
+    "category": "学习研究",
+    "description": "SWE-bench 是评估从 GitHub 收集的现实世界软件问题的大型语言模型的基准。给定代码库和问题，语言模型的任务是生成解决所描述问题的补丁。",
+    "tags": [
+      "benchmark"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "arxiv-mwt5eixz",
+    "name": "Arxiv",
+    "url": "https://arxiv.org/",
+    "icon": "/tools-icons/arxiv-mwt5eixz.ico",
+    "category": "学习研究",
+    "description": "arXiv 是一项免费分发服务和开放获取档案，包含物理、数学、计算机科学、定量生物学、定量金融、统计学、电气工程和系统科学以及经济学领域的超过 320 万篇学术文章。本网站上的材料未经 arXiv 同行评审。",
+    "tags": [
+      "论文"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "workbuddy-mwt4ptqm",
+    "name": "Workbuddy",
+    "url": "https://www.workbuddy.cn/",
+    "icon": "/tools-icons/workbuddy-mwt4ptqm.svg",
+    "category": "效率办公",
+    "description": "WorkBuddy 是腾讯出品的全场景 AI 办公工作台。说出要求、开始执行任务、交付完整成果。完美连接腾讯办公生态，你的办公好搭子。",
+    "tags": [
+      "AI Agent"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "trae-mwt51xvh",
+    "name": "Trae CN",
+    "url": "https://www.trae.cn/",
+    "icon": "/tools-icons/trae-mwt51xvh.png",
+    "category": "效率办公",
+    "description": "从需求拆解、方案生成到产物交付，帮你高效把任务推进到结果",
+    "tags": [
+      "AI Agent"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "qoder-mwt5433b",
+    "name": "Qoder CN",
+    "url": "https://qoder.cn/",
+    "icon": "/tools-icons/qoder-mwt5433b.png",
+    "category": "效率办公",
+    "description": "Qoder 全新形态，以编程智能体为核心引擎，从想法到实现，轻松搞定",
+    "tags": [
+      "AI Agent"
+    ],
+    "createdAt": "2026-11-23"
+  },
+  {
+    "id": "doubao-mwt5747q",
+    "name": "Doubao",
+    "url": "https://www.doubao.com",
+    "icon": "/tools-icons/doubao-mwt5747q.ico",
+    "category": "效率办公",
+    "description": "高效地使用 AI，让每一项工作都更轻松。",
+    "tags": [
+      "大模型",
+      "聊天"
+    ],
+    "createdAt": "2026-11-23"
+  }
+]

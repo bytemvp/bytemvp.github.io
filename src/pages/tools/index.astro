@@ -2,17 +2,27 @@
 import BaseHead from "../../components/BaseHead.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
-import { SITE_TITLE, SUPABASE_URL, SUPABASE_ANON_KEY, TOOL_CATEGORIES } from "../../consts";
+import { SITE_TITLE, TOOL_CATEGORIES } from "../../consts";
 import toolsData from "../../data/tools.json";
-import type { ToolItem } from "../../lib/supabase";
 
-const presetTools = toolsData as ToolItem[];
+interface ToolItem {
+    id: string;
+    name: string;
+    url: string;
+    icon: string;
+    category: string;
+    description: string;
+    tags: string[];
+    createdAt?: string;
+}
+
+const tools = toolsData as ToolItem[];
 
 const categoryCounts: Record<string, number> = {
-    全部: presetTools.length,
+    全部: tools.length,
 };
 
-presetTools.forEach((t) => {
+tools.forEach((t) => {
     categoryCounts[t.category] = (categoryCounts[t.category] || 0) + 1;
 });
 
@@ -31,8 +41,6 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
         <main
             class="flex w-full flex-1 flex-col gap-8 py-8 md:gap-12 md:py-12"
             id="tools-page-container"
-            data-supabase-url={SUPABASE_URL}
-            data-supabase-key={SUPABASE_ANON_KEY}
         >
             <!-- Header Section -->
             <section class="mx-auto w-[calc(100%-1rem)] max-w-6xl">
@@ -43,7 +51,7 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                             AI Curation
                         </span>
                         <span class="text-xs text-ink/60 dark:text-gray">
-                            已收录 <strong id="total-tools-counter" class="text-ink dark:text-gray-dark font-semibold">{presetTools.length}</strong> 款精选工具
+                            已收录 <strong id="total-tools-counter" class="text-ink dark:text-gray-dark font-semibold">{tools.length}</strong> 款精选工具
                         </span>
                     </div>
 
@@ -111,7 +119,7 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                 <!-- Results Summary Bar -->
                 <div class="mt-4 flex items-center justify-between text-xs text-ink/60 dark:text-gray px-1">
                     <div>
-                        正在展示: <span id="visible-count" class="font-bold text-accent">{presetTools.length}</span> 个工具
+                        正在展示: <span id="visible-count" class="font-bold text-accent">{tools.length}</span> 个工具
                     </div>
                 </div>
             </section>
@@ -125,35 +133,7 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                     aria-label="AI 工具列表"
                 >
                     {
-                        presetTools.length === 0 &&
-                            Array.from({ length: 6 }).map((_, idx) => (
-                                <div
-                                    class="loading-skeleton surface-card rounded-xl p-5 flex flex-col justify-between animate-pulse"
-                                    aria-hidden="true"
-                                    data-skeleton={idx}
-                                >
-                                    <div>
-                                        <div class="flex items-center gap-3">
-                                            <div class="h-11 w-11 shrink-0 rounded-lg bg-black/10 dark:bg-white/10" />
-                                            <div class="flex-1 space-y-2">
-                                                <div class="h-4 w-28 rounded bg-black/10 dark:bg-white/10" />
-                                                <div class="h-3 w-16 rounded bg-black/5 dark:bg-white/5" />
-                                            </div>
-                                        </div>
-                                        <div class="mt-4 space-y-2">
-                                            <div class="h-3 w-full rounded bg-black/5 dark:bg-white/5" />
-                                            <div class="h-3 w-4/5 rounded bg-black/5 dark:bg-white/5" />
-                                        </div>
-                                    </div>
-                                    <div class="mt-5 pt-3 border-t border-[var(--glass-border)]/40 flex gap-2">
-                                        <div class="h-4 w-12 rounded bg-black/5 dark:bg-white/5" />
-                                        <div class="h-4 w-14 rounded bg-black/5 dark:bg-white/5" />
-                                    </div>
-                                </div>
-                            ))
-                    }
-                    {
-                        presetTools.map((tool) => (
+                        tools.map((tool) => (
                             <article
                                 class="tool-card surface-card lift-card group relative flex flex-col justify-between overflow-hidden rounded-xl p-5"
                                 data-id={tool.id}
@@ -201,14 +181,19 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                                     </p>
                                 </div>
 
-                                <!-- Bottom Row: Tags + Link overlay -->
+                                <!-- Bottom Row: Clickable Tags + Visit Label -->
                                 <div class="mt-5 pt-3 border-t border-[var(--glass-border)]/60 flex items-center justify-between gap-2">
-                                    <div class="flex flex-wrap items-center gap-1.5 min-w-0">
+                                    <div class="relative z-20 flex flex-wrap items-center gap-1.5 min-w-0">
                                         {
                                             (tool.tags || []).slice(0, 3).map((tag) => (
-                                                <span class="inline-block rounded px-2 py-0.5 text-[11px] font-medium bg-black/5 text-ink/70 dark:bg-white/5 dark:text-gray/90 truncate max-w-[120px]">
+                                                <button
+                                                    type="button"
+                                                    data-tag={tag}
+                                                    class="tag-filter-btn inline-block rounded px-2 py-0.5 text-[11px] font-medium bg-black/5 text-ink/70 hover:bg-accent/15 hover:text-accent dark:bg-white/5 dark:text-gray/90 dark:hover:bg-accent/20 dark:hover:text-accent transition truncate max-w-[120px] cursor-pointer"
+                                                    title={`点击筛选「${tag}」标签`}
+                                                >
                                                     #{tag}
-                                                </span>
+                                                </button>
                                             ))
                                         }
                                     </div>
@@ -235,7 +220,10 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                 <!-- Empty State -->
                 <div
                     id="empty-state"
-                    class="hidden my-12 flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--glass-border)] p-12 text-center"
+                    class:list={[
+                        "my-12 flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--glass-border)] p-12 text-center",
+                        tools.length === 0 ? "flex" : "hidden"
+                    ]}
                 >
                     <div class="flex h-16 w-16 items-center justify-center rounded-full bg-accent/10 text-accent mb-4">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -259,34 +247,17 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
 
         <Footer />
 
-        <!-- Client-side Public Script: Search, Filter & Cloud Sync -->
+        <!-- Client-side Public Script: Pure Static Search, Category & Tag Filtering -->
         <script>
             import { TOOL_CATEGORIES } from "../../consts";
-            import { fetchCloudTools, TOOLS_CACHE_KEY, type ToolItem } from "../../lib/supabase";
-            import { escapeHtml, sanitizeUrl } from "../../lib/utils";
-
-            function mergePresetAndCloud(presets: ToolItem[], cloudItems: ToolItem[]): ToolItem[] {
-                const merged = [...presets];
-                cloudItems.forEach((item) => {
-                    const existingIdx = merged.findIndex((t) => t.id === item.id || t.url === item.url);
-                    if (existingIdx >= 0) {
-                        merged[existingIdx] = item;
-                    } else {
-                        merged.push(item);
-                    }
-                });
-                return merged;
-            }
 
             function initVisitorTools() {
-                const container = document.getElementById("tools-page-container");
                 const searchInput = document.getElementById("search-input") as HTMLInputElement | null;
                 const clearSearchBtn = document.getElementById("clear-search");
                 const categoryPills = document.querySelectorAll<HTMLButtonElement>(".category-pill");
                 const toolsGrid = document.getElementById("tools-grid");
                 const emptyState = document.getElementById("empty-state");
                 const visibleCountSpan = document.getElementById("visible-count");
-                const totalCounterSpan = document.getElementById("total-tools-counter");
                 const resetBtn = document.getElementById("reset-filters-btn");
 
                 if (!toolsGrid || toolsGrid.hasAttribute("data-tools-init")) return;
@@ -300,34 +271,6 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                 if (searchInput && searchQuery) {
                     searchInput.value = searchQuery;
                 }
-
-                const presetTools: ToolItem[] = [];
-                let allTools: ToolItem[] = [];
-
-                // 1. Collect preset tools from SSR DOM
-                const existingCards = document.querySelectorAll<HTMLElement>(".tool-card");
-                existingCards.forEach((card) => {
-                    const id = card.getAttribute("data-id") || "";
-                    const name = card.querySelector("h2")?.textContent?.trim() || "";
-                    const category = card.getAttribute("data-category") || "";
-                    const description = card.querySelector("p")?.textContent?.trim() || "";
-                    const link = card.querySelector<HTMLAnchorElement>("a")?.href || "";
-                    const icon = card.querySelector<HTMLImageElement>("img")?.src || "";
-                    const tagsStr = card.getAttribute("data-tags") || "";
-                    const tags = tagsStr.split(" ").filter(Boolean);
-
-                    presetTools.push({
-                        id,
-                        name,
-                        url: link,
-                        icon,
-                        category,
-                        description,
-                        tags
-                    });
-                });
-
-                allTools = [...presetTools];
 
                 function syncFilterUrl() {
                     const nextParams = new URLSearchParams();
@@ -343,111 +286,6 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                     if (nextUrl !== `${window.location.pathname}${window.location.search}`) {
                         window.history.replaceState(null, "", nextUrl);
                     }
-                }
-
-                function renderCards() {
-                    if (!toolsGrid) return;
-                    toolsGrid.innerHTML = "";
-
-                    allTools.forEach((tool) => {
-                        const safeName = escapeHtml(tool.name);
-                        const safeCategory = escapeHtml(tool.category);
-                        const safeDesc = escapeHtml(tool.description);
-                        const safeUrl = escapeHtml(sanitizeUrl(tool.url));
-                        const safeIcon = escapeHtml(sanitizeUrl(tool.icon, "/favicon.svg"));
-
-                        const article = document.createElement("article");
-                        article.className = "tool-card surface-card lift-card group relative flex flex-col justify-between overflow-hidden rounded-xl p-5";
-                        article.setAttribute("data-id", tool.id);
-                        article.setAttribute("data-category", tool.category);
-                        article.setAttribute("data-title", tool.name.toLowerCase());
-                        article.setAttribute("data-description", tool.description.toLowerCase());
-                        article.setAttribute("data-tags", (tool.tags || []).join(" ").toLowerCase());
-
-                        const tagsHtml = (tool.tags || [])
-                            .slice(0, 3)
-                            .map((tag) => {
-                                const safeTag = escapeHtml(tag);
-                                return `<button type="button" data-tag="${safeTag}" class="tag-filter-btn inline-block rounded px-2 py-0.5 text-[11px] font-medium bg-black/5 text-ink/70 hover:bg-accent/15 hover:text-accent dark:bg-white/5 dark:text-gray/90 dark:hover:bg-accent/20 dark:hover:text-accent transition truncate max-w-[120px] cursor-pointer" title="点击筛选「${safeTag}」标签">#${safeTag}</button>`;
-                            })
-                            .join("");
-
-                        article.innerHTML = `
-                            <div>
-                                <div class="flex items-start justify-between gap-3">
-                                    <div class="flex items-center gap-3 min-w-0">
-                                        <div class="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--glass-border)] bg-white/70 p-1 shadow-sm dark:bg-black/20">
-                                            <img
-                                                src="${safeIcon}"
-                                                alt="${safeName} 图标"
-                                                width="44"
-                                                height="44"
-                                                loading="lazy"
-                                                class="h-full w-full object-contain"
-                                                onerror="this.onerror=null; this.src='/favicon.svg';"
-                                            />
-                                        </div>
-                                        <div class="min-w-0">
-                                            <h2 class="text-base font-bold text-ink truncate group-hover:text-accent-dark transition-colors dark:text-gray-dark">
-                                                ${safeName}
-                                            </h2>
-                                            <span class="inline-block mt-0.5 text-xs text-ink/50 dark:text-gray/60 font-medium">
-                                                ${safeCategory}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="shrink-0 text-ink/30 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-accent dark:text-gray/40">
-                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <p class="mt-3.5 text-sm text-ink/75 leading-relaxed dark:text-gray-dark/85 line-clamp-3">
-                                    ${safeDesc}
-                                </p>
-                            </div>
-                            <div class="mt-5 pt-3 border-t border-[var(--glass-border)]/60 flex items-center justify-between gap-2">
-                                <div class="relative z-20 flex flex-wrap items-center gap-1.5 min-w-0">
-                                    ${tagsHtml}
-                                </div>
-                                <span class="shrink-0 text-xs font-semibold text-accent group-hover:underline">
-                                    访问
-                                </span>
-                            </div>
-                            <a
-                                href="${safeUrl}"
-                                target="_blank"
-                                rel="noreferrer"
-                                class="absolute inset-0 z-10"
-                                aria-label="访问 ${safeName} 官网"
-                            >
-                                <span class="sr-only">访问 ${safeName}</span>
-                            </a>
-                        `;
-                        toolsGrid.appendChild(article);
-                    });
-
-                    updateCounts();
-                    filterTools();
-                }
-
-                function updateCounts() {
-                    const counts: Record<string, number> = { 全部: allTools.length };
-                    allTools.forEach((t) => {
-                        counts[t.category] = (counts[t.category] || 0) + 1;
-                    });
-
-                    if (totalCounterSpan) {
-                        totalCounterSpan.textContent = String(allTools.length);
-                    }
-
-                    categoryPills.forEach((pill) => {
-                        const cat = pill.getAttribute("data-category") || "";
-                        const countSpan = pill.querySelector(".pill-count");
-                        if (countSpan) {
-                            countSpan.textContent = `(${counts[cat] || 0})`;
-                        }
-                    });
                 }
 
                 function filterTools() {
@@ -520,69 +358,7 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                     syncFilterUrl();
                 }
 
-                // 2. SWR Cache + Fetch remote tools from Supabase
-                async function syncCloudTools() {
-                    let renderedFromCache = false;
-                    try {
-                        const cachedRaw = localStorage.getItem(TOOLS_CACHE_KEY);
-                        if (cachedRaw) {
-                            const cachedItems = JSON.parse(cachedRaw) as ToolItem[];
-                            if (Array.isArray(cachedItems) && cachedItems.length > 0) {
-                                allTools = mergePresetAndCloud(presetTools, cachedItems);
-                                renderCards();
-                                renderedFromCache = true;
-                            }
-                        }
-                    } catch {
-                        // Ignore cache errors
-                    }
-
-                    let supabaseUrl = container?.getAttribute("data-supabase-url") || "";
-                    let supabaseKey = container?.getAttribute("data-supabase-key") || "";
-
-                    if (!supabaseUrl || !supabaseKey) {
-                        try {
-                            const localCfg = localStorage.getItem("bytemvp_supabase_config");
-                            if (localCfg) {
-                                const parsed = JSON.parse(localCfg);
-                                supabaseUrl = parsed.url;
-                                supabaseKey = parsed.key;
-                            }
-                        } catch {
-                            // Ignore local config error
-                        }
-                    }
-
-                    if (!supabaseUrl || !supabaseKey) {
-                        if (!renderedFromCache) renderCards();
-                        return;
-                    }
-
-                    try {
-                        const cloudItems = await fetchCloudTools(supabaseUrl, supabaseKey);
-                        const nextTools = mergePresetAndCloud(presetTools, cloudItems);
-                        const prevSnapshot = JSON.stringify(allTools);
-                        const nextSnapshot = JSON.stringify(nextTools);
-
-                        try {
-                            localStorage.setItem(TOOLS_CACHE_KEY, JSON.stringify(cloudItems));
-                        } catch {
-                            // Ignore quota errors
-                        }
-
-                        if (!renderedFromCache || prevSnapshot !== nextSnapshot) {
-                            allTools = nextTools;
-                            renderCards();
-                        }
-                    } catch (e) {
-                        console.warn("Public cloud sync silent notice:", e);
-                        if (!renderedFromCache) {
-                            renderCards();
-                        }
-                    }
-                }
-
-                // Search & Filter event listeners
+                // Event listeners
                 searchInput?.addEventListener("input", (e) => {
                     searchQuery = (e.target as HTMLInputElement).value;
                     filterTools();
@@ -614,7 +390,6 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                     });
                 });
 
-                // Tag click-to-filter via event delegation
                 toolsGrid.addEventListener("click", (e) => {
                     const tagBtn = (e.target as HTMLElement)?.closest<HTMLButtonElement>(".tag-filter-btn");
                     if (!tagBtn) return;
@@ -649,7 +424,7 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                     });
                 }
 
-                syncCloudTools();
+                filterTools();
             }
 
             document.addEventListener("astro:page-load", initVisitorTools);

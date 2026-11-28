@@ -20,10 +20,8 @@ src/
 │   └── tools.json    # AI 工具精选数据源
 ├── pages/
 │   ├── index.astro        # 首页：hero 与产品介绍
-│   ├── tools/
-│   │   └── index.astro    # 访客端：AI 工具精选页面（分类、搜索、卡片网格，纯净只读）
-│   └── tools-manage/
-│       └── index.astro    # 管理端：隐蔽后台控制台（口令验证、快捷抓取录入、在线编辑下架）
+│   └── tools/
+│       └── index.astro    # 访客端：AI 工具精选页面（分类、搜索、卡片网格，纯静态构建）
 ├── styles/global.css # Tailwind layers、主题变量、全局/共享组件样式
 ├── consts.ts         # SITE_TITLE、SITE_DESCRIPTION 等站点常量
 └── env.d.ts          # Astro 客户端类型引用
