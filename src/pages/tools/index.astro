@@ -145,23 +145,23 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                                 <div>
                                     <!-- Top Row: Icon + Name + Category -->
                                     <div class="flex items-start justify-between gap-3">
-                                        <div class="flex items-center gap-3 min-w-0">
-                                            <div class="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-[var(--glass-border)] bg-white/70 p-1 shadow-sm dark:bg-black/20">
+                                        <div class="flex items-center gap-3.5 min-w-0">
+                                            <div class="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-black/10 bg-white/95 p-1.5 shadow-sm transition-transform duration-200 group-hover:scale-105 dark:border-white/20 dark:bg-white/90">
                                                 <img
                                                     src={tool.icon}
                                                     alt={`${tool.name} 图标`}
-                                                    width="44"
-                                                    height="44"
+                                                    width="48"
+                                                    height="48"
                                                     loading="lazy"
                                                     class="h-full w-full object-contain"
                                                     onerror="this.onerror=null; this.src='/favicon.svg';"
                                                 />
                                             </div>
                                             <div class="min-w-0">
-                                                <h2 class="text-base font-bold text-ink truncate group-hover:text-accent-dark transition-colors dark:text-gray-dark">
+                                                <h2 class="text-base font-bold tracking-tight text-ink truncate group-hover:text-accent transition-colors dark:text-gray-dark">
                                                     {tool.name}
                                                 </h2>
-                                                <span class="inline-block mt-0.5 text-xs text-ink/50 dark:text-gray/60 font-medium">
+                                                <span class="mt-1 inline-flex items-center rounded-md bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
                                                     {tool.category}
                                                 </span>
                                             </div>
@@ -176,7 +176,7 @@ const pageDescription = "精选实用好用的 AI 生产力工具导航，涵盖
                                     </div>
 
                                     <!-- Description -->
-                                    <p class="mt-3.5 text-sm text-ink/75 leading-relaxed dark:text-gray-dark/85 line-clamp-3">
+                                    <p class="mt-3.5 text-[13.5px] text-ink/75 leading-relaxed dark:text-gray-dark/80 line-clamp-3">
                                         {tool.description}
                                     </p>
                                 </div>
